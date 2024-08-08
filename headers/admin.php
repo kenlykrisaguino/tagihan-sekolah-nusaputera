@@ -4,6 +4,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,25 @@ $current_page = basename($_SERVER['PHP_SELF']);
             text-align: center;
         }
     </style>
+
+    <script src="../assets/js/jquery-3.7.1.min.js"></script>
+    <script>
+        const formatToIDR = (number) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(number);
+        }
+
+        const fromIDRtoNum = (string) => {
+            let cleanedString = string.replace(/Rp\s?/g, '').replace(/,00/g, '').replace(/[,.]/g, '');
+
+            let numberValue = parseInt(cleanedString, 10);
+            return numberValue;
+        }
+    </script>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -30,13 +49,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <!-- Navigation Tabs -->
         <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
             <li class="nav-item">
-                <a class="nav-link <?php echo ($current_page == 'inputdata.php' || $current_page == 'index.php') ? 'active' : ''; ?>" href="inputdata.php">Input Data</a>
+                <a class="nav-link <?php echo $current_page == 'input-data.php' ? 'active' : ''; ?>" href="input-data.php">Input Data</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php echo ($current_page == 'editdata.php') ? 'active' : ''; ?>" href="editdata.php">Edit Data</a>
+                <a class="nav-link <?php echo $current_page == 'edit-data.php' ? 'active' : ''; ?>" href="edit-data.php">Edit Data</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php echo ($current_page == 'rekapdata.php') ? 'active' : ''; ?>" href="rekap2.php">Rekap</a>
+                <a class="nav-link <?php echo $current_page == 'rekap-data.php' ? 'active' : ''; ?>" href="rekap-data.php">Rekap</a>
             </li>
             <!-- <li class="nav-item">
                 <a class="nav-link" href="settings.html">Penjurnalan</a>

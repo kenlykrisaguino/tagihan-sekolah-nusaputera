@@ -17,22 +17,29 @@ $current_page = basename($_SERVER['PHP_SELF']);
             text-align: center;
         }
     </style>
+
+    <script src="../assets/js/jquery-3.7.1.min.js"></script>
+    <script>
+        const formatToIDR = (number) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
+        }
+    </script>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="text-center my-4">
-            <img src="images/logo.png" alt="Logo" style="width: 50px; height: 50px;">
+            <img src="../assets/img/logo.png" alt="Logo" style="width: 50px; height: 50px;">
             <h1>Sistem Pembayaran</h1>
         </div>
 
         <!-- Navigation Tabs -->
         <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
             <li class="nav-item">
-                <a class="nav-link <?php echo ($current_page == 'siswa2.php' || $current_page == 'index.php') ? 'active' : ''; ?>" href="siswa2.php">Beranda</a>
+                <a class="nav-link <?php echo ($current_page == 'informasi-pembayaran.php') ? 'active' : ''; ?>" href="informasi-pembayaran.php">Beranda</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php echo ($current_page == 'rekapsiswa.php') ? 'active' : ''; ?>" href="rekapsiswa.php">Rekap</a>
+                <a class="nav-link <?php echo ($current_page == 'rekap-siswa.php') ? 'active' : ''; ?>" href="rekap-siswa.php">Rekap</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="Logout.php">Logout</a>

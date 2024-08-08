@@ -24,10 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $result = $results[0];
 
     if ($result['tipe'] == 1){
-        header('Location: inputData.php');
+        header('Location: input-data.php');
         exit();
     } else if ($result['tipe'] == 2) {
-        header('Location: informasiPembayaran.php');
+        header('Location: informasi-pembayaran.php');
         exit();
     }
 } else {

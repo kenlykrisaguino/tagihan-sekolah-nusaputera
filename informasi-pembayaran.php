@@ -1,7 +1,7 @@
 <?php
 include './config/app.php';
 include_once './config/session.php';
-include './header/admin.php';
+include './headers/siswa.php';
 // Check if user is logged in
 IsLoggedIn();
 
@@ -13,27 +13,25 @@ $semester_options = read($query_semester);
 
 ?>
 
+<h2 class="my-4">Informasi Pembayaran</h2>
+
 <div class="d-flex flex-wrap">
-    <div class="form-group col-12">
-        <label for="tahun_ajaran">Search</label>
-        <input type="text" class="form-control" placeholder="Search Name" id="search" name="search"
-            value="">
-    </div>
     <div class="form-group col-6">
         <label for="tahun_ajaran">Tahun Ajaran:</label>
         <select name="tahun_ajaran" id="tahun_ajaran" class="form-control">
             <!-- <option selected disabled>Pilih Tahun Ajaran</option> -->
-            <?php foreach ($tahun_ajaran_options[0] as $option) { ?>
-                <option value="<?php echo $option; ?>" <?php echo $tahun_ajaran == $option ? 'selected' : ''; ?>><?php echo $option; ?></option>
+            <?php foreach ($tahun_ajaran_options as $option) { ?>
+                <option value="<?php echo $option['tahun_ajaran']; ?>" <?php echo $tahun_ajaran == $option['tahun_ajaran'] ? 'selected' : ''; ?>><?php echo $option['tahun_ajaran'] ?></option>
             <?php } ?>
         </select>
     </div>
+
     <div class="form-group col-6">
         <label for="semester">Semester:</label>
         <select name="semester" id="semester" class="form-control">
             <!-- <option selected disabled>Pilih Semester</option> -->
-            <?php foreach ($semester_options[0] as $option) { ?>
-            <option value="<?php echo $option; ?>" <?php echo $semester == $option ? 'selected' : ''; ?>><?php echo $option; ?></option>
+            <?php foreach ($semester_options as $option) { ?>
+                <option value="<?php echo $option['semester']; ?>" <?php echo $semester == $option['semester'] ? 'selected' : ''; ?>><?php echo $option['semester'] ?></option>
             <?php } ?>
         </select>
     </div>
@@ -42,10 +40,20 @@ $semester_options = read($query_semester);
     </div>
 </div>
 
-<div class="table-responsive" id="table">
-    <table class="table">
-        <thead>
+<table class="table table-bordered my-4">
+    <tbody id="data-siswa">
 
-        </thead>
-    </table>
-</div>
+    </tbody>
+</table>
+
+<table class="table table-bordered my-4">
+    <thead class="thead-dark text-center">
+        <tr>
+            <th>Bulan</th>
+            <th>Tagihan</th>
+            <th>Tunggakan</th>
+            <th>Status</th>
+            <th>Tanggal Pembayaran</th>
+        </tr>
+    </thead>
+</table>

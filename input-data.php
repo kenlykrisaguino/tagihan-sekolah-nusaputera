@@ -1,7 +1,7 @@
 <?php
 include './config/app.php';
 include_once './config/session.php';
-include './header/admin.php';
+include './headers/admin.php';
 // Check if user is logged in
 IsLoggedIn();
 
@@ -15,7 +15,7 @@ $semester_options = read($query_semester);
 <h2 class="my-4">Input Data</h2>
 
 <div class="d-flex mb-4 flex-wrap">
-    <form action="csvinput.php" method="post" enctype="multipart/form-data" class="col-12 col-lg-6">
+    <form action="csv-input.php" method="post" enctype="multipart/form-data" class="col-12 col-lg-6">
         <label for="file" class="d-block">Upload CSV File</label>
         <input type="file" name="file" id="file" accept=".csv" class="mb-2">
         <input type="submit" name="submit" value="Upload" class="btn btn-primary">
@@ -26,7 +26,8 @@ $semester_options = read($query_semester);
         <div class="form-row">
             <div class="form-group col-9">
                 <label for="bulan" class="d-block">Filter Bulan</label>
-                <select class="form-control" id="bulan" name="bulan">
+                <select class="form-control" id="filter-bulan" name="filter-bulan">
+                    <option value="">-- Pilih Bulan --</option>
                     <?php
                     // Daftar bulan
                     $bulan_arr = [
@@ -45,16 +46,55 @@ $semester_options = read($query_semester);
                     ];
                     
                     foreach ($bulan_arr as $bulan => $nama_bulan) {
-                        $selected = $bulan_arr[$month] == $nama_bulan ? 'selected' : '';
-                        echo "<option value='$bulan' $selected>$nama_bulan</option>";
+                        echo "<option value='$bulan'>$nama_bulan</option>";
                     }
                     ?>
                 </select>
             </div>
             <div class="form-group col-3 align-self-end">
-                <button type="submit" class="btn btn-primary">Filter</button>
+                <button type="submit" class="btn btn-primary" onclick="getData()">Filter</button>
                 <!-- <a href="export_csv.php?bulan=<?= isset($_GET['bulan']) ? $_GET['bulan'] : '' ?>" class="btn btn-success">Export CSV</a> -->
             </div>
         </div>
     </div>
 </div>
+
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Virtual Account</th>
+            <th>Nama Pelanggan</th>
+            <th>Jumlah Pembayaran</th>
+            <th>Tanggal Pembayaran</th>
+        </tr>
+    </thead>
+    <tbody id="input-data-table"></tbody>
+</table>
+
+<script>
+    const getData = () => {
+        var month = $('#filter-bulan').find(':selected').val();
+        if (month == ""){
+            var url = 'api/input-data.php'
+        } else {
+            var url = `api/input-data.php?month=${month}`
+        }
+        fetch(url)
+           .then(response => response.json())
+           .then(data => {
+            console.log(data);
+               $('#input-data-table').empty();
+                data.data.forEach(trx => {
+                    $('#input-data-table').append(`<?php include_once './tables/input-data.php'?>`);
+                })
+
+                if (data.data.length == 0) {
+                    $('#input-data-table').append(`<tr><td colspan="4" class="text-center">Tidak ada data yang ditemukan.</td></tr>`);
+                }
+            });
+    }
+
+    $(document).ready( () => {
+        getData();
+    });
+</script>
