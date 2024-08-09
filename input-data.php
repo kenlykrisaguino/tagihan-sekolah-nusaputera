@@ -5,8 +5,8 @@ include './headers/admin.php';
 // Check if user is logged in
 IsLoggedIn();
 
-$query_tahun_ajaran = 'SELECT DISTINCT tahun_ajaran FROM tagihan ORDER BY tahun_ajaran';
-$query_semester = 'SELECT DISTINCT semester FROM tagihan ORDER BY semester';
+$query_tahun_ajaran = 'SELECT DISTINCT period FROM bills ORDER BY period';
+$query_semester = 'SELECT DISTINCT semester FROM bills ORDER BY semester';
 
 $tahun_ajaran_options = read($query_tahun_ajaran);
 $semester_options = read($query_semester);

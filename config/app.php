@@ -20,7 +20,7 @@ if ($month > 6){
 $hostname = "localhost";
 $username = "root";
 $password = "";
-$db_name  = "tagihan";
+$db_name  = "tagihan_nusput";
 
 $conn = new mysqli($hostname, $username, $password, $db_name);
 

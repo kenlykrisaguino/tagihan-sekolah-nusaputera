@@ -4,19 +4,17 @@ include_once '../config/app.php';
 
 header('Content-Type: application/json');
 
-$bulan = isset($_GET['month']) ? $_GET['month'] : '';
+$month = isset($_GET['month']) ? $_GET['month'] : '';
 
 
 $sql = "SELECT 
-nis, virtual_account, customer_name, 
-trx_amount, expired_date 
-FROM 
-tagihan ";
+payments.virtual_account, users.name AS user, payments.trx_amount, payments.trx_timestamp
+FROM
+payments INNER JOIN users ON payments.sender = users.id";
 
-if ($bulan != '') {
-    $sql .= "WHERE MONTH(expired_date) = '$bulan'";
+if ($month != '') {
+    $sql .= " WHERE MONTH(trx_timestamp) = '$month'";
 }
-
 
 $result = read($sql);
 

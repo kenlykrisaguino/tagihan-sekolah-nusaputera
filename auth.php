@@ -6,27 +6,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $inputUsername = $_POST['username'];
     $inputPassword = $_POST['password'];
 
-    // Enkripsi input password menggunakan SHA-512
-    $hashedPassword = hash('sha512', $inputPassword);
-
     // Query untuk mencari pengguna dengan username dan password yang diberikan
-    $query = "SELECT * FROM `user` WHERE `username` = '$inputUsername' AND `password` = '$hashedPassword'";
+    $query = "SELECT `password` FROM `users` WHERE `virtual_account` = '$inputUsername'";
 
     $results = read($query);
 
     if (count($results) < 1) {
-        $_SESSION['error_message'] = 'Data tidak valid';
+        $_SESSION['error_message'] = 'User tidak ditemukan';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
-    $_SESSION['username'] = $inputUsername;
+    $hashed_password = $results[0]['password'];
+    $check_password = password_verify($inputPassword, $hashed_password);
+    
+    if (!$check_password) {
+        $_SESSION['error_message'] = 'Password salah';
+        header('Location: '. $_SERVER['HTTP_REFERER']);
+        exit;
+    }
 
+    $query = "SELECT `id`, `nis`, `level` FROM `users` WHERE `virtual_account` = '$inputUsername'";
+
+    $results = read($query);
     $result = $results[0];
 
-    if ($result['tipe'] == 1){
+    $_SESSION['user_id'] = $results['id'];
+    $_SESSION['nis'] = $results['nis'];
+    $_SESSION['username'] = $inputUsername;
+
+
+    if ($result['level'] == 7){
         header('Location: input-data.php');
         exit();
-    } else if ($result['tipe'] == 2) {
+    } else {
         header('Location: informasi-pembayaran.php');
         exit();
     }
@@ -34,5 +46,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     header('Location: login.php');
     exit();
 }
-
-$conn->close(); // Tutup koneksi
