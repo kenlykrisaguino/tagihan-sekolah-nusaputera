@@ -36,10 +36,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <!-- Navigation Tabs -->
         <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
             <li class="nav-item">
-                <a class="nav-link <?php echo ($current_page == 'informasi-pembayaran.php') ? 'active' : ''; ?>" href="informasi-pembayaran.php">Beranda</a>
+                <a class="nav-link <?php echo ($current_page == 'beranda-siswa.php') ? 'active' : ''; ?>" href="beranda-siswa.php">Beranda</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php echo ($current_page == 'rekap-siswa.php') ? 'active' : ''; ?>" href="rekap-siswa.php">Rekap</a>
+                <a class="nav-link <?php echo ($current_page == 'pembayaran.php') ? 'active' : ''; ?>" href="pembayaran.php">Pembayaran</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="Logout.php">Logout</a>

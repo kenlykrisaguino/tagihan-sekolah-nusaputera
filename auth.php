@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header('Location: input-data.php');
         exit();
     } else {
-        header('Location: informasi-pembayaran.php');
+        header('Location: beranda-siswa.php');
         exit();
     }
 } else {

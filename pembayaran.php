@@ -1,7 +1,7 @@
 <?php
 include './config/app.php';
 include_once './config/session.php';
-include './headers/admin.php';
+include './headers/siswa.php';
 // Check if user is logged in
 IsLoggedIn();
 
@@ -13,20 +13,17 @@ $semester_options = read($query_semester);
 
 ?>
 
-<h2 class="my-4">Data Rekap</h2>
+<h2 class="my-4">
+    Informasi Pembayaran
+</h2>
 
 <div class="d-flex flex-wrap">
-    <div class="form-group col-12">
-        <label for="tahun_ajaran">Search</label>
-        <input type="text" class="form-control" oninput="getData()" placeholder="Search Name" id="search" name="search"
-            value="">
-    </div>
     <div class="form-group col-6">
         <label for="tahun_ajaran">Tahun Ajaran:</label>
         <select name="tahun_ajaran" id="tahun_ajaran" class="form-control">
             <!-- <option selected disabled>Pilih Tahun Ajaran</option> -->
             <?php foreach ($tahun_ajaran_options as $option) { ?>
-            <option value="<?php echo $option['period']; ?>" <?php echo $tahun_ajaran == $option['period'] ? 'selected' : ''; ?>><?php echo $option['period']; ?></option>
+                <option value="<?php echo $option['period']; ?>" <?php echo $tahun_ajaran == $option['period'] ? 'selected' : ''; ?>><?php echo $option['period'] ?></option>
             <?php } ?>
         </select>
     </div>
@@ -36,42 +33,46 @@ $semester_options = read($query_semester);
         <select name="semester" id="semester" class="form-control">
             <!-- <option selected disabled>Pilih Semester</option> -->
             <?php foreach ($semester_options as $option) { ?>
-            <option value="<?php echo $option['semester']; ?>" <?php echo $semester == $option['semester'] ? 'selected' : ''; ?>><?php echo $option['semester']; ?></option>
+                <option value="<?php echo $option['semester']; ?>" <?php echo $semester == $option['semester'] ? 'selected' : ''; ?>><?php echo $option['semester'] ?></option>
             <?php } ?>
         </select>
     </div>
     <div class="form-group col-12">
-        <button class="btn btn-primary w-100" onclick="getData()">Filter</button>
+        <button class="btn btn-primary w-100" id="filter-btn">Filter</button>
     </div>
 </div>
 
-<div class="table-responsive" id="table">
-    <table class="table table-bordered table-striped" id="table-rekap">
-        <thead class="thead-dark">
+<table class="table table-bordered my-4">
+    <tbody id="data-siswa">
+
+    </tbody>
+</table>
+
+<div class="table-responsive">
+    <table class="table table-bordered my-4">
+        <thead class="thead-dark text-center">
             <tr>
-                <th>VA</th>
-                <th>Nama</th>
-                <th>Jenjang</th>
-                <th>No. Ortu</th>
-                <th>Pembayaran</th>
+                <th>Bulan</th>
+                <th>Tagihan</th>
                 <th>Tunggakan</th>
+                <th>Pembayaran</th>
+                <th>Status</th>
+                <th>Tanggal Pembayaran</th>
             </tr>
         </thead>
-        <tbody id="body-rekap">
-            <!-- Data will be loaded here -->
+        <tbody id="trx-body">
         </tbody>
     </table>
 </div>
 
 <script>
     const getData = () => {
-        var url = 'api/rekap-data.php';
-        var search = document.getElementById('search').value;
+        var url = 'api/students/student-payment.php';
         var tahunAjaran = document.getElementById('tahun_ajaran').value;
         var semester = document.getElementById('semester').value;
 
         var params = new URLSearchParams({
-            search: search,
+            user: "<?php echo $_SESSION['username'] ?>",
             tahun_ajaran: tahunAjaran,
             semester: semester
         });
@@ -83,21 +84,30 @@ $semester_options = read($query_semester);
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                $('#body-rekap').empty();
-
-                if (data.data.length > 0) {
-                    data.data.forEach(trx => {
-                        $('#body-rekap').append(`<?php include_once './tables/rekap-data.php'; ?>`);
+                console.log(data);
+                siswa = data.data.user;
+                payment = data.data.trx;
+                $('#data-siswa').empty();
+                $('#data-siswa').append(`<?php include_once './tables/beranda-siswa.php'?>`);
+                
+                $('#trx-body').empty();
+                if(payment.length > 0) {
+                    payment.forEach(trx => {
+                        $('#trx-body').append(`<?php include_once './tables/pembayaran-siswa.php'?>`);
                     })
                 } else {
-                    $('#body-rekap').append(
-                        `<tr><td colspan="6" class="text-center">Tidak ada data yang ditemukan.</td></tr>`);
+                    $('#trx-body').append(
+                        `<tr><td colspan="6" class="text-center">Tidak ada data pembayaran</td></tr>`
+                    );
                 }
+
+            
             });
     }
 
     $(document).ready(() => {
         getData();
+        $(document).on('click', '#filter-btn', getData);
 
     });
 </script>

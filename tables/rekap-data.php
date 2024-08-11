@@ -1,8 +1,8 @@
 <tr>
     <td>${trx.virtual_account}</td>
-    <td>${trx.customer_name}</td>
-    <td>${trx.jenjang}</td>
-    <td>${trx.no_ortu}</td>
+    <td>${trx.student_name}</td>
+    <td>${trx.level}</td>
+    <td>${trx.parent_phone}</td>
     <td>${formatToIDR(trx.penerimaan)}</td>
-    <td>${formatToIDR(trx.tunggakan ?? 0)}</td>
+    <td>${formatToIDR(trx.tunggakan)}</td>
 </tr>

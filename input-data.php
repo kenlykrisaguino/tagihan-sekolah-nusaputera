@@ -15,10 +15,10 @@ $semester_options = read($query_semester);
 <h2 class="my-4">Input Data</h2>
 
 <div class="d-flex mb-4 flex-wrap">
-    <form action="csv-input.php" method="post" enctype="multipart/form-data" class="col-12 col-lg-6">
+    <form id="csvUploadForm" class="col-12 col-lg-6">
         <label for="file" class="d-block">Upload CSV File</label>
         <input type="file" name="file" id="file" accept=".csv" class="mb-2">
-        <input type="submit" name="submit" value="Upload" class="btn btn-primary">
+        <input type="submit" value="Upload" class="btn btn-primary">
     </form>
 
     <!-- Form untuk filter berdasarkan bulan -->
@@ -94,7 +94,34 @@ $semester_options = read($query_semester);
             });
     }
 
+    const uploadCSV = (e) => {
+        e.preventDefault(); 
+
+        var formData = new FormData();
+        var fileInput = $('#file')[0].files[0];
+        formData.append('input', fileInput); 
+
+        $.ajax({
+            url: 'api/csv-input.php', 
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                $('#uploadStatus').html('<div class="alert alert-success">File uploaded successfully!</div>');
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                $('#uploadStatus').html('<div class="alert alert-danger">Error occurred while uploading the file.</div>');
+                console.error(xhr.responseText);
+            }
+        });
+    }
+
     $(document).ready( () => {
         getData();
+        $('#csvUploadForm').on('submit', function(e) {
+            uploadCSV(e);
+        });
     });
 </script>
