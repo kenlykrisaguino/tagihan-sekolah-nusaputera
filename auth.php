@@ -33,13 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $_SESSION['user_id'] = $results['id'];
     $_SESSION['nis'] = $results['nis'];
     $_SESSION['username'] = $inputUsername;
+    $_SESSION['level'] = $result['level'];
 
-
-    if ($result['level'] == 7){
+    if ($_SESSION['level'] == 7){
         header('Location: input-data.php');
         exit();
-    } else {
+    } else if ($_SESSION['level'] < 7){
         header('Location: beranda-siswa.php');
+        exit();
+    } else {
+        header('Location: login.php');
         exit();
     }
 } else {
