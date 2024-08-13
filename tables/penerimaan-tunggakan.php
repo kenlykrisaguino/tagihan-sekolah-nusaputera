@@ -7,8 +7,8 @@
     </thead>
     <tbody>
         <tr>
-            <td>${formatToIDR(total.penerimaan)}</td>
-            <td>${formatToIDR(total.tunggakan)}</td>
+            <td>${formatToIDR(total.penerimaan ?? 0)}</td>
+            <td>${formatToIDR(total.tunggakan ?? 0)}</td>
         </tr>
     </tbody>
 </table>
