@@ -47,6 +47,7 @@ $semester_options = read($query_semester);
 
     </table>
 </div>
+<div id="total-table"></div>
 
 <script>
     const getData = () => {
@@ -70,20 +71,26 @@ $semester_options = read($query_semester);
             .then(data => {
                 console.log(data);
                 $('#edit-table').empty();
+                $('#total-table').empty();
                 if (data.data.length === 0) {
                     $('#edit-table').append(`<?php include './tables/edit-header-kosong.php'; ?>`);
                     $('#edit-table').append(
                         '<tr><td colspan="6" class="text-center">Tidak ada data yang ditemukan.</td></tr>');
                 } else {
+                    users = data.data.users;
+                    total = data.data.total;
+
+                    $('#total-table').append(`<?php include './tables/penerimaan-tunggakan.php'; ?>`);
+
                     if (semester === 'Gasal') {
                         $('#edit-table').append(`<?php include './tables/edit-header-gasal.php'; ?>`);
-                        data.data.forEach(trx => {
+                        users.forEach(trx => {
                             rows += `<?php include './tables/edit-gasal.php'; ?>`;
                         });
                         $('#edit-table').append(`<tbody>${rows}</tbody>`);
                     } else {
                         $('#edit-table').append(`<?php include './tables/edit-header-genap.php'; ?>`);
-                        data.data.forEach(trx => {
+                        users.forEach(trx => {
                             rows += `<?php include './tables/edit-genap.php'; ?>`;
                         });
                         $('#edit-table').append(`<tbody>${rows}</tbody>`);

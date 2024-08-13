@@ -60,13 +60,28 @@ $sql = "SELECT
         b.student_name, b.level, b.parent_phone, b.period;
     ";
 
-$result = read($sql);
+$users = read($sql);
+
+$totalsql = "SELECT
+    SUM(CASE WHEN b.trx_status = 'not paid' OR b.trx_status = 'waiting' THEN b.trx_amount ELSE 0 END) + (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis) AS penerimaan,
+    (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis) AS tunggakan
+FROM 
+    bills b
+HAVING 
+    b.period = '$tahun_ajaran' AND 
+    b.semester = '$semester'
+";
+
+$total = read($sql);
 
 $data = [
     'status' => 'OK',
     'message' => 'Get Input Data',
     'query' => $sql,
-    'data' => $result
+    'data' => [
+        "users" => $users,
+        "total" => $total[0]
+    ]
 ];
 
 echo json_encode($data);
