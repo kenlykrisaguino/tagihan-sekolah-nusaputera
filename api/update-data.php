@@ -8,7 +8,7 @@ $id = $_POST['id'];
 $column = $_POST['column'];
 $value = $_POST['value'];
 
-$sql = "UPDATE tagihan SET $column = '$value' WHERE nis = '$id'";
+$sql = "UPDATE bills SET $column = '$value' WHERE nis = '$id'";
 
 $result = crud($sql);
 

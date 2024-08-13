@@ -29,31 +29,31 @@ $indonesianMonths = [
 $checkQuery = "SELECT
     trx_amount
 FROM
-    tagihan
+    bills
 WHERE
     nis = '$id' AND
     semester = '$semester' AND
-    tahun_ajaran = '$tahunAjaran' AND
-    MONTH(expired_date) = '$indonesianMonths[$month]'";
+    period = '$tahunAjaran' AND
+    MONTH(payment_due) = '$indonesianMonths[$month]'";
 
 $checkResult = read($checkQuery);
 
 if (isset($checkResult) && count($checkResult) != 0) {
     // Kalau sudah ada transaktinya
     $sql = "UPDATE
-        tagihan
+        bills
     SET
         $column = '$value'
     WHERE
         nis = '$id' AND
         semester = '$semester' AND
-        tahun_ajaran = '$tahunAjaran' AND
-        MONTH(expired_date) = '$indonesianMonths[$month]'";
+        period = '$tahunAjaran' AND
+        MONTH(payment_due) = '$indonesianMonths[$month]'";
 } else {
     $customer = "SELECT
-    id, nis, nama,
-    jenjang, mva, telp_ortu
-    FROM siswa
+    id, nis, name,
+    level, virtual_account, parent_phone
+    FROM users
     WHERE nis = '$id'";
 
     $customer_data = read($customer);
@@ -80,32 +80,31 @@ if (isset($checkResult) && count($checkResult) != 0) {
 
     $sql =
         "INSERT INTO
-        tagihan(
+        bills(
             nis, trx_id, virtual_account,
-            customer_name, jenjang, no_ortu,
-            customer_email, customer_phone, trx_amount,
-            expired_date, expired_time, description,
-            semester, tahun_ajaran
+            student_name, level, parent_phone,
+            student_email, student_phone, trx_amount,
+            payment_due, description, semester, period
         )
         VALUES (
             '$id', '" .
-        $data['jenjang'] .
+        $data['level'] .
         '/11/5/1/' .
         substr($data['nis'], -4) .
         "', '" .
-        $data['mva'] .
+        $data['virtual_account'] .
         "',
             '" .
-        $data['nama'] .
+        $data['name'] .
         "', '" .
-        $data['jenjang'] .
+        $data['level'] .
         "', '" .
-        $data['telp_ortu'] .
+        $data['parent_phone'] .
         "',
             '', '', '$value',
             '" .
         $dayMonth->format('Y-m-d') .
-        "', '23:59:59', 'Tagihan sd MEI 2024',
+        "', '23:59:59', '',
             '$semester', '$tahunAjaran'
         )";
 }
