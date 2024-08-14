@@ -177,6 +177,14 @@ $semester_options = read($query_semester);
         });
     }
 
+    const statusColor = (status) => {
+        if (status === 'paid') { return 'txt-green'; }
+        else if (status === 'late') { return 'txt-yellow';} 
+        else if (status === 'not paid') { return 'txt-red';} 
+        else if (status === 'waiting') { return '';} 
+        else { return 'txt-grey';}
+    }
+
     $(document).ready(() => {
         getData();
         $(document).on('dblclick', '.editable', editTable);

@@ -16,6 +16,12 @@ if($semester == 'Genap') {
     SUM(CASE WHEN MONTH(b.payment_due) = 4 THEN b.trx_amount ELSE 0 END) AS April,
     SUM(CASE WHEN MONTH(b.payment_due) = 5 THEN b.trx_amount ELSE 0 END) AS Mei,
     SUM(CASE WHEN MONTH(b.payment_due) = 6 THEN b.trx_amount ELSE 0 END) AS Juni,
+    max(CASE WHEN MONTH(b.payment_due) = 1 THEN b.trx_status ELSE '' END) AS statusJanuari,
+    max(CASE WHEN MONTH(b.payment_due) = 2 THEN b.trx_status ELSE '' END) AS statusFebruari,
+    max(CASE WHEN MONTH(b.payment_due) = 3 THEN b.trx_status ELSE '' END) AS statusMaret,
+    max(CASE WHEN MONTH(b.payment_due) = 4 THEN b.trx_status ELSE '' END) AS statusApril,
+    max(CASE WHEN MONTH(b.payment_due) = 5 THEN b.trx_status ELSE '' END) AS statusMei,
+    max(CASE WHEN MONTH(b.payment_due) = 6 THEN b.trx_status ELSE '' END) AS statusJuni,
     SUM(CASE WHEN MONTH(b.payment_due) = 1 THEN b.late_bills ELSE 0 END) AS LateJanuari,
     SUM(CASE WHEN MONTH(b.payment_due) = 2 THEN b.late_bills ELSE 0 END) AS LateFebruari,
     SUM(CASE WHEN MONTH(b.payment_due) = 3 THEN b.late_bills ELSE 0 END) AS LateMaret,
@@ -36,6 +42,12 @@ if($semester == 'Genap') {
     SUM(CASE WHEN MONTH(b.payment_due) = 10 THEN b.trx_amount ELSE 0 END) AS Oktober,
     SUM(CASE WHEN MONTH(b.payment_due) = 11 THEN b.trx_amount ELSE 0 END) AS November,
     SUM(CASE WHEN MONTH(b.payment_due) = 12 THEN b.trx_amount ELSE 0 END) AS Desember,
+    max(CASE WHEN MONTH(b.payment_due) = 7  THEN b.trx_status ELSE '' END) AS statusJuli,
+    max(CASE WHEN MONTH(b.payment_due) = 8  THEN b.trx_status ELSE '' END) AS statusAgustus,
+    max(CASE WHEN MONTH(b.payment_due) = 9  THEN b.trx_status ELSE '' END) AS statusSeptember,
+    max(CASE WHEN MONTH(b.payment_due) = 10 THEN b.trx_status ELSE '' END) AS statusOktober,
+    max(CASE WHEN MONTH(b.payment_due) = 11 THEN b.trx_status ELSE '' END) AS statusNovember,
+    max(CASE WHEN MONTH(b.payment_due) = 12 THEN b.trx_status ELSE '' END) AS statusDesember,
     SUM(CASE WHEN MONTH(b.payment_due) = 7  THEN b.late_bills ELSE 0 END) AS LateJuli,
     SUM(CASE WHEN MONTH(b.payment_due) = 8  THEN b.late_bills ELSE 0 END) AS LateAgustus,
     SUM(CASE WHEN MONTH(b.payment_due) = 9  THEN b.late_bills ELSE 0 END) AS LateSeptember,
@@ -67,7 +79,8 @@ $sql = "SELECT
     GROUP BY 
         b.nis, 
         b.virtual_account,
-        b.student_name, b.level, b.parent_phone, b.period;
+        b.student_name, b.level, 
+        b.parent_phone, b.period;
     ";
 
 $users = read($sql);
@@ -89,6 +102,7 @@ $total = read($totalsql);
 $data = [
     'status' => true,
     'message' => 'Get Input Data',
+    'q' => $sql,
     'data' => [
         "users" => $users,
         "total" => $total[0] ?? 0

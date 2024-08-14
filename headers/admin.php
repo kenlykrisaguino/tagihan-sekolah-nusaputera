@@ -19,8 +19,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
             text-align: center;
         }
     </style>
+    <link rel="stylesheet" href="assets/css/style.css">
 
-    <script src="../assets/js/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/jquery-3.7.1.min.js"></script>
     <script>
         const formatToIDR = (number) => {
             return new Intl.NumberFormat('id-ID', {
@@ -42,7 +43,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="container">
         <!-- Header -->
         <div class="text-center my-4">
-            <img src="../assets/img/logo.png" alt="Logo" style="width: 50px; height: 50px;">
+            <img src="assets/img/logo.png" alt="Logo" style="width: 50px; height: 50px;">
             <h1>Sistem Pembayaran</h1>
         </div>
 

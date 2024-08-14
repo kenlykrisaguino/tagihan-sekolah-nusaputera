@@ -1,0 +1,26 @@
+.hl-green{
+    background-color: #c5ffc5;
+    color: #008000;
+}
+
+
+.hl-red{
+    background-color: #ffcccc;
+    color: #720000;
+}
+
+.txt-green{
+    color: #009b00;
+}
+
+.txt-yellow{
+    color: #c76d00;
+}
+
+.txt-red{
+    color: #a80000;
+}
+
+.txt-grey{
+    color: #aaaaaa;
+}
