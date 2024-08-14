@@ -1,7 +1,6 @@
-
-<thead class="thead-dark">
+<thead class="thead-dark text-center">
     <tr>
-        <th>VA</th>
+        <th>Virtual Account</th>
         <th>Nama</th>
         <th>Jenjang</th>
         <th>No. Ortu</th>

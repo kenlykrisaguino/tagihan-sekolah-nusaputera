@@ -14,6 +14,7 @@ $sql = "SELECT
         CASE 
             WHEN b.trx_status = 'paid' 
             OR b.trx_status = 'late' 
+            OR b.trx_status = 'inactive'
             THEN 
                 0 
             WHEN b.trx_status = 'not paid'

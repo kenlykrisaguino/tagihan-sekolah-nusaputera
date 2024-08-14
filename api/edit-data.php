@@ -55,7 +55,7 @@ $sql = "SELECT
     b.nis, 
     b.virtual_account,
     b.student_name, b.level, b.parent_phone, b.period,
-    SUM(CASE WHEN b.trx_status = 'not paid' OR b.trx_status = 'waiting' THEN b.trx_amount ELSE 0 END) + (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis) AS penerimaan, 
+    SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
     $sql_semester, 
     (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis) AS tunggakan
     FROM 
@@ -89,7 +89,6 @@ $total = read($totalsql);
 $data = [
     'status' => 'OK',
     'message' => 'Get Input Data',
-    'query' => $sql,
     'data' => [
         "users" => $users,
         "total" => $total[0] ?? 0

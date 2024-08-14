@@ -15,37 +15,21 @@ $semester_options = read($query_semester);
 <h2 class="my-4">Input Data</h2>
 
 <div class="d-flex mb-4 flex-wrap">
-    <form id="csvUploadForm" class="col-12 col-lg-6">
+    <form id="csvUploadForm" class="col-12 col-md-8">
         <label for="file" class="d-block">Upload CSV File</label>
         <input type="file" name="file" id="file" accept=".csv" class="mb-2">
         <input type="submit" value="Upload" class="btn btn-primary">
     </form>
 
     <!-- Form untuk filter berdasarkan bulan -->
-    <div class="col-12 col-lg-6">
+    <div class="col-12 col-md-4">
         <div class="form-row">
             <div class="form-group col-9">
                 <label for="bulan" class="d-block">Filter Bulan</label>
                 <select class="form-control" id="filter-bulan" name="filter-bulan">
                     <option value="">-- Pilih Bulan --</option>
-                    <?php
-                    // Daftar bulan
-                    $bulan_arr = [
-                        '01' => 'Januari',
-                        '02' => 'Februari',
-                        '03' => 'Maret',
-                        '04' => 'April',
-                        '05' => 'Mei',
-                        '06' => 'Juni',
-                        '07' => 'Juli',
-                        '08' => 'Agustus',
-                        '09' => 'September',
-                        '10' => 'Oktober',
-                        '11' => 'November',
-                        '12' => 'Desember',
-                    ];
-                    
-                    foreach ($bulan_arr as $bulan => $nama_bulan) {
+                    <?php                    
+                    foreach ($months as $bulan => $nama_bulan) {
                         echo "<option value='$bulan'>$nama_bulan</option>";
                     }
                     ?>
@@ -102,7 +86,7 @@ $semester_options = read($query_semester);
         formData.append('input', fileInput); 
 
         $.ajax({
-            url: 'api/csv-input.php', 
+            url: 'api/input-payment.php', 
             type: 'POST',
             data: formData,
             contentType: false,

@@ -18,7 +18,7 @@ $semester_options = read($query_semester);
 <div class="d-flex flex-wrap">
     <div class="form-group col-12">
         <label for="tahun_ajaran">Search</label>
-        <input type="text" class="form-control" oninput="getData()" placeholder="Search Name" id="search" name="search"
+        <input type="search" class="form-control" oninput="getData()" placeholder="Search Name" id="search" name="search"
             value="">
     </div>
     <div class="form-group col-6">

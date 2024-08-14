@@ -16,7 +16,7 @@ $semester_options = read($query_semester);
 <div class="d-flex flex-wrap">
     <div class="form-group col-12">
         <label for="tahun_ajaran">Search</label>
-        <input type="text" class="form-control" oninput="getData()" placeholder="Search Name" id="search" name="search" value="">
+        <input type="search" class="form-control" oninput="getData()" placeholder="Search Name" id="search" name="search" value="">
     </div>
     <div class="form-group col-6">
         <label for="tahun_ajaran">Tahun Ajaran:</label>
@@ -42,12 +42,14 @@ $semester_options = read($query_semester);
     </div>
 </div>
 
+<div id="total-table" class="mb-5"></div>
+
 <div class="table-responsive" id="table">
     <table class="table table-bordered table-striped" id="edit-table">
 
     </table>
 </div>
-<div id="total-table"></div>
+
 
 <script>
     const getData = () => {
@@ -72,7 +74,7 @@ $semester_options = read($query_semester);
                 console.log(data);
                 $('#edit-table').empty();
                 $('#total-table').empty();
-                if (data.data.length === 0) {
+                if (data.data.users.length == 0) {
                     $('#edit-table').append(`<?php include './tables/edit-header-kosong.php'; ?>`);
                     $('#edit-table').append(
                         '<tr><td colspan="6" class="text-center">Tidak ada data yang ditemukan.</td></tr>');
@@ -107,13 +109,22 @@ $semester_options = read($query_semester);
         var month = $(this).data('month');
         var payment = $(this).data('payment');
 
+        if(payment === true){
+            originalContent = fromIDRtoNum(originalContent);
+        }
+
         $(this).addClass('cellEditing');
+        
         $(this).html('<input type="text" value="' + originalContent + '" />');
+        
         $(this).children().first().focus();
 
         $(this).children().first().keypress(function(e) {
             if (e.which === 13) { // Enter key pressed
                 var newContent = $(this).val();
+                if (payment === true) {
+                    newContent = formatToIDR(newContent);
+                }
                 $(this).parent().text(newContent);
                 $(this).parent().removeClass('cellEditing');
 
@@ -129,9 +140,9 @@ $semester_options = read($query_semester);
                             tahunAjaran: document.getElementById('tahun_ajaran').value,
                             semester: document.getElementById('semester').value,
                         },
-                        success: (response) => {
-                            console.log(response);
-                            if (response !== 'success') {
+                        success: (data) => {
+                            console.log(data);
+                            if (!data.status) {
                                 alert('Update failed');
                             }
                         }
@@ -154,10 +165,13 @@ $semester_options = read($query_semester);
                         }
                     });
                 }
-            }
+            } 
         });
 
         $(this).children().first().blur(function() {
+            if(payment === true){
+                originalContent = formatToIDR(originalContent);
+            }
             $(this).parent().text(originalContent);
             $(this).parent().removeClass('cellEditing');
         });
