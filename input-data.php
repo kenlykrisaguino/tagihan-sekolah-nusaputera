@@ -93,7 +93,7 @@ $semester_options = read($query_semester);
             processData: false,
             success: function(response) {
                 $('#uploadStatus').html('<div class="alert alert-success">File uploaded successfully!</div>');
-                console.log(response);
+                getData();
             },
             error: function(xhr, status, error) {
                 $('#uploadStatus').html('<div class="alert alert-danger">Error occurred while uploading the file.</div>');
