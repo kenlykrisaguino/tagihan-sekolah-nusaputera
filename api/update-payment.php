@@ -39,7 +39,6 @@ WHERE
 $checkResult = read($checkQuery);
 
 if (isset($checkResult) && count($checkResult) != 0) {
-    // Kalau sudah ada transaktinya
     $sql = "UPDATE
         bills
     SET

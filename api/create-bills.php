@@ -16,7 +16,6 @@ if ($readResult) {
 
 $semester_month = $semester == 'Genap' ? [1, 2, 3, 4, 5, 6] : [7, 8, 9, 10, 11, 12];
 
-// Determine the first month of the semester
 $first_month = $semester_month[0];
 
 $users = "SELECT
@@ -40,14 +39,13 @@ foreach ($usersResult as $user) {
         $dayOfWeek = $due_date->format('N');
 
         if ($dayOfWeek == 6) {
-            $due_date->modify('-1 day'); // Move to Friday
+            $due_date->modify('-1 day'); 
         } elseif ($dayOfWeek == 7) {
-            $due_date->modify('-2 days'); // Move to Friday
+            $due_date->modify('-2 days'); 
         }
 
         $query_duedate = $due_date->format('Y-m-d') . " 23:59:59";
 
-        // Determine trx_status based on whether it's the first month
         $trx_status = ($month_num == $first_month) ? 'waiting' : 'inactive';
 
         $input .= "(
@@ -78,8 +76,15 @@ $sql = "INSERT INTO administrations(admin_code, type) VALUES ('$admin_code', 'cr
 $result = crud($sql);
 
 if ($result) {
-    echo json_encode(['message' => 'Tagihan berhasil dibuat', 'sql' => $sql, 'data' => $usersResult]);
+    echo json_encode([
+        'status' => true,
+        'message' => 'Tagihan berhasil dibuat', 
+        'data' => $usersResult
+    ]);
 } else {
-    echo json_encode(['message' => 'Gagal membuat tagihan']);
+    echo json_encode([
+        'status' => false,
+        'message' => 'Gagal membuat tagihan'
+    ]);
 }
 ?>

@@ -45,9 +45,8 @@ ORDER BY
 $trx = read($sql);
 
 $data = [
-    'status' => 'OK',
+    'status' => true,
     'message' => 'Get Student Payment Data',
-    'query' => $sql,
     'data' => [
         'user' => $user,
         'trx'  => $trx 

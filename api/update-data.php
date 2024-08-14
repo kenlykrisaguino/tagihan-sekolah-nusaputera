@@ -13,7 +13,14 @@ $sql = "UPDATE bills SET $column = '$value' WHERE nis = '$id'";
 $result = crud($sql);
 
 if ($result) {
-    echo json_encode(['success' => true, 'message'=>'Data has been updated', 'data' => $result]);
+    echo json_encode([
+        'success' => true, 
+        'message'=>'Data has been updated', 
+        'data' => $result
+    ]);
 } else {
-    echo json_encode(['success' => false]);
+    echo json_encode([
+        'success' => false,
+        'message' => 'failed to update data'
+    ]);
 }

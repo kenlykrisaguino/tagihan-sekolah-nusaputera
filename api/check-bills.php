@@ -29,7 +29,6 @@ $sql_create_temp_table = "
 
 crud($sql_create_temp_table);
 
-// Update the bills based on the level and late bills amount
 $sql_update = "
     UPDATE bills b
     LEFT JOIN temp_bills t ON b.id = t.id
@@ -44,14 +43,15 @@ $sql_update = "
         AND b.payment_due < DATE_SUB(NOW(), INTERVAL 24 HOUR)
 ";
 
-// Execute the update query
 $result = crud($sql_update);
 
-// Drop the temporary table
 $sql_drop_temp_table = "DROP TEMPORARY TABLE temp_bills";
 crud($sql_drop_temp_table);
 
-// Return the response
-echo json_encode(['message' => 'Tagihan berhasil dicek', 'sql' => $sql_update, 'data' => $late_bills]);
+echo json_encode([
+    'status' => true,
+    'message' => 'Tagihan berhasil dicek', 
+    'data' => $late_bills
+]);
 
 ?>

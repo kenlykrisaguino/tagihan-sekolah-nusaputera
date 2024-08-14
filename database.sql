@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS tagihan_nusput;
-CREATE DATABASE tagihan_nusput;
-USE tagihan_nusput;
+-- DROP DATABASE IF EXISTS tagihan_nusput;
+-- CREATE DATABASE tagihan_nusput;
+-- USE tagihan_nusput;
 
 CREATE TABLE `administrations` (
   `id` int PRIMARY KEY AUTO_INCREMENT,

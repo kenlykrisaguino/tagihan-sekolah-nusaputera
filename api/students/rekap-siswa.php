@@ -47,7 +47,7 @@ GROUP BY
 $result = read($sql);
 
 $data = [
-    'status' => 'OK',
+    'status' => true,
     'message' => 'Get Student Recap Success',
     'data' => $result[0]
 ];

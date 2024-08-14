@@ -87,7 +87,7 @@ WHERE
 $total = read($totalsql);
 
 $data = [
-    'status' => 'OK',
+    'status' => true,
     'message' => 'Get Input Data',
     'data' => [
         "users" => $users,

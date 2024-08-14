@@ -28,9 +28,8 @@ $sql = "SELECT
 $result = read($sql);
 
 $data = [
-    'status' => 'OK',
+    'status' => true,
     'message' => 'Get Input Data',
-    'query' => $sql,
     'data' => $result
 ];
 

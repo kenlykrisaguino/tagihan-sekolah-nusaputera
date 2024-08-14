@@ -12,15 +12,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $csvData = [];
 
         if (($handle = fopen($fileTmpPath, 'r')) !== false) {
-            $headers = fgetcsv($handle); // Read the first line as headers
+            $headers = fgetcsv($handle); 
             while (($row = fgetcsv($handle)) !== false) {
-                $csvData[] = array_combine($headers, $row); // Combine headers with row values
+                $csvData[] = array_combine($headers, $row); 
             }
             fclose($handle);
         }
 
         if (empty($csvData)) {
-            echo json_encode(['error' => 'No data found in the CSV file.']);
+            echo json_encode([
+                'status' => false,
+                'message' => 'No data found in the CSV file.'
+            ]);
             exit;
         }
 
@@ -67,26 +70,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $query .= implode(',', $values);
 
             if (crud($query)) {
-                // Update trx_status in the bills table to be not paid => late, waiting => paid
                 $updateQuery = "UPDATE bills SET trx_status = 'paid' WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'waiting'";
                 crud($updateQuery);
                 $updateQuery = "UPDATE bills SET trx_status = 'late', late_bills = 0 WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'not paid'";
                 crud($updateQuery);
-                echo json_encode(['fileName' => $fileName, 'data' => $csvData, 'status' => 'success']);
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Payment has been added successfully',
+                    'data' => $csvData
+                ]);
             } else {
-                echo json_encode(['error' => 'Failed to insert data into the database.']);
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Failed to insert data into the database.'
+                ]);
             }
         } else {
-            echo json_encode(['error' => 'No matching unpaid bills found for the provided data.']);
+            echo json_encode([
+                'status' => false,
+                'message' => 'No matching unpaid bills found for the provided data.'
+            ]);
         }
     } else {
-        echo json_encode(['error' => 'No file uploaded.']);
+        echo json_encode([
+            'status' => false,
+            'message' => 'No file uploaded.'
+        ]);
     }
 } else {
-    echo json_encode(['error' => 'Invalid request method.']);
+    echo json_encode([
+        'status' => false,
+        'error' => 'Invalid request method.'
+    ]);
 }
 
-// Helper function to generate trx_id
 function generateTrxId($level, $nis) {
     return $level . '/11/5/1/' . $nis;
 }
