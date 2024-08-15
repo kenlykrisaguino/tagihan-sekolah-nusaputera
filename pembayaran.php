@@ -5,8 +5,10 @@ include './headers/siswa.php';
 // Check if user is logged in
 IsLoggedIn();
 
-$query_tahun_ajaran = 'SELECT DISTINCT period FROM bills ORDER BY period';
-$query_semester = 'SELECT DISTINCT semester FROM bills ORDER BY semester';
+$username = $_SESSION['username'];
+
+$query_tahun_ajaran = "SELECT DISTINCT period FROM bills WHERE virtual_account = '$username' ORDER BY period";
+$query_semester = "SELECT DISTINCT semester FROM bills WHERE virtual_account = '$username' ORDER BY semester";
 
 $tahun_ajaran_options = read($query_tahun_ajaran);
 $semester_options = read($query_semester);
@@ -72,7 +74,7 @@ $semester_options = read($query_semester);
         var semester = document.getElementById('semester').value;
 
         var params = new URLSearchParams({
-            user: "<?php echo $_SESSION['username'] ?>",
+            user: "<?php echo $username ?>",
             tahun_ajaran: tahunAjaran,
             semester: semester
         });

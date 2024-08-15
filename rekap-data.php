@@ -21,7 +21,7 @@ $semester_options = read($query_semester);
         <input type="search" class="form-control" oninput="getData()" placeholder="Search Name" id="search" name="search"
             value="">
     </div>
-    <div class="form-group col-6">
+    <div class="form-group col-4">
         <label for="tahun_ajaran">Tahun Ajaran:</label>
         <select name="tahun_ajaran" id="tahun_ajaran" class="form-control">
             <!-- <option selected disabled>Pilih Tahun Ajaran</option> -->
@@ -31,13 +31,25 @@ $semester_options = read($query_semester);
         </select>
     </div>
 
-    <div class="form-group col-6">
+    <div class="form-group col-4">
         <label for="semester">Semester:</label>
         <select name="semester" id="semester" class="form-control">
             <!-- <option selected disabled>Pilih Semester</option> -->
             <?php foreach ($semester_options as $option) { ?>
             <option value="<?php echo $option['semester']; ?>" <?php echo $semester == $option['semester'] ? 'selected' : ''; ?>><?php echo $option['semester']; ?></option>
             <?php } ?>
+        </select>
+    </div>
+
+    <div class="form-group col-4">
+        <label for="semester">Bulan:</label>
+        <select class="form-control" id="filter-bulan" name="filter-bulan">
+            <option value="">Semua Bulan</option>
+            <?php
+            foreach ($months as $bulan => $nama_bulan) {
+                echo "<option value='$bulan'>$nama_bulan</option>";
+            }
+            ?>
         </select>
     </div>
     <div class="form-group col-12">

@@ -28,7 +28,7 @@ $semester_options = read($query_semester);
                 <label for="bulan" class="d-block">Filter Bulan</label>
                 <select class="form-control" id="filter-bulan" name="filter-bulan">
                     <option value="">-- Pilih Bulan --</option>
-                    <?php                    
+                    <?php
                     foreach ($months as $bulan => $nama_bulan) {
                         echo "<option value='$bulan'>$nama_bulan</option>";
                     }
@@ -58,51 +58,56 @@ $semester_options = read($query_semester);
 <script>
     const getData = () => {
         var month = $('#filter-bulan').find(':selected').val();
-        if (month == ""){
+        if (month == "") {
             var url = 'api/input-data.php'
         } else {
             var url = `api/input-data.php?month=${month}`
         }
         fetch(url)
-           .then(response => response.json())
-           .then(data => {
-            console.log(data);
-               $('#input-data-table').empty();
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                $('#input-data-table').empty();
                 data.data.forEach(trx => {
-                    $('#input-data-table').append(`<?php include_once './tables/input-data.php'?>`);
+                    $('#input-data-table').append(`<?php include_once './tables/input-data.php'; ?>`);
                 })
 
                 if (data.data.length == 0) {
-                    $('#input-data-table').append(`<tr><td colspan="4" class="text-center">Tidak ada data yang ditemukan.</td></tr>`);
+                    $('#input-data-table').append(
+                        `<tr><td colspan="4" class="text-center">Tidak ada data yang ditemukan.</td></tr>`);
                 }
             });
     }
 
     const uploadCSV = (e) => {
-        e.preventDefault(); 
+        e.preventDefault();
 
         var formData = new FormData();
         var fileInput = $('#file')[0].files[0];
-        formData.append('input', fileInput); 
+        formData.append('input', fileInput);
 
         $.ajax({
-            url: 'api/input-payment.php', 
+            url: 'api/input-payment.php',
             type: 'POST',
             data: formData,
             contentType: false,
             processData: false,
             success: function(response) {
-                $('#uploadStatus').html('<div class="alert alert-success">File uploaded successfully!</div>');
+                console.log(response);
+                $('#uploadStatus').html(
+                    '<div class="alert alert-success">File uploaded successfully!</div>');
                 getData();
             },
             error: function(xhr, status, error) {
-                $('#uploadStatus').html('<div class="alert alert-danger">Error occurred while uploading the file.</div>');
+                $('#uploadStatus').html(
+                    '<div class="alert alert-danger">Error occurred while uploading the file.</div>'
+                    );
                 console.error(xhr.responseText);
             }
         });
     }
 
-    $(document).ready( () => {
+    $(document).ready(() => {
         getData();
         $('#csvUploadForm').on('submit', function(e) {
             uploadCSV(e);

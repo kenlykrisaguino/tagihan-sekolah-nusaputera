@@ -29,7 +29,9 @@ if($semester == 'Genap') {
     SUM(CASE WHEN MONTH(b.payment_due) = 5 THEN b.late_bills ELSE 0 END) AS LateMei,
     SUM(CASE WHEN MONTH(b.payment_due) = 6 THEN b.late_bills ELSE 0 END) AS LateJuni";
 
-    $academic_year = substr($tahun_ajaran, -4) - 1;
+    $final_month = 6;
+
+    $academic_year = substr($tahun_ajaran, -4);
 
     $filter_total = "
     YEAR(p.trx_timestamp) = '$academic_year' AND
@@ -55,6 +57,8 @@ if($semester == 'Genap') {
     SUM(CASE WHEN MONTH(b.payment_due) = 11 THEN b.late_bills ELSE 0 END) AS LateNovember,
     SUM(CASE WHEN MONTH(b.payment_due) = 12 THEN b.late_bills ELSE 0 END) AS LateDesember";
     
+    $final_month = 12;
+
     $academic_year = substr($tahun_ajaran, -4) - 1;
     
     $filter_total = "
@@ -69,7 +73,7 @@ $sql = "SELECT
     b.student_name, b.level, b.parent_phone, b.period,
     SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
     $sql_semester, 
-    (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis) AS tunggakan
+    (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis AND MONTH(bills.payment_due) <= $final_month AND YEAR(bills.payment_due)<=$academic_year)  AS tunggakan
     FROM 
         bills b
     WHERE 
@@ -87,7 +91,7 @@ $users = read($sql);
 
 $totalsql = "SELECT
     SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
-    SUM(CASE WHEN b.trx_status = 'late' OR b.trx_status = 'not paid' THEN l.late_bills ELSE 0 END) AS tunggakan
+    SUM(CASE WHEN b.trx_status = 'late' OR b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS tunggakan
 FROM
     bills b
     LEFT JOIN levels l ON b.level = l.name
