@@ -48,9 +48,10 @@ foreach ($usersResult as $user) {
 
         $trx_status = ($month_num == $first_month) ? 'waiting' : 'inactive';
 
+        $trx_id = generateTrxID($user['level'], $user['nis']);
         $input .= "(
-            '{$user['nis']}', '{$user['level']}/11/5/1/{$user['nis']}', '{$user['virtual_account']}',
-            '{$user['name']}', '{$user['parent_phone']}', '{$user['phone_number']}',
+            '$user[nis]', '$trx_id', '$user[virtual_account]',
+            '{$user['name']}', '$user[parent_phone]', '$user[phone_number]',
             '{$user['email_address']}', '{$user['monthly_bills']}', '$trx_status',
             'Pembayaran tahun ajaran $tahun_ajaran Semester $semester bulan $months[$num_padded]', '{$user['level']}', '$tahun_ajaran',
             '$semester', '$query_duedate'
@@ -86,5 +87,19 @@ if ($result) {
         'status' => false,
         'message' => 'Gagal membuat tagihan'
     ]);
+}
+
+function generateTrxID($level, $nis){
+    global $year;
+    global $semester;
+    global $month;
+
+    $trimmed_year = substr($year, -2);
+    $curr_semester = $semester == 'Gasal' ? "1" : "2";
+    $semester_month = $month % 6;
+
+    $trx_id = "$level/$trimmed_year/$curr_semester/$semester_month/$nis";
+
+    return $trx_id;
 }
 ?>
