@@ -27,7 +27,8 @@ $indonesianMonths = [
 ];
 
 $checkQuery = "SELECT
-    trx_amount
+    trx_amount,
+    payment_due
 FROM
     bills
 WHERE
@@ -39,10 +40,12 @@ WHERE
 $checkResult = read($checkQuery);
 
 if (isset($checkResult) && count($checkResult) != 0) {
+    $due = $checkResult[0]['payment_due'];
     $sql = "UPDATE
         bills
     SET
-        $column = '$value'
+        $column = '$value',
+        payment_due = '$due'
     WHERE
         nis = '$id' AND
         semester = '$semester' AND
