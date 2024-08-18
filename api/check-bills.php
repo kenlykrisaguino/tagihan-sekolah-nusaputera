@@ -12,7 +12,7 @@ foreach ($late_bill_list as $late_bill){
 
 $sql_create_temp_table = "
     CREATE TEMPORARY TABLE temp_bills AS
-    SELECT b.id, next_b.id AS next_b_id, b.level
+    SELECT b.id, next_b.id AS next_b_id, b.level, b.payment_due
     FROM bills b
     LEFT JOIN bills next_b ON next_b.nis = b.nis 
         AND next_b.payment_due = (
@@ -37,6 +37,7 @@ $sql_update = "
     SET 
         b.trx_status = 'not paid', 
         b.late_bills = COALESCE(l.late_bills, 0),
+        b.payment_due = t.payment_due,
         next_b.trx_status = 'waiting'
     WHERE 
         b.trx_status = 'waiting' 
