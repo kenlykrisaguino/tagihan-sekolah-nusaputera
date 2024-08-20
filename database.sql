@@ -6,7 +6,7 @@ CREATE TABLE `administrations` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `admin_code` VARCHAR(30) UNIQUE NOT NULL,
   `type` VARCHAR(10) NOT NULL,
-  `created_at` timestamp DEFAULT NOW()
+  `created_at` datetime DEFAULT NOW()
 );
 
 CREATE TABLE `levels` (
@@ -57,7 +57,7 @@ CREATE TABLE `bills` (
   `level` VARCHAR(5) NOT NULL,
   `period` VARCHAR(9) NOT NULL,
   `semester` VARCHAR(5) NOT NULL,
-  `payment_due` timestamp NOT NULL
+  `payment_due` datetime NOT NULL
 );
 
 CREATE TABLE `payments` (
@@ -68,7 +68,7 @@ CREATE TABLE `payments` (
   `trx_id` VARCHAR(20) NOT NULL,
   `trx_amount` decimal NOT NULL,
   `notes` text DEFAULT NULL,
-  `trx_timestamp` timestamp DEFAULT NOW()
+  `trx_timestamp` datetime DEFAULT NOW()
 );
 
 ALTER TABLE `users` ADD FOREIGN KEY (`level`) REFERENCES `levels` (`id`);
@@ -83,22 +83,22 @@ INSERT INTO `users` (
   `parent_phone`, `latest_bill`, `virtual_account`, 
   `period`, `semester`, `password`) VALUES
 ('0000', 'admin', 'active', 7, '000000000000', 'admin@nusput.com', '000000000000', NULL, 'admin', '2023/2024', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu'),
-('5048', 'Angel Ravelynta', 'active', 6, NULL, NULL, '087731335955', NULL, '9881105622235048', '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu'),
+('5048', 'Angel Ravelynta', 'active', 6, NULL, NULL, '081329171920', NULL, '9881105622235048', '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu'),
 ('5049', 'Wira Anggara', 'active', 6, NULL, NULL, '081329171920', NULL, '9881105622235049', '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu');
 
 INSERT INTO `bills` (`nis`, `trx_id`, `virtual_account`, `student_name`, `parent_phone`, `student_phone`, `student_email`, `trx_amount`, `trx_status`, `late_bills`, `description`, `level`, `period`, `semester`, `payment_due`) VALUES
-('5048', 'SMA/23/1/7/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-07-31 23:59:59'),
-('5048', 'SMA/23/1/8/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-08-31 23:59:59'),
-('5048', 'SMA/23/1/9/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-09-29 23:59:59'),
-('5048', 'SMA/23/1/10/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-10-31 23:59:59'),
-('5048', 'SMA/23/1/11/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-11-30 23:59:59'),
-('5048', 'SMA/23/1/12/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-12-29 23:59:59'),
-('5048', 'SMA/24/2/1/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-01-31 23:59:59'),
-('5048', 'SMA/24/2/2/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-02-29 23:59:59'),
-('5048', 'SMA/24/2/3/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Genap', '2024-03-29 23:59:59'),
-('5048', 'SMA/24/2/4/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-04-30 23:59:59'),
-('5048', 'SMA/24/2/5/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-05-31 23:59:59'),
-('5048', 'SMA/24/2/6/5048', '9881105622235048', 'Angel Ravelynta', '087731335955', NULL, NULL, 165000, 'not paid', 10000, '', 'SMA', '2023/2024', 'Genap', '2024-06-28 23:59:59');
+('5048', 'SMA/23/1/7/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-07-31 23:59:59'),
+('5048', 'SMA/23/1/8/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-08-31 23:59:59'),
+('5048', 'SMA/23/1/9/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-09-29 23:59:59'),
+('5048', 'SMA/23/1/10/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-10-31 23:59:59'),
+('5048', 'SMA/23/1/11/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-11-30 23:59:59'),
+('5048', 'SMA/23/1/12/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-12-29 23:59:59'),
+('5048', 'SMA/24/2/1/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-01-31 23:59:59'),
+('5048', 'SMA/24/2/2/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-02-29 23:59:59'),
+('5048', 'SMA/24/2/3/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Genap', '2024-03-29 23:59:59'),
+('5048', 'SMA/24/2/4/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-04-30 23:59:59'),
+('5048', 'SMA/24/2/5/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-05-31 23:59:59'),
+('5048', 'SMA/24/2/6/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'not paid', 10000, '', 'SMA', '2023/2024', 'Genap', '2024-06-28 23:59:59');
 
 
 INSERT INTO `payments` (`sender`, `virtual_account`, `bill_id`, `trx_id`, `trx_amount`, `trx_timestamp`) VALUES
