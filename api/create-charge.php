@@ -4,13 +4,16 @@ require_once '../config/midtrans/Midtrans.php';
 require_once '../config/parse-env.php';
 header('Content-Type: application/json');
 
+use Midtrans\Config;
+use Midtrans\CoreApi;
+
 // Masukin Admin Log per bulan, jalan tiap awal bulan hari kerja
 
 
-\Midtrans\Config::$serverKey = getenv('MIDTRANS_SERVER_KEY');
-\Midtrans\Config::$isProduction = false;
-\Midtrans\Config::$isSanitized = true;
-\Midtrans\Config::$is3ds = true;
+Config::$serverKey = getenv('MIDTRANS_SERVER_KEY');
+Config::$isProduction = false;
+Config::$isSanitized = true;
+Config::$is3ds = true;
 
 $params = array(
     'payment_type' => 'bank_transfer',
@@ -28,4 +31,4 @@ $params = array(
     ),
 );
 
-$chargeResponse = \Midtrans\CoreApi::charge($params);
+$chargeResponse = CoreApi::charge($params);
