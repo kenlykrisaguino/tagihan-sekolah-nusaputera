@@ -81,11 +81,13 @@ $semester_options = read($query_semester);
         var search = document.getElementById('search').value;
         var tahunAjaran = document.getElementById('tahun_ajaran').value;
         var semester = document.getElementById('semester').value;
+        var month = document.getElementById('filter-bulan').value;
 
         var params = new URLSearchParams({
             search: search,
             tahun_ajaran: tahunAjaran,
-            semester: semester
+            semester: semester,
+            month: month
         });
 
         url += '?' + params.toString();
