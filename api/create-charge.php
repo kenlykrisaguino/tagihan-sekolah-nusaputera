@@ -4,6 +4,9 @@ require_once '../config/midtrans/Midtrans.php';
 require_once '../config/parse-env.php';
 header('Content-Type: application/json');
 
+// Masukin Admin Log per bulan, jalan tiap awal bulan hari kerja
+
+
 \Midtrans\Config::$serverKey = getenv('MIDTRANS_SERVER_KEY');
 \Midtrans\Config::$isProduction = false;
 \Midtrans\Config::$isSanitized = true;
