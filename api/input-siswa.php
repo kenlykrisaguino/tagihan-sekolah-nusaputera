@@ -28,35 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $nisList = array_column($csvData, 'nis');
-        $nisList = array_unique($nisList);
-
-        $userQuery = "SELECT c.level AS level, u.id, u.nis, u.parent_phone FROM users u JOIN classes c ON c.id = u.class WHERE u.nis IN ('" . implode("','", $nisList) . "')";
-        $users = crud($userQuery);
-
-        $userMap = [];
-        foreach ($users as $user) {
-            $userMap[$user['nis']] = [
-                "id"=>$user['id'], 
-                "level" => $user['level'], 
-                "parent_phone" => $user['parent_phone']
-            ];
-        }
-
-        $billQuery = "SELECT id, nis, MONTH(payment_due) AS bill_month FROM bills WHERE nis IN ('" . implode("','", $nisList) . "') AND trx_status = 'waiting'";
-        $bills = crud($billQuery);
-
-        $billMap = [];
-        foreach ($bills as $bill) {
-            $billMap[$bill['nis']] = [
-                "id" => $bill['id'],
-                "bill_month" => $bill['bill_month']
-            ];
-        }
-
-        $values = [];
-        $msgData = [];
-
         foreach ($csvData as $data) {
             $nis = $data['nis'];
             $virtual_account = $data['virtual_account'];

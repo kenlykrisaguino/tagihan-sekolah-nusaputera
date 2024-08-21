@@ -3,7 +3,7 @@
 include_once '../config/app.php';
 header('Content-Type: application/json');
 
-$level_query = "SELECT name, late_bills FROM levels";
+$level_query = "SELECT CONCAT(level, '-',name, '-',major) AS name, late_bills FROM classes";
 $late_bill_list = read($level_query);
 
 foreach ($late_bill_list as $late_bill){
@@ -12,7 +12,7 @@ foreach ($late_bill_list as $late_bill){
 
 $sql_create_temp_table = "
     CREATE TEMPORARY TABLE temp_bills AS
-    SELECT b.id, next_b.id AS next_b_id, b.level, b.payment_due
+    SELECT b.id, next_b.id AS next_b_id, b.class, b.payment_due
     FROM bills b
     LEFT JOIN bills next_b ON next_b.nis = b.nis 
         AND next_b.payment_due = (
@@ -33,10 +33,10 @@ $sql_update = "
     UPDATE bills b
     LEFT JOIN temp_bills t ON b.id = t.id
     LEFT JOIN bills next_b ON next_b.id = t.next_b_id
-    LEFT JOIN levels l ON l.name = t.level
+    LEFT JOIN classes c ON c.id = t.class
     SET 
         b.trx_status = 'not paid', 
-        b.late_bills = COALESCE(l.late_bills, 0),
+        b.late_bills = COALESCE(c.late_bills, 0),
         b.payment_due = t.payment_due,
         next_b.trx_status = 'waiting'
     WHERE 

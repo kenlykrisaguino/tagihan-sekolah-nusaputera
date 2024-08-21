@@ -5,7 +5,7 @@ include './config/app.php';
 IsLoggedIn();
 
 if ($_SESSION['level'] == 7){
-    header('Location: input-data.php');
+    header('Location: rekap-siswa.php');
     exit();
 } else if ($_SESSION['level'] < 7){
     header('Location: beranda-siswa.php');

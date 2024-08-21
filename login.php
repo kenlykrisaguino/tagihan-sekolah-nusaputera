@@ -1,6 +1,9 @@
 <?php
-include './config/app.php';
-session_start();
+require_once './config/app.php';
+
+if(isset($_SESSION['level'])){
+  returnError();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

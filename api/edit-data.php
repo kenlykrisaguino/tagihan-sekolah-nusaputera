@@ -70,12 +70,13 @@ if($semester == 'Genap') {
 $sql = "SELECT
     b.nis, 
     b.virtual_account,
-    b.student_name, b.level, b.parent_phone, b.period,
+    b.student_name, CONCAT(c.level, ' ', c.name, ' ', c.major) AS level, b.parent_phone, b.period,
     SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
     $sql_semester, 
     (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis AND MONTH(bills.payment_due) <= $final_month AND YEAR(bills.payment_due)<=$academic_year)  AS tunggakan
     FROM 
         bills b
+        JOIN classes c on b.class = c.id
     WHERE 
         b.period = '$tahun_ajaran' AND 
         b.semester = '$semester' AND
@@ -83,7 +84,7 @@ $sql = "SELECT
     GROUP BY 
         b.nis, 
         b.virtual_account,
-        b.student_name, b.level, 
+        b.student_name, CONCAT(c.level, ' ', c.name, ' ', c.major), 
         b.parent_phone, b.period;
     ";
 
@@ -91,13 +92,13 @@ $users = read($sql);
 
 $totalsql = "SELECT
     SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
-    SUM(CASE WHEN b.trx_status = 'late' OR b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS tunggakan
+    SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS tunggakan
 FROM
     bills b
-    LEFT JOIN levels l ON b.level = l.name
 WHERE 
     b.period = '$tahun_ajaran' AND 
-    b.semester = '$semester'";
+    b.semester = '$semester';
+";
 
 
 

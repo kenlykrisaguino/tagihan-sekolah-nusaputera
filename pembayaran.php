@@ -1,9 +1,9 @@
 <?php
 include './config/app.php';
-include_once './config/session.php';
-include './headers/siswa.php';
 // Check if user is logged in
 IsLoggedIn();
+RoleAllowed() ? null : returnError();
+include './headers/siswa.php';
 
 $username = $_SESSION['username'];
 

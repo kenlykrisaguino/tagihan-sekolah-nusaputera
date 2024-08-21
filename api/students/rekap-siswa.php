@@ -9,7 +9,7 @@ $virtual_account = isset($_GET['user']) ? $_GET['user'] : '';
 $sql = "SELECT
     u.nis, u.name, u.virtual_account,
     u.parent_phone, u.period, u.semester,
-    l.name AS level, l.monthly_bills, l.late_bills,
+    CONCAT(c.level, ' ', c.name, ' ', c.major) AS level, c.monthly_bills, c.late_bills,
     SUM(
         CASE 
             WHEN b.trx_status = 'paid' 
@@ -19,7 +19,7 @@ $sql = "SELECT
                 0 
             WHEN b.trx_status = 'not paid'
             THEN 
-                b.trx_amount + l.late_bills
+                b.trx_amount + c.late_bills
             ELSE 
                 b.trx_amount
         END
@@ -34,13 +34,13 @@ $sql = "SELECT
     ) AS last_payment
 FROM
     users u
-    JOIN levels l ON u.level = l.id
+    JOIN classes c ON u.class = c.id
     JOIN bills b ON u.nis = b.nis
 WHERE 
     b.virtual_account = '$virtual_account'
 GROUP BY
     u.nis, u.name, u.virtual_account,
-    l.name, l.monthly_bills
+    c.name, c.monthly_bills
 ";
 
 

@@ -20,9 +20,9 @@ $first_month = $semester_month[0];
 
 $users = "SELECT
     u.nis, u.virtual_account, u.name, u.parent_phone, u.phone_number,
-    u.email_address, l.monthly_bills, l.name AS level
+    u.email_address, c.monthly_bills, c.id AS class, c.level as level
     FROM users u
-    INNER JOIN levels l ON u.level = l.id
+    INNER JOIN classes c ON u.class = c.id
     WHERE 
     u.status = 'active' AND
     u.name != 'ADMIN'";
@@ -53,7 +53,7 @@ foreach ($usersResult as $user) {
             '$user[nis]', '$trx_id', '$user[virtual_account]',
             '{$user['name']}', '$user[parent_phone]', '$user[phone_number]',
             '{$user['email_address']}', '{$user['monthly_bills']}', '$trx_status',
-            'Pembayaran tahun ajaran $tahun_ajaran Semester $semester bulan $months[$num_padded]', '{$user['level']}', '$tahun_ajaran',
+            'Pembayaran tahun ajaran $tahun_ajaran Semester $semester bulan $months[$num_padded]', '{$user['class']}', '$tahun_ajaran',
             '$semester', '$query_duedate'
         ), ";
     }
@@ -63,7 +63,7 @@ $sql = "INSERT INTO bills(
     nis, trx_id, virtual_account, 
     student_name, parent_phone, student_phone,
     student_email, trx_amount, trx_status,
-    description, level, period,
+    description, class, period,
     semester, payment_due
 ) VALUES 
 $input";

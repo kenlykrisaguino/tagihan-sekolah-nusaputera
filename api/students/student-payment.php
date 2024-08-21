@@ -9,10 +9,10 @@ $semester = isset($_GET['semester']) ? $_GET['semester'] : '';
 $virtual_account = isset($_GET['user']) ? $_GET['user'] : '';
 
 $sql = "SELECT
-users.nis, users.name, users.virtual_account,
-levels.name AS jenjang
-FROM users INNER JOIN levels ON users.level = levels.id
-WHERE users.virtual_account = '$virtual_account'
+u.nis, u.name, u.virtual_account,
+CONCAT(c.level, ' ',c.name, ' ', c.major) AS jenjang
+FROM users u INNER JOIN classes c ON u.class = c.id
+WHERE u.virtual_account = '$virtual_account'
 ";
 
 $users = read($sql);
@@ -33,13 +33,13 @@ FROM
 LEFT JOIN 
     payments p ON b.id = p.bill_id
 JOIN 
-    levels l ON b.level = l.name
+    classes l ON b.class = l.id
 WHERE 
     b.virtual_account = '$virtual_account' AND
     b.period = '$tahun_ajaran' AND
     b.semester = '$semester'
 ORDER BY 
-    b.payment_due ASC;
+    b.payment_due ASC
 ";
 
 $trx = read($sql);

@@ -9,36 +9,67 @@ CREATE TABLE `administrations` (
   `created_at` datetime DEFAULT NOW()
 );
 
-CREATE TABLE `levels` (
+CREATE TABLE `classes` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
-  `name` VARCHAR(5) UNIQUE NOT NULL,
+  `level` VARCHAR(5) NOT NULL,
+  `name` VARCHAR(50) NOT NULL,
+  `major` VARCHAR(50),
   `monthly_bills` decimal NOT NULL,
   `late_bills` decimal NOT NULL
 );
 
-INSERT INTO `levels` (`name`, `monthly_bills`, `late_bills`) VALUES
-('PG', 50000, 5000),
-('TKA', 65000, 5000),
-('TKB', 75000, 5000),
-('SD', 100000, 10000),
-('SMP', 150000, 10000),
-('SMA', 165000, 10000),
-('ADMIN', 0, 0);
+INSERT INTO classes (name, major, level, monthly_bills, late_bills) VALUES
+('PG', NULL, 'TK', 650000, 10000),
+('A' , NULL, 'TK', 650000, 10000),
+('B' , NULL, 'TK', 650000, 10000),
+('A' , 'Excel', 'TK', 900000, 10000),
+('B' , 'Excel', 'TK', 950000, 10000),
+('1' , NULL, 'SD', 650000, 10000),
+('2' , NULL, 'SD', 650000, 10000),
+('3' , NULL, 'SD', 655000, 10000),
+('4' , 'A', 'SD', 485000, 10000),
+('4' , 'B', 'SD', 485000, 10000),
+('5' , 'A', 'SD', 385000, 10000),
+('5' , 'B', 'SD', 385000, 10000),
+('6' , NULL, 'SD', 562000, 10000),
+('7' , 'A', 'SMP', 575000, 10000),
+('7' , 'B', 'SMP', 575000, 10000),
+('8' , NULL, 'SMP', 540000, 10000),
+('9' , 'A', 'SMP', 835000, 10000),
+('9' , 'B', 'SMP', 835000, 10000),
+('X' , '1', 'SMA', 700000, 10000),
+('X' , '2', 'SMA', 700000, 10000),
+('XI', '1', 'SMA', 665000, 10000),
+('XI', '2', 'SMA', 665000, 10000),
+('XI', 'Excel', 'SMA', 950000, 10000),
+('XII','IPS', 'SMA', 866000, 10000),
+('XII','IPA', 'SMA', 776000, 10000),
+('XII','EXCEL', 'SMA', 1226000, 10000),
+('X MM','A', 'SMK 1', 520000, 10000),
+('X MM','B', 'SMK 1', 520000, 10000),
+('XI MM','A', 'SMK 1 ', 520000, 10000),
+('XI MM','B', 'SMK 1 ', 520000, 10000),
+('XII MM',NULL, 'SMK 1', 694000, 10000),
+('X TKJ',NULL, 'SMK 1 ', 610000, 10000),
+('XI TKJ',NULL, 'SMK 1', 625000, 10000),
+('XII TKJ',NULL, 'SMK 1', 820000, 10000);
 
 CREATE TABLE `users` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `nis` VARCHAR(10) UNIQUE,
   `name` VARCHAR(255) NOT NULL,
+  `address` VARCHAR(255) NOT NULL,
+  `birthdate` DATE NOT NULL,
   `status` VARCHAR(10) NOT NULL,
-  `level` int NOT NULL,
+  `class` int NOT NULL,
   `phone_number` VARCHAR(16) DEFAULT NULL,
   `email_address` VARCHAR(255) DEFAULT NULL,
   `parent_phone` VARCHAR(16) NOT NULL,
-  `latest_bill` datetime DEFAULT NULL,
   `virtual_account` VARCHAR(16) NOT NULL,
   `period` VARCHAR(9) NOT NULL,
   `semester` VARCHAR(5) NOT NULL,
-  `password` VARCHAR(255) NOT NULL
+  `password` VARCHAR(255) NOT NULL,
+  `role` VARCHAR(10) DEFAULT 'STUDENT'
 );
 
 CREATE TABLE `bills` (
@@ -54,7 +85,7 @@ CREATE TABLE `bills` (
   `trx_status` VARCHAR(15) NOT NULL,
   `late_bills` decimal DEFAULT 0,
   `description` text DEFAULT NULL,
-  `level` VARCHAR(5) NOT NULL,
+  `class` INT NOT NULL,
   `period` VARCHAR(9) NOT NULL,
   `semester` VARCHAR(5) NOT NULL,
   `payment_due` datetime NOT NULL
@@ -71,41 +102,24 @@ CREATE TABLE `payments` (
   `trx_timestamp` datetime DEFAULT NOW()
 );
 
-ALTER TABLE `users` ADD FOREIGN KEY (`level`) REFERENCES `levels` (`id`);
+ALTER TABLE `users` ADD FOREIGN KEY (`class`) REFERENCES `classes` (`id`);
 
 ALTER TABLE `payments` ADD FOREIGN KEY (`sender`) REFERENCES `users` (`id`);
 
 ALTER TABLE `payments` ADD FOREIGN KEY (`bill_id`) REFERENCES `bills` (`id`);
 
-INSERT INTO `users` (
-  `nis`, `name`, `status`, 
-  `level`, `phone_number`, `email_address`, 
-  `parent_phone`, `latest_bill`, `virtual_account`, 
-  `period`, `semester`, `password`) VALUES
-('0000', 'admin', 'active', 7, '000000000000', 'admin@nusput.com', '000000000000', NULL, 'admin', '2023/2024', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu'),
-('5048', 'Angel Ravelynta', 'active', 6, NULL, NULL, '081329171920', NULL, '9881105622235048', '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu'),
-('5049', 'Wira Anggara', 'active', 6, NULL, NULL, '081329171920', NULL, '9881105622235049', '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu');
-
-INSERT INTO `bills` (`nis`, `trx_id`, `virtual_account`, `student_name`, `parent_phone`, `student_phone`, `student_email`, `trx_amount`, `trx_status`, `late_bills`, `description`, `level`, `period`, `semester`, `payment_due`) VALUES
-('5048', 'SMA/23/1/7/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-07-31 23:59:59'),
-('5048', 'SMA/23/1/8/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-08-31 23:59:59'),
-('5048', 'SMA/23/1/9/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-09-29 23:59:59'),
-('5048', 'SMA/23/1/10/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-10-31 23:59:59'),
-('5048', 'SMA/23/1/11/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-11-30 23:59:59'),
-('5048', 'SMA/23/1/12/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Gasal', '2023-12-29 23:59:59'),
-('5048', 'SMA/24/2/1/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-01-31 23:59:59'),
-('5048', 'SMA/24/2/2/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-02-29 23:59:59'),
-('5048', 'SMA/24/2/3/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'late', 0, '', 'SMA', '2023/2024', 'Genap', '2024-03-29 23:59:59'),
-('5048', 'SMA/24/2/4/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-04-30 23:59:59'),
-('5048', 'SMA/24/2/5/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'paid', 0, '', 'SMA', '2023/2024', 'Genap', '2024-05-31 23:59:59'),
-('5048', 'SMA/24/2/6/5048', '9881105622235048', 'Angel Ravelynta', '081329171920', NULL, NULL, 165000, 'not paid', 10000, '', 'SMA', '2023/2024', 'Genap', '2024-06-28 23:59:59');
-
-
-INSERT INTO `payments` (`sender`, `virtual_account`, `bill_id`, `trx_id`, `trx_amount`, `trx_timestamp`) VALUES
-(2, '9881105622235048', 1, 'SMA/23/1/7/5048', 165000, '2023-06-14 12:32:10'),
-(2, '9881105622235048', 5, 'SMA/23/1/11/5048', 690000, '2023-11-16 15:53:16'),
-(2, '9881105622235048', 6, 'SMA/23/1/12/5048', 165000, '2023-12-12 11:25:58'),
-(2, '9881105622235048', 7, 'SMA/24/2/1/5048', 165000, '2024-01-24 10:52:13'),
-(2, '9881105622235048', 8, 'SMA/24/2/2/5048', 165000, '2024-02-15 18:35:17'),
-(2, '9881105622235048', 10, 'SMA/24/2/4/5048', 340000, '2024-04-27 20:34:36'),
-(2, '9881105622235048', 11, 'SMA/24/2/5/5048', 165000, '2024-05-23 19:27:48');
+INSERT INTO users(
+  nis, name, address, birthdate, status,
+  class, phone_number, email_address, parent_phone, virtual_account,
+  period, semester, password, role
+) VALUES 
+(
+  '0000', 'Admin', 'Semarang', NOW(), 'Inactive',
+  1, '', '', '087731335955', 'admin',
+  '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu', 'ADMIN'
+),
+(
+  '5048', 'Angel Ravelynta', 'Semarang', NOW(), 'Active',
+  25, '', '', '087731335955', '9881105622235048',
+  '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu', 'STUDENT'
+);

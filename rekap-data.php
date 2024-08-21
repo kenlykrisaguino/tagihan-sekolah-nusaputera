@@ -1,9 +1,9 @@
 <?php
 include './config/app.php';
-include_once './config/session.php';
-include './headers/admin.php';
 // Check if user is logged in
 IsLoggedIn();
+RoleAllowed(7) ? null : returnError();
+include './headers/admin.php';
 
 $query_tahun_ajaran = 'SELECT DISTINCT period FROM bills ORDER BY period';
 $query_semester = 'SELECT DISTINCT semester FROM bills ORDER BY semester';

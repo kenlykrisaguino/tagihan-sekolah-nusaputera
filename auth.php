@@ -1,6 +1,5 @@
 <?php
 include_once './config/app.php';
-session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $inputUsername = $_POST['username'];
@@ -25,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    $query = "SELECT `id`, `nis`, `level` FROM `users` WHERE `virtual_account` = '$inputUsername'";
+    $query = "SELECT `id`, `nis`, `class`, `role` FROM `users` WHERE `virtual_account` = '$inputUsername'";
 
     $results = read($query);
     $result = $results[0];
@@ -33,12 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $_SESSION['user_id'] = $results['id'];
     $_SESSION['nis'] = $results['nis'];
     $_SESSION['username'] = $inputUsername;
-    $_SESSION['level'] = $result['level'];
+    $_SESSION['class'] = $result['class'];
+    $_SESSION['role'] = $result['role'];
 
-    if ($_SESSION['level'] == 7){
-        header('Location: input-data.php');
+    if ($_SESSION['role'] == 'ADMIN'){
+        header('Location: rekap-siswa.php');
         exit();
-    } else if ($_SESSION['level'] < 7){
+    } else if ($_SESSION['role'] == 'STUDENT'){
         header('Location: beranda-siswa.php');
         exit();
     } else {

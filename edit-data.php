@@ -1,9 +1,9 @@
 <?php
 include './config/app.php';
-include_once './config/session.php';
-include './headers/admin.php';
 // Check if user is logged in
 IsLoggedIn();
+RoleAllowed(7) ? null : returnError();
+include './headers/admin.php';
 
 $query_tahun_ajaran = 'SELECT DISTINCT period FROM bills ORDER BY period';
 $query_semester = 'SELECT DISTINCT semester FROM bills ORDER BY semester';
@@ -141,10 +141,22 @@ $semester_options = read($query_semester);
                             semester: document.getElementById('semester').value,
                         },
                         success: (data) => {
-                            console.log(data);
                             if (!data.status) {
-                                alert('Update failed');
+                                $.toast({
+                                    heading: 'Gagal',
+                                    text: 'Gagal mengupdate data',
+                                    showHideTransition: 'plain',
+                                    icon: 'error'
+                                })
+                            } else {
+                                $.toast({
+                                    heading: 'Berhasil',
+                                    text: 'Berhasil mengupdate data',
+                                    showHideTransition: 'plain',
+                                    icon:'success'
+                                })
                             }
+                            getData();
                         }
                     });
                 } else {
