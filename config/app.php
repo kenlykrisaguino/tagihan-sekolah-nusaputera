@@ -1,5 +1,7 @@
 <?php
 
+require_once 'parse-env.php';
+
 $current_page = basename($_SERVER['PHP_SELF']);
 
 $current_date = date('Y-m-d');
@@ -32,10 +34,10 @@ $months = [
  * Database Setup
  */
 
-$hostname = "localhost";
-$username = "root";
-$password = "";
-$db_name  = "tagihan_nusput";
+$hostname = getenv('DB_HOSTNAME') ?: 'localhost';
+$username = getenv('DB_USERNAME') ?: 'root';
+$password = getenv('DB_PASSWORD') ?: '';
+$db_name  = getenv('DB_NAME') ?: 'tagihan_nusput';
 
 $conn = new mysqli($hostname, $username, $password, $db_name);
 
@@ -78,4 +80,9 @@ function read($query) {
 function crud($query) {
     global $conn;
     return $conn->query($query);
+}
+
+function returnError() {
+    header("HTTP/1.1 404 Not Found");
+    exit(404);
 }

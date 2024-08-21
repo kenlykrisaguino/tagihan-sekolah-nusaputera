@@ -1,5 +1,7 @@
 <?php
 
+require_once 'parse-env.php';
+
 /**
  * Sends a message to the Fonnte API.
  *
@@ -27,7 +29,7 @@ function sendMessage($data)
 {
     $curl = curl_init();
 
-    $token = 'Yg5KeT@iH!nAUqmRoz1B';
+    $token = getenv('FONNTE_TOKEN');
 
     curl_setopt_array($curl, [
         CURLOPT_URL => 'https://api.fonnte.com/send',
