@@ -144,14 +144,14 @@ $semester_options = read($query_semester);
                             if (!data.status) {
                                 $.toast({
                                     heading: 'Gagal',
-                                    text: 'Gagal mengupdate data',
+                                    text: `Gagal mengupdate data pembayaran bulan ${month}`,
                                     showHideTransition: 'plain',
                                     icon: 'error'
                                 })
                             } else {
                                 $.toast({
                                     heading: 'Berhasil',
-                                    text: 'Berhasil mengupdate data',
+                                    text: `Berhasil mengupdate data pembayaran bulan ${month}`,
                                     showHideTransition: 'plain',
                                     icon:'success'
                                 })
@@ -172,8 +172,21 @@ $semester_options = read($query_semester);
                             console.log(data);
 
                             if (!data.data) {
-                                alert('Update failed');
+                                $.toast({
+                                    heading: 'Gagal',
+                                    text: `Gagal mengupdate data`,
+                                    showHideTransition: 'plain',
+                                    icon: 'error'
+                                })
+                            } else {
+                                $.toast({
+                                    heading: 'Berhasil',
+                                    text: `Berhasil mengupdate data`,
+                                    showHideTransition: 'plain',
+                                    icon:'success'
+                                })
                             }
+                            getData();
                         }
                     });
                 }
