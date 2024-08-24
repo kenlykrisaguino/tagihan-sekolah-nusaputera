@@ -93,7 +93,7 @@ include './headers/admin.php';
                         if (l.level != null) {
                             $('#jenjang').append(
                                 `<option value="${l.level}" ${l.level == jenjang ? 'selected' : ''}>${l.level}</option>`
-                                );
+                            );
                         }
                     });
                 }

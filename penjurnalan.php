@@ -56,8 +56,8 @@ include './headers/admin.php';
         </select>
     </div>
     <div class="form-group col-6">
-        <label for="name">Nama</label>
-        <select name="name" id="name" class="form-control" onchange="filterUser()">
+        <label for="nis">Nama</label>
+        <select name="nis" id="nis" class="form-control" onchange="filterUser()">
             <option value='' selected>Semua Siswa/i</option>
         </select>
     </div>
@@ -68,7 +68,132 @@ include './headers/admin.php';
         <tbody>
             <tr><td class="w-50">Bank</td><td id="data-pemasukan"></td></tr>
             <tr><td class="w-50">Tunggakan</td><td id="data-tunggakan"></td></tr>
-            <tr class="font-weight-bold"><td class="w-50">Pendapatan</td><td id="data-keseluruhan"></td></tr>
+            <tr class="font-weight-bold text-right"><td class="w-50">Pendapatan</td><td id="data-keseluruhan"></td></tr>
         </tbody>
     </table>
 </div>
+
+<script>
+    const filterUser = () => {
+        getData();
+
+        var url = 'api/classes-filter.php';
+        var jenjang = document.getElementById('jenjang').value;
+        var tingkat = document.getElementById('tingkat').value;
+        var kelas = document.getElementById('kelas').value;
+        var nis = document.getElementById('nis').value;
+
+        var params = new URLSearchParams({
+            level: jenjang,
+            class: tingkat,
+            major: kelas
+        });
+        url += '?' + params.toString();
+
+
+        console.log(url);
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(data) {
+                console.log(data);
+                $('#jenjang').empty();
+                $('#jenjang').append("<option value='' selected>Semua Jenjang</option>");
+
+                if (data.data.levels != null) {
+                    data.data.levels.forEach((l) => {
+                        if (l.level != null) {
+                            $('#jenjang').append(
+                                `<option value="${l.level}" ${l.level == jenjang ? 'selected' : ''}>${l.level}</option>`
+                            );
+                        }
+                    });
+                }
+
+                $('#tingkat').empty();
+                $('#tingkat').append("<option value='' selected>Semua Tingkat</option>");
+
+                if (data.data.classes != null) {
+                    data.data.classes.forEach((l) => {
+                        if (l.name != null) {
+                            $('#tingkat').append(
+                                `<option value="${l.name}" ${l.name == tingkat ? 'selected' : ''}>${l.name}</option>`
+                                )
+                        }
+                    });
+                }
+
+                $('#kelas').empty();
+                $('#kelas').append("<option value='' selected>Semua Kelas</option>");
+
+                if (data.data.majors != null) {
+                    data.data.majors.forEach((l) => {
+                        if (l.major != null) {
+                            $('#kelas').append(
+                                `<option value="${l.major}" ${l.major == kelas? 'selected' : ''}>${l.major}</option>`
+                                );
+                        }
+                    });
+                }
+
+                $('#nis').empty();
+                $('#nis').append("<option value='' selected>Semua Siswa/i</option>");
+
+                if (data.data.students != null) {
+                    data.data.students.forEach((l) => {
+                        if (l.name!= null) {
+                            $('#nis').append(
+                                `<option value="${l.nis}" ${l.nis == nis? 'selected' : ''}>${l.name}</option>`
+                            );
+                        }
+                    });
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+        })
+    }
+
+    const getData = () => {
+        var url = 'api/penjurnalan.php';
+        var tahun_ajaran = document.getElementById('tahun_ajaran').value;
+        var semester = document.getElementById('semester').value;
+        var jenjang = document.getElementById('jenjang').value;
+        var tingkat = document.getElementById('tingkat').value;
+        var kelas = document.getElementById('kelas').value;
+        var nis = document.getElementById('nis').value;
+
+        var params = new URLSearchParams({
+            period: tahun_ajaran,
+            semester: semester,
+            level: jenjang,
+            class: tingkat,
+            major: kelas,
+            nis: nis,
+        });
+
+        url += '?' + params.toString();
+
+
+        console.log(url);
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(data) {
+                console.log(data);
+                $('#data-pemasukan').html(formatToIDR(data.data.bank));
+                $('#data-tunggakan').html(formatToIDR(data.data.tunggakan));
+                $('#data-keseluruhan').html(formatToIDR(data.data.pendapatan));
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+        })
+    }
+
+    $(document).ready(() => {
+        getData();
+        filterUser();
+    })
+</script>

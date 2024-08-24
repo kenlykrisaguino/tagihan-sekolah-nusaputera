@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 
 $level = isset($_GET['level']) ? $_GET['level'] : '';
 $class = isset($_GET['class']) ? $_GET['class'] : '';
+$major = isset($_GET['major']) ? $_GET['major'] : '';
 
 $level_query = 'SELECT DISTINCT level FROM classes';
 $levels = read($level_query);
@@ -19,13 +20,27 @@ if($level != '') {
     }
 }
 
+$getClass = "SELECT id FROM classes WHERE TRUE ";
+
+$getClass .= $level != "" ? " AND level = '$level' " :"";
+
+$getClass.= $class!= ""? " AND name = '$class' " :"";
+
+$getClass.= $major!= ""? " AND major = '$major' " :"";
+
+$classID = read($getClass)[0]['id'];
+
+$getStudents = "SELECT nis, name FROM users WHERE class = '$classID';";
+$students = read($getStudents);
+
 $data = array(
     'status' => true,
     'message' => 'Get Filter Classes successfull',
     'data' => array(
         'levels' => $levels ?? null,
         'classes'=> $classes ?? null,
-        'majors' => $majors ?? null
+        'majors' => $majors ?? null,
+        'students' => $students ?? null
     )
 );
 
