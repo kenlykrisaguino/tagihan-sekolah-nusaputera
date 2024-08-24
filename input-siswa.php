@@ -29,7 +29,7 @@ include './headers/admin.php';
     Input Form
 </h2>
 
-<form id="inputForm" action="./upload-siswa-form.php" class="w-100 d-flex flex-wrap">
+<form method="POST" id="inputForm" action="./upload-siswa-form.php" class="w-100 d-flex flex-wrap">
     <div class="form-group col-12 col-md-4">
         <label for="nis">Nomor Induk Siswa</label>
         <input type="number" class="form-control" id="nis" name="nis" required>
@@ -51,24 +51,24 @@ include './headers/admin.php';
         <input type="text" class="form-control" id="major" name="major" required>
     </div>
     <div class="form-group col-12">
-        <label for="birth_date">Nomor Telepon</label>
-        <input type="text" class="form-control" id="birth_date" name="birth_date" required>
+        <label for="birth_date">Ulang Tahun</label>
+        <input type="date" class="form-control" id="birth_date" name="birth_date" required>
     </div>
     <div class="form-group col-12">
         <label for="phone_number">Nomor Telepon</label>
-        <input type="text" class="form-control" id="phone_number" name="phone_number">
+        <input type="phone" class="form-control" id="phone_number" name="phone_number">
     </div>
     <div class="form-group col-12">
         <label for="email_address">Alamat Email</label>
-        <input type="text" class="form-control" id="email_address" name="email_address">
+        <input type="email" class="form-control" id="email_address" name="email_address">
     </div>
     <div class="form-group col-12">
         <label for="parent_phone">Telepon Orang Tua</label>
-        <input type="text" class="form-control" id="parent_phone" name="parent_phone" required>
+        <input type="phone" class="form-control" id="parent_phone" name="parent_phone" required>
     </div>
     <div class="form-group col-12">
         <label for="address">Alamat Rumah</label>
-        <input type="text" class="form-control" id="address" name="address" required>
+        <input type="address" class="form-control" id="address" name="address" required>
     </div>
 
     <div class="form-group col-12">

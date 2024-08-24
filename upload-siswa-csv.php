@@ -45,6 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $classQuery = "SELECT id from classes WHERE level = '$level' AND name = '$class' AND major = '$major';";
                 $class_id = read($classQuery)[0]['id'] ?? 1;
 
+                $password = password_hash($va, PASSWORD_DEFAULT);
+
                 $users[] = "('$nis', '$name', '$address', 
                 '$birthdate', 'Active', '$class_id', 
                 '$phone_number', '$email_address', '$parent_phone',
