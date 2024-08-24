@@ -40,6 +40,7 @@ include './headers/admin.php';
     <div class="form-group col-6">
         <label for="jenjang">Jenjang</label>
         <select name="jenjang" id="jenjang" class="form-control" onchange="filterUser()">
+            <option value='' selected>Semua Jenjang</option>
         </select>
     </div>
     <div class="form-group col-6">
@@ -65,9 +66,9 @@ include './headers/admin.php';
 <div class="px-3">
     <table class="table table-bordered my-4">
         <tbody>
-            <tr><td class="w-50">Total Pemasukan</td><td id="data-pemasukan"></td></tr>
-            <tr><td class="w-50">Total Tunggakan</td><td id="data-tunggakan"></td></tr>
-            <tr class="font-weight-bold"><td class="w-50">Total Keseluruhan</td><td id="data-keseluruhan"></td></tr>
+            <tr><td class="w-50">Bank</td><td id="data-pemasukan"></td></tr>
+            <tr><td class="w-50">Tunggakan</td><td id="data-tunggakan"></td></tr>
+            <tr class="font-weight-bold"><td class="w-50">Pendapatan</td><td id="data-keseluruhan"></td></tr>
         </tbody>
     </table>
 </div>
