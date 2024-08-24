@@ -10,7 +10,7 @@ $class = isset($_GET['tingkat']) ? $_GET['tingkat'] : null;
 $major = isset($_GET['kelas']) ? $_GET['kelas'] : null;
 
 $sql = "SELECT
-    u.nis, u.name, c.level AS level, CONCAT(c.name, ' ', c.major) AS class, u.phone_number,
+    u.nis, u.name, c.level AS level, c.name AS class, c.major, u.phone_number,
     u.email_address, u.parent_phone, u.virtual_account, 
     MAX(p.trx_timestamp) AS latest_payment, u.status
     FROM users u
@@ -36,7 +36,7 @@ if ($major) {
 }
 
 $sql .= "GROUP BY 
-    u.nis, u.name, c.level, CONCAT(c.name, ' ', c.major), u.phone_number,
+    u.nis, u.name, c.level, c.name, c.major, u.phone_number,
     u.email_address, u.parent_phone, u.virtual_account, u.status";
 $result = read($sql);
 

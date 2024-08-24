@@ -68,6 +68,7 @@ include './headers/admin.php';
                 <th>NIS</th>
                 <th>Nama</th>
                 <th>Jenjang</th>
+                <th>Tingkat</th>
                 <th>Kelas</th>
                 <th>No Telp</th>
                 <th>Email</th>
@@ -96,7 +97,8 @@ include './headers/admin.php';
 
         var params = new URLSearchParams({
             level: jenjang,
-            class: tingkat
+            class: tingkat,
+            major: kelas
         });
         url += '?' + params.toString();
 

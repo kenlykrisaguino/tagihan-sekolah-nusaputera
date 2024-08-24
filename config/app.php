@@ -5,6 +5,8 @@ require_once 'parse-env.php';
 
 session_start();
 
+date_default_timezone_set('Asia/Jakarta');
+
 $current_page = basename($_SERVER['PHP_SELF']);
 
 $current_date = date('Y-m-d');

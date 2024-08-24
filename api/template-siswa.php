@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $output = fopen('php://output', 'w');
 
     // Add column headers for the CSV template
-    fputcsv($output, ['nis', 'name', 'level', 'phone_number', 'email_address', 'parent_phone', 'virtual_account']);
+    fputcsv($output, ['nis', 'name', 'jenjang', 'tingkat', 'kelas','alamat', 'birthdate', 'phone_number', 'email_address', 'parent_phone']);
 
     // Close the output stream
     fclose($output);

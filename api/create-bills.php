@@ -48,7 +48,7 @@ foreach ($usersResult as $user) {
 
         $trx_status = ($month_num == $first_month) ? 'waiting' : 'inactive';
 
-        $trx_id = generateTrxID($user['level'], $user['nis']);
+        $trx_id = generateTrxID($user['level'], $user['nis'], $month_num);
         $input .= "(
             '$user[nis]', '$trx_id', '$user[virtual_account]',
             '{$user['name']}', '$user[parent_phone]', '$user[phone_number]',
@@ -89,14 +89,13 @@ if ($result) {
     ]);
 }
 
-function generateTrxID($level, $nis){
+function generateTrxID($level, $nis, $month){
     global $year;
     global $semester;
-    global $month;
 
     $trimmed_year = substr($year, -2);
     $curr_semester = $semester == 'Gasal' ? "1" : "2";
-    $semester_month = $month % 6;
+    $semester_month = (($month-1) % 6)+1;
 
     $trx_id = "$level/$trimmed_year/$curr_semester/$semester_month/$nis";
 

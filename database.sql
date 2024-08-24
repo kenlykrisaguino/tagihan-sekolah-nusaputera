@@ -4,7 +4,7 @@ USE tagihan_nusput;
 
 CREATE TABLE `administrations` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
-  `admin_code` VARCHAR(30) UNIQUE NOT NULL,
+  `admin_code` VARCHAR(50) UNIQUE NOT NULL,
   `type` VARCHAR(10) NOT NULL,
   `created_at` datetime DEFAULT NOW()
 );

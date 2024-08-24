@@ -146,6 +146,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <a class="nav-link <?php echo $current_page == 'rekap-siswa.php' ? 'active' : ''; ?>" href="rekap-siswa.php">Siswa</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link <?php echo $current_page == 'input-siswa.php' ? 'active' : ''; ?>" href="input-siswa.php">Input Siswa</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link <?php echo $current_page == 'input-data.php' ? 'active' : ''; ?>" href="input-data.php">Input Data</a>
             </li>
             <li class="nav-item">

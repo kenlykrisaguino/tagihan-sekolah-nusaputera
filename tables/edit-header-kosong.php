@@ -2,7 +2,7 @@
     <tr>
         <th>Virtual Account</th>
         <th>Nama</th>
-        <th>Jenjang</th>
+        <th>Kelas</th>
         <th>No. Ortu</th>
         <th>Penerimaan</th>
         <th>Tunggakan</th>

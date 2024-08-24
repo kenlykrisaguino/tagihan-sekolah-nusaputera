@@ -3,6 +3,7 @@
     <td>${u.name}</td>
     <td>${u.level ?? '-'}</td>
     <td>${u.class ?? '-'}</td>
+    <td>${u.major ?? '-'}</td>
     <td>${u.phone_number ?? '-'}</td>
     <td>${u.email_address ?? '-'}</td>
     <td>${u.parent_phone}</td>
