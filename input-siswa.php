@@ -12,10 +12,10 @@ include './headers/admin.php';
     Input Siswa
 </h2>
 
-<form action="./upload-siswa-csv.php" method="POST">
-    <label for="file" class="d-block">Upload CSV</label>
+<form action="./upload-siswa-csv.php" method="POST" enctype="multipart/form-data">
+    <label for="data" class="d-block">Upload CSV</label>
     <div class="d-flex my-2 w-100 justify-content-between">
-        <input type="file" name="file" id="file" accept=".csv" class="mb-2">
+        <input type="file" name="data" id="data" accept=".csv" class="mb-2">
         <div class="d-flex">
             <input type="submit" value="Upload" class="mr-2 btn btn-primary">
             <input onclick="downloadCSV()" type="button" value="Download Template" class="ml-2 btn btn-outline-primary">
@@ -56,11 +56,11 @@ include './headers/admin.php';
     </div>
     <div class="form-group col-12">
         <label for="phone_number">Nomor Telepon</label>
-        <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+        <input type="text" class="form-control" id="phone_number" name="phone_number">
     </div>
     <div class="form-group col-12">
         <label for="email_address">Alamat Email</label>
-        <input type="text" class="form-control" id="email_address" name="email_address" required>
+        <input type="text" class="form-control" id="email_address" name="email_address">
     </div>
     <div class="form-group col-12">
         <label for="parent_phone">Telepon Orang Tua</label>
@@ -100,4 +100,30 @@ include './headers/admin.php';
             }
         })
     }
+
+    
+    const showToast = (status, message) => {
+        const icon = status == true ? 'success' : 'error'
+        const heading = status == true ? 'Berhasil' : 'Gagal'
+        $.toast({
+            heading: heading,
+            text: message,
+            showHideTransition: 'plain',
+            icon: icon
+        })
+    }
+
+    $(document).ready(() => {
+        <?php
+            if(isset($_SESSION['success'])){
+                echo 'showToast(true, "'.$_SESSION['success'].'")';
+                unset($_SESSION['success']);
+            }
+
+            if(isset($_SESSION['error'])){
+                echo 'showToast(false, "'.$_SESSION['error'].'")';
+                unset($_SESSION['error']);
+            }
+        ?>
+    })
 </script>

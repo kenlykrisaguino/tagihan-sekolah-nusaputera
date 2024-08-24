@@ -7,40 +7,16 @@ include './headers/admin.php';
 
 ?>
 
-<div class="modal fade" id="tambahSiswa" tabindex="-1" aria-labelledby="tambahSiswaLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="tambahSiswaLabel">Tambah Siswa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="csvUploadForm" class="col-12 col-md-8">
-                    <label for="file" class="d-block">Upload CSV</label>
-                    <input type="file" name="file" id="file" accept=".csv" class="mb-2">
-                    <div class="d-flex my-2">
-                        <input type="submit" value="Upload" class="mr-2 btn btn-primary">
-                        <input onclick="downloadCSV()" type="button" value="Download Template" class="ml-2 btn btn-outline-primary">
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 <div class="d-flex my-4">
     <div class="col-9">
         <h2 class="">Data Siswa</h2>
-    </div>
-    <div class="col-3">        
-        <button class="btn btn-outline-primary w-100" onclick="showAddUser()">Tambah Siswa</button>
     </div>
 </div>
 <div class="d-flex flex-wrap my-4">
     <div class="form-group col-12">
         <label for="tahun_ajaran">Search</label>
-        <input type="search" class="form-control" oninput="getData()" placeholder="Search Name" id="search" name="search" value="">
+        <input type="search" class="form-control" oninput="getData()" placeholder="Search Name" id="search"
+            name="search" value="">
     </div>
     <div class="form-group col-4">
         <label for="jenjang">Jenjang</label>
@@ -107,42 +83,48 @@ include './headers/admin.php';
         $.ajax({
             url: url,
             method: 'GET',
-            success: function (data) {
+            success: function(data) {
                 console.log(data);
                 $('#jenjang').empty();
                 $('#jenjang').append("<option value='' selected>Semua Jenjang</option>");
-                
-                if (data.data.levels != null){
+
+                if (data.data.levels != null) {
                     data.data.levels.forEach((l) => {
-                        if(l.level != null) {
-                            $('#jenjang').append(`<option value="${l.level}" ${l.level == jenjang ? 'selected' : ''}>${l.level}</option>`);
+                        if (l.level != null) {
+                            $('#jenjang').append(
+                                `<option value="${l.level}" ${l.level == jenjang ? 'selected' : ''}>${l.level}</option>`
+                                );
                         }
                     });
                 }
-                
+
                 $('#tingkat').empty();
                 $('#tingkat').append("<option value='' selected>Semua Tingkat</option>");
 
-                if (data.data.classes != null){
+                if (data.data.classes != null) {
                     data.data.classes.forEach((l) => {
-                        if(l.name!= null) {
-                            $('#tingkat').append(`<option value="${l.name}" ${l.name == tingkat ? 'selected' : ''}>${l.name}</option>`)
+                        if (l.name != null) {
+                            $('#tingkat').append(
+                                `<option value="${l.name}" ${l.name == tingkat ? 'selected' : ''}>${l.name}</option>`
+                                )
                         }
                     });
                 }
 
                 $('#kelas').empty();
                 $('#kelas').append("<option value='' selected>Semua Kelas</option>");
-                
-                if (data.data.majors!= null){
+
+                if (data.data.majors != null) {
                     data.data.majors.forEach((l) => {
-                        if(l.major!= null) {
-                            $('#kelas').append(`<option value="${l.major}" ${l.major == kelas? 'selected' : ''}>${l.major}</option>`);
+                        if (l.major != null) {
+                            $('#kelas').append(
+                                `<option value="${l.major}" ${l.major == kelas? 'selected' : ''}>${l.major}</option>`
+                                );
                         }
                     });
                 }
             },
-            error: function (jqXHR, textStatus, errorThrown) {
+            error: function(jqXHR, textStatus, errorThrown) {
                 console.log(errorThrown);
             }
         })
@@ -182,31 +164,34 @@ include './headers/admin.php';
             });
     }
 
-    const downloadCSV = () => {
-        $.ajax({
-            url: 'api/template-siswa.php',
-            method: 'POST',
-            xhrFields: {
-                responseType: 'blob' // Important to receive a binary file
-            },
-            success: function(response) {
-                var link = document.createElement('a');
-                link.href = URL.createObjectURL(response);
-                link.download = 'template_siswa.csv';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            },
-            error: function(xhr, status, error) {
-                console.error(xhr);
-                console.error(status);
-                console.error(error);
-            }
+    const showToast = (status, message) => {
+        const icon = status == true ? 'success' : 'error'
+        const heading = status == true ? 'Berhasil' : 'Gagal'
+        $.toast({
+            heading: heading,
+            text: message,
+            showHideTransition: 'plain',
+            icon: icon
         })
     }
 
     $(document).ready(() => {
         getData();
         filterUser();
+
+        <?php
+
+            if(isset($_SESSION['success'])){
+                echo 'showToast(true, "'.$_SESSION['success'].'")';
+                unset($_SESSION['success']);
+            }
+            
+            if(isset($_SESSION['error'])){
+                echo 'showToast(false, "'.$_SESSION['error'].'")';
+                unset($_SESSION['error']);
+            }
+        ?>
     });
 </script>
+
+

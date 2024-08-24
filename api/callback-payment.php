@@ -78,7 +78,9 @@ if ($apiResponse !== null) {
         exit();
     }
 
-    $bill_month = getMonth($month);
+    $sem_month = $semester == "Gasal" ? $month + 6 : $month;
+
+    $bill_month = getMonth($sem_month);
     $formattedAmount = formatToRupiah($trx_amount);
     $now = date('d-m-Y H:i:s');
 

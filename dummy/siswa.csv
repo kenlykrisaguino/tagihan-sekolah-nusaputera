@@ -1,2 +1,2 @@
-nis,name,level,phone_number,email_address,parent_phone,virtual_account
-"5050","Giftan Seconda","SMA","","","081329171920","9881105622235050"
+nis,name,jenjang,tingkat,kelas,alamat,birthdate,phone_number,email_address,parent_phone
+"5050","Giftan Seconda","SMA","XI","2","Semarang", "2023-10-14", "", "", "081329171920"

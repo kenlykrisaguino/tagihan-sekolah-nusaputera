@@ -1,102 +1,96 @@
 <?php
+
+include_once './config/app.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_FILES['file'])) {
-        $fileTmpPath = $_FILES['input']['tmp_name'];
-        $fileName = $_FILES['input']['name'];
+    if (isset($_FILES['data']) && $_FILES['data']['error'] === UPLOAD_ERR_OK) { // Check if file upload was successful
+        $fileTmpPath = $_FILES['data']['tmp_name']; 
+        $fileName = $_FILES['data']['name']; 
 
-        $csvData = [];
+        if (is_uploaded_file($fileTmpPath)) {
+            $csvData = [];
 
-        if (($handle = fopen($fileTmpPath, 'r')) !== false) {
-            $headers = fgetcsv($handle); 
-            while (($row = fgetcsv($handle)) !== false) {
-                $csvData[] = array_combine($headers, $row); 
+            if (($handle = fopen($fileTmpPath, 'r')) !== false) {
+                $headers = fgetcsv($handle); 
+                while (($row = fgetcsv($handle)) !== false) {
+                    $csvData[] = array_combine($headers, $row); 
+                }
+                fclose($handle);
             }
-            fclose($handle);
-        }
 
-        if (empty($csvData)) {
-            echo json_encode([
-                'status' => false,
-                'message' => 'No data found in the CSV file.'
-            ]);
+            if (empty($csvData)) {
+                // Redirect back to the previous page if CSV has no data
+                $_SESSION['error'] = 'No data found in the CSV file.';
+                header('Location: ' . $_SERVER['HTTP_REFERER']);
+                exit;
+            }
+
+            // Simulating adding users to the database
+            $users = [];
+
+            foreach ($csvData as $data) {
+                $nis = $data['nis'];
+                $name = $data['name'];
+                $level = $data['jenjang'];
+                $class = $data['tingkat'];
+                $major = $data['kelas'];
+                $address = $data['alamat'];
+                $birthdate = $data['birthdate'];
+                $phone_number = $data['phone_number'];
+                $email_address = $data['email_address'];
+                $parent_phone = $data['parent_phone'];
+
+                $va = "988110562223" . $nis;
+
+                $classQuery = "SELECT id from classes WHERE level = '$level' AND name = '$class' AND major = '$major';";
+                $class_id = read($classQuery)[0]['id'] ?? 1;
+
+                $users[] = "('$nis', '$name', '$address', 
+                '$birthdate', 'Active', '$class_id', 
+                '$phone_number', '$email_address', '$parent_phone',
+                '$va', '$tahun_ajaran', '$semester', '$password')";
+            }
+
+            $query = "INSERT INTO users(
+                nis, name, address,
+                birthdate, status, class,
+                phone_number, email_address, parent_phone,
+                virtual_account, period, semester, password
+            ) VALUES";
+
+            $query .= implode(", ", $users);
+
+            if (crud($query)) {
+                // Redirect to success page on success
+                // Count total data 
+                $totalData = count($csvData);
+                $_SESSION['success'] = "Berhasil menambahkan $totalData data siswa.";
+                header('Location: ./rekap-siswa.php');
+                exit;
+            } else {
+                // Redirect back to the previous page on failure
+                $_SESSION['error'] = 'Data gagal disimpan.';
+                header('Location: ' . $_SERVER['HTTP_REFERER']);
+                exit;
+            }
+
+        } else {
+            // Redirect back if file processing fails
+            $_SESSION['error'] = 'Failed to process the uploaded file.';
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
             exit;
         }
 
-        foreach ($csvData as $data) {
-            $nis = $data['nis'];
-            $virtual_account = $data['virtual_account'];
-            $trx_amount = $data['trx_amount'];
-            $notes = $data['notes'];
-            $trx_timestamp = $data['trx_timestamp'];
-
-            if (isset($userMap[$nis]) && isset($billMap[$nis])) {
-                $level = $userMap[$nis]['level'];
-                $userId = $userMap[$nis]['id'];
-                $billId = $billMap[$nis]['id'];
-                $trx_id = generateTrxId($level, $nis);
-
-                $parentPhone = $userMap[$nis]['parent_phone'];
-                $bill_month = $months[str_pad($billMap[$nis]['bill_month'], 2, '0', STR_PAD_LEFT)];
-                $formattedAmount = formatToRupiah($trx_amount);
-                $now = date('d-m-Y H:i:s');
-
-                $values[] = "('$userId', '$virtual_account', '$billId', '$trx_id', '$trx_amount', '$notes', '$trx_timestamp')";
-                $msgData[] = [
-                    'target' => $parentPhone,
-                    'message' => "Pembayaran untuk bulan *$bill_month* Semester *$semester* pada tahun ajaran $tahun_ajaran sebesar *$formattedAmount* berhasil! \n\n_Pembayaran diterima pada tanggal $now ._",
-                    'delay' => '1'
-                ];
-            }
-        }
-
-        $messages = json_encode($msgData);
-
-        if (!empty($values)) {
-            $query = "INSERT INTO payments (sender, virtual_account, bill_id, trx_id, trx_amount, notes, trx_timestamp) VALUES ";
-            $query .= implode(',', $values);
-
-            if (crud($query)) {
-                $updateQuery = "UPDATE bills SET trx_status = 'paid' WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'waiting'";
-                crud($updateQuery);
-                $updateQuery = "UPDATE bills SET trx_status = 'late', late_bills = 0 WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'not paid'";
-                crud($updateQuery);
-
-                sendMessage(array('data' => $messages));
-                echo json_encode([
-                    'status' => true,
-                    'message' => 'Payment has been added successfully',
-                    'fonnte' => $messages,
-                    'data' => $csvData
-                ]);
-            } else {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Gagal memasukan data ke database'
-                ]);
-            }
-        } else {
-            echo json_encode([
-                'status' => false,
-                'message' => 'Tidak ada tagihan yang dapat dibayarkan.'
-            ]);
-        }
     } else {
-        echo json_encode([
-            'status' => false,
-            'message' => 'Tidak ada file.'
-        ]);
+        // Redirect back if no file or file upload error occurs
+        $_SESSION['error'] = 'Tidak ada file atau terjadi kesalahan saat mengunggah.';
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        exit;
     }
 } else {
-    echo json_encode([
-        'status' => false,
-        'error' => 'Invalid request method.'
-    ]);
+    // Redirect back if the request method is invalid
+    $_SESSION['error'] = 'Invalid request method.';
+    header('Location: ' . $_SERVER['HTTP_REFERER']);
+    exit;
 }
-
-function generateTrxId($level, $nis) {
-    return `$level/11/5/1/$nis`;
-}
-
-function formatToRupiah($number) {
-    return 'Rp ' . number_format($number, 0, ',', '.');
-}
+?>
