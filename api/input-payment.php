@@ -15,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fileName = $_FILES['input']['name'];
 
         $csvData = [];
-
         if (($handle = fopen($fileTmpPath, 'r')) !== false) {
             $headers = fgetcsv($handle); 
             while (($row = fgetcsv($handle)) !== false) {
@@ -32,30 +31,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $nisList = array_column($csvData, 'nis');
-        $nisList = array_unique($nisList);
+        // Consolidate all required NIS values
+        $nisList = array_unique(array_column($csvData, 'nis'));
 
-        $userQuery = "SELECT c.level AS level, u.id, u.nis, u.parent_phone FROM users u JOIN classes c ON c.id = u.class WHERE u.nis IN ('" . implode("','", $nisList) . "')";
-        $users = crud($userQuery);
+        // Combine the queries to fetch user and bill data in a single query
+        $userBillQuery = "
+            SELECT u.id AS user_id, u.nis, u.parent_phone, c.level, b.id AS bill_id, MONTH(b.payment_due) AS bill_month, b.midtrans_trx_id
+            FROM users u
+            JOIN classes c ON c.id = u.class
+            LEFT JOIN bills b ON b.nis = u.nis AND b.trx_status = 'waiting'
+            WHERE u.nis IN ('" . implode("','", $nisList) . "')
+        ";
+        $userBills = crud($userBillQuery);
 
         $userMap = [];
-        foreach ($users as $user) {
-            $userMap[$user['nis']] = [
-                "id"=>$user['id'], 
-                "level" => $user['level'], 
-                "parent_phone" => $user['parent_phone']
-            ];
-        }
-
-        $billQuery = "SELECT id, nis, MONTH(payment_due) AS bill_month FROM bills WHERE nis IN ('" . implode("','", $nisList) . "') AND trx_status = 'waiting'";
-        $bills = crud($billQuery);
-
         $billMap = [];
-        foreach ($bills as $bill) {
-            $billMap[$bill['nis']] = [
-                "id" => $bill['id'],
-                "bill_month" => $bill['bill_month']
+        $midtransTrxIds = [];
+
+        foreach ($userBills as $entry) {
+            $nis = $entry['nis'];
+            $userMap[$nis] = [
+                "id" => $entry['user_id'], 
+                "level" => $entry['level'], 
+                "parent_phone" => $entry['parent_phone']
             ];
+            if ($entry['bill_id']) {
+                $billMap[$nis] = [
+                    "id" => $entry['bill_id'],
+                    "bill_month" => $entry['bill_month']
+                ];
+                $midtransTrxIds[] = $entry['midtrans_trx_id'];
+            }
         }
 
         $values = [];
@@ -63,23 +69,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         foreach ($csvData as $data) {
             $nis = $data['nis'];
-            $virtual_account = $data['virtual_account'];
-            $trx_amount = $data['trx_amount'];
-            $notes = $data['notes'];
-            $trx_timestamp = $data['trx_timestamp'];
-
             if (isset($userMap[$nis]) && isset($billMap[$nis])) {
-                $level = $userMap[$nis]['level'];
-                $userId = $userMap[$nis]['id'];
-                $billId = $billMap[$nis]['id'];
-                $trx_id = generateTrxId($level, $nis);
+                $user = $userMap[$nis];
+                $bill = $billMap[$nis];
 
-                $parentPhone = $userMap[$nis]['parent_phone'];
-                $bill_month = $months[str_pad($billMap[$nis]['bill_month'], 2, '0', STR_PAD_LEFT)];
-                $formattedAmount = formatToRupiah($trx_amount);
+                $trx_id = generateTrxId($user['level'], $nis);
+                $parentPhone = $user['parent_phone'];
+                $bill_month = $months[str_pad($bill['bill_month'], 2, '0', STR_PAD_LEFT)];
+                $formattedAmount = formatToRupiah($data['trx_amount']);
                 $now = date('d-m-Y H:i:s');
 
-                $values[] = "('$userId', '$virtual_account', '$billId', '$trx_id', '$trx_amount', '$notes', '$trx_timestamp')";
+                $values[] = "(
+                    '{$user['id']}', 
+                    '{$data['virtual_account']}', 
+                    '{$bill['id']}', 
+                    '$trx_id', 
+                    '{$data['trx_amount']}', 
+                    '{$data['notes']}', 
+                    '{$data['trx_timestamp']}'
+                )";
+
+                // Prepare message data
                 $msgData[] = [
                     'target' => $parentPhone,
                     'message' => "Pembayaran untuk bulan *$bill_month* Semester *$semester* pada tahun ajaran $tahun_ajaran sebesar *$formattedAmount* berhasil! \n\n_Pembayaran diterima pada tanggal $now ._",
@@ -88,71 +98,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        $messages = json_encode($msgData);
-
         if (!empty($values)) {
-            $query = "INSERT INTO payments (sender, virtual_account, bill_id, trx_id, trx_amount, notes, trx_timestamp) VALUES ";
-            $query .= implode(',', $values);
-
+            $query = "INSERT INTO payments 
+                (sender, virtual_account, bill_id, trx_id, trx_amount, notes, trx_timestamp) 
+                VALUES " . implode(',', $values);
+            
             if (crud($query)) {
-                $isProduction = getenv('MIDTRANS_IS_PRODUCTION') == 0 ?  false : true;
-                $isSanitized = getenv('MIDTRANS_IS_SANITIZED') == 0 ?  false : true;
-                $is3ds = getenv('MIDTRANS_IS_3DS') == 0 ?  false : true;
-                
+                // Midtrans API Configuration
                 Config::$serverKey = getenv('MIDTRANS_SERVER_KEY');
-                Config::$isProduction = $isProduction;
-                Config::$isSanitized = $isSanitized;
-                Config::$is3ds = $is3ds;
-                
-                // Get midtrans trx id from bills
-                $midtransQuery = "SELECT midtrans_trx_id FROM bills WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'waiting'";
-                $midtransTrxIds = read($midtransQuery);
-                // make the result to be simple array instead of [{}, {}, ...]
-                $midtransTrxIds = array_column($midtransTrxIds,'midtrans_trx_id');
-                
-                // Call Midtrans API to change the status to paid
-                $trxData = [];
-                foreach ($midtransTrxIds as $trx){
-                    try{
-                        $trxData[] = CoreApi::cancelTrx($trx);
-                    } catch (Exception $e){
-                        $response = array(
+                Config::$isProduction = getenv('MIDTRANS_IS_PRODUCTION') == 1;
+                Config::$isSanitized = getenv('MIDTRANS_IS_SANITIZED') == 1;
+                Config::$is3ds = getenv('MIDTRANS_IS_3DS') == 1;
+
+                // Process Midtrans transactions in parallel (if possible)
+                foreach ($midtransTrxIds as $trx) {
+                    try {
+                        CoreApi::cancelTrx($trx);
+                    } catch (Exception $e) {
+                        echo json_encode([
                             'status' => 'error',
                             'error' => $e->getMessage()
-                        );
-                        echo json_encode($response);
-                        exit();
+                        ]);
+                        exit;
                     }
                 }
 
-                $updateQuery = "UPDATE bills SET trx_status = 'paid' WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'waiting'";
-                crud($updateQuery);
-                $updateQuery = "UPDATE bills SET trx_status = 'late', late_bills = 0 WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'not paid'";
+                // Update bill status
+                $updateQuery = "UPDATE bills 
+                    SET trx_status = 'paid' 
+                    WHERE nis IN ('" . implode("','", $nisList) . "') AND trx_status = 'waiting'";
                 crud($updateQuery);
 
-                sendMessage(array('data' => $messages));
+                $updateQueryLate = "UPDATE bills 
+                    SET trx_status = 'late', late_bills = 0 
+                    WHERE nis IN ('" . implode("','", $nisList) . "') AND trx_status = 'not paid'";
+                crud($updateQueryLate);
+
+                // Send messages
+                sendMessage(['data' => json_encode($msgData)]);
+
                 echo json_encode([
                     'status' => true,
                     'message' => 'Payment has been added successfully',
-                    'fonnte' => $messages,
+                    'fonnte' => $msgData,
                     'data' => $csvData
                 ]);
             } else {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Gagal memasukan data ke database'
+                    'message' => 'Failed to insert data into the database.'
                 ]);
             }
         } else {
             echo json_encode([
                 'status' => false,
-                'message' => 'Tidak ada tagihan yang dapat dibayarkan.'
+                'message' => 'No valid bills found for payment.'
             ]);
         }
     } else {
         echo json_encode([
             'status' => false,
-            'message' => 'Tidak ada file.'
+            'message' => 'No file provided.'
         ]);
     }
 } else {
@@ -163,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 function generateTrxId($level, $nis) {
-    return `$level/11/5/1/$nis`;
+    return "$level/11/5/1/$nis";
 }
 
 function formatToRupiah($number) {
