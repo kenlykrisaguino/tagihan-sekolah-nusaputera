@@ -4,8 +4,8 @@ include './config/app.php';
 IsLoggedIn();
 RoleAllowed(7) ? null : returnError();
 
-$query_tahun_ajaran = "SELECT DISTINCT period FROM bills ORDER BY period";
-$query_semester = "SELECT DISTINCT semester FROM bills ORDER BY semester";
+$query_tahun_ajaran = 'SELECT DISTINCT period FROM bills ORDER BY period';
+$query_semester = 'SELECT DISTINCT semester FROM bills ORDER BY semester';
 
 $tahun_ajaran_options = read($query_tahun_ajaran);
 $semester_options = read($query_semester);
@@ -13,9 +13,14 @@ $semester_options = read($query_semester);
 include './headers/admin.php';
 ?>
 
-<h2 class="my-4">
-    Penjurnalan
-</h2>
+<div class="d-flex my-4">
+    <div class="col-9">
+        <h2 class="">Penjurnalan`</h2>
+    </div>
+    <div class="col-3">
+        <button onclick="downloadPDF()" class="btn btn-outline-primary w-100">Download</button>
+    </div>
+</div>
 
 <div class="filter d-flex flex-wrap">
     <div class="form-group col-4">
@@ -73,9 +78,18 @@ include './headers/admin.php';
 <div class="px-3">
     <table class="table table-bordered my-4">
         <tbody>
-            <tr><td class="w-50">Bank</td><td id="data-pemasukan"></td></tr>
-            <tr><td class="w-50">Tunggakan</td><td id="data-tunggakan"></td></tr>
-            <tr class="font-weight-bold text-right"><td class="w-50">Pendapatan</td><td id="data-keseluruhan"></td></tr>
+            <tr>
+                <td class="w-50">Bank</td>
+                <td id="data-pemasukan"></td>
+            </tr>
+            <tr>
+                <td class="w-50">Tunggakan</td>
+                <td id="data-tunggakan"></td>
+            </tr>
+            <tr class="font-weight-bold text-right">
+                <td class="w-50">Pendapatan</td>
+                <td id="data-keseluruhan"></td>
+            </tr>
         </tbody>
     </table>
 </div>
@@ -87,14 +101,72 @@ include './headers/admin.php';
         filterUser();
     }
 
+    const downloadPDF = () => {
+        var tahun_ajaran = document.getElementById('tahun_ajaran').value;
+        var semester = document.getElementById('semester').value;
+        var month = document.getElementById('month').value;
+        var jenjang = document.getElementById('jenjang').value;
+        var tingkat = document.getElementById('tingkat').value;
+        var kelas = document.getElementById('kelas').value;
+        var nis = document.getElementById('nis').value;
+
+        var bank = document.getElementById('data-pemasukan').textContent.trim();
+        var tunggakan = document.getElementById('data-tunggakan').textContent.trim();
+        var pendapatan = document.getElementById('data-keseluruhan').textContent.trim();
+
+        $.ajax({
+            url: './api/pdf/download-journal.php',
+            method: 'POST',
+            data: {
+                tahun_ajaran: tahun_ajaran,
+                semester: `${semester} ${month}`,
+                kelas: `${jenjang} ${tingkat} ${kelas}`,
+                nis: nis,
+                bank: bank,
+                tunggakan: tunggakan,
+                total: pendapatan
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(response) {
+                // Convert the response into a Blob
+                var blob = new Blob([response], {
+                    type: 'application/pdf'
+                });
+
+                // Create an object URL for the Blob
+                var url = window.URL.createObjectURL(blob);
+
+                // Create a link element and trigger the download
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = 'journal.pdf';
+                document.body.appendChild(link);
+                link.click();
+
+                // Remove the link element after download
+                document.body.removeChild(link);
+
+                // Release the object URL after download
+                window.URL.revokeObjectURL(url);
+            },
+
+            error: function(xhr, status, error) {
+                console.error('Error generating PDF:', error);
+            }
+        });
+    }
+
+
+
     const filterMonth = () => {
         getData();
         var semester = document.getElementById('semester').value;
         var month = document.getElementById('month').value;
 
         var months = [
-            [
-                {
+            [{
                     value: 1,
                     text: 'Januari'
                 },
@@ -119,8 +191,7 @@ include './headers/admin.php';
                     text: 'Juni'
                 }
             ],
-            [
-                {
+            [{
                     value: 7,
                     text: 'Juli'
                 },
@@ -139,7 +210,7 @@ include './headers/admin.php';
                 {
                     value: 11,
                     text: 'November'
-                },{
+                }, {
                     value: 12,
                     text: 'Desember'
                 }
@@ -202,7 +273,7 @@ include './headers/admin.php';
                         if (l.name != null) {
                             $('#tingkat').append(
                                 `<option value="${l.name}" ${l.name == tingkat ? 'selected' : ''}>${l.name}</option>`
-                                )
+                            )
                         }
                     });
                 }
@@ -215,7 +286,7 @@ include './headers/admin.php';
                         if (l.major != null) {
                             $('#kelas').append(
                                 `<option value="${l.major}" ${l.major == kelas? 'selected' : ''}>${l.major}</option>`
-                                );
+                            );
                         }
                     });
                 }
@@ -225,7 +296,7 @@ include './headers/admin.php';
 
                 if (data.data.students != null) {
                     data.data.students.forEach((l) => {
-                        if (l.name!= null) {
+                        if (l.name != null) {
                             $('#nis').append(
                                 `<option value="${l.nis}" ${l.nis == nis? 'selected' : ''}>${l.name}</option>`
                             );
