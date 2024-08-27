@@ -18,9 +18,9 @@ class CoreApi
      */
     public static function charge($params)
     {
-        $payloads = array(
-            'payment_type' => 'credit_card'
-        );
+        $payloads = [
+            'payment_type' => 'credit_card',
+        ];
 
         if (isset($params['item_details'])) {
             $gross_amount = 0;
@@ -36,11 +36,7 @@ class CoreApi
             Sanitizer::jsonRequest($payloads);
         }
 
-        return ApiRequestor::post(
-            Config::getBaseUrl() . '/v2/charge',
-            Config::$serverKey,
-            $payloads
-        );
+        return ApiRequestor::post(Config::getBaseUrl() . '/v2/charge', Config::$serverKey, $payloads);
     }
 
     /**
@@ -52,15 +48,11 @@ class CoreApi
      */
     public static function capture($param)
     {
-        $payloads = array(
+        $payloads = [
             'transaction_id' => $param,
-        );
+        ];
 
-        return ApiRequestor::post(
-            Config::getBaseUrl() . '/v2/capture',
-            Config::$serverKey,
-            $payloads
-        );
+        return ApiRequestor::post(Config::getBaseUrl() . '/v2/capture', Config::$serverKey, $payloads);
     }
 
     /**
@@ -74,16 +66,9 @@ class CoreApi
      */
     public static function cardRegister($cardNumber, $expMoth, $expYear)
     {
-        $path = "/card/register?card_number=" . $cardNumber
-            . "&card_exp_month=" . $expMoth
-            . "&card_exp_year=" . $expYear
-            . "&client_key=" . Config::$clientKey;
+        $path = '/card/register?card_number=' . $cardNumber . '&card_exp_month=' . $expMoth . '&card_exp_year=' . $expYear . '&client_key=' . Config::$clientKey;
 
-        return ApiRequestor::get(
-            Config::getBaseUrl() . "/v2" . $path,
-            Config::$clientKey,
-            false
-        );
+        return ApiRequestor::get(Config::getBaseUrl() . '/v2' . $path, Config::$clientKey, false);
     }
 
     /**
@@ -98,17 +83,9 @@ class CoreApi
      */
     public static function cardToken($cardNumber, $expMoth, $expYear, $cvv)
     {
-        $path = "/token?card_number=" . $cardNumber
-            . "&card_exp_month=" . $expMoth
-            . "&card_exp_year=" . $expYear
-            . "&card_cvv=" . $cvv
-            . "&client_key=" . Config::$clientKey;
+        $path = '/token?card_number=' . $cardNumber . '&card_exp_month=' . $expMoth . '&card_exp_year=' . $expYear . '&card_cvv=' . $cvv . '&client_key=' . Config::$clientKey;
 
-        return ApiRequestor::get(
-            Config::getBaseUrl() . "/v2" . $path,
-            Config::$clientKey,
-            false
-        );
+        return ApiRequestor::get(Config::getBaseUrl() . '/v2' . $path, Config::$clientKey, false);
     }
 
     /**
@@ -120,11 +97,7 @@ class CoreApi
      */
     public static function cardPointInquiry($tokenId)
     {
-        return ApiRequestor::get(
-            Config::getBaseUrl() . '/v2/point_inquiry/' . $tokenId,
-            Config::$serverKey,
-            false
-        );
+        return ApiRequestor::get(Config::getBaseUrl() . '/v2/point_inquiry/' . $tokenId, Config::$serverKey, false);
     }
 
     /**
@@ -136,11 +109,7 @@ class CoreApi
      */
     public static function linkPaymentAccount($param)
     {
-        return ApiRequestor::post(
-            Config::getBaseUrl() . '/v2/pay/account',
-            Config::$serverKey,
-            $param
-        );
+        return ApiRequestor::post(Config::getBaseUrl() . '/v2/pay/account', Config::$serverKey, $param);
     }
 
     /**
@@ -152,11 +121,7 @@ class CoreApi
      */
     public static function getPaymentAccount($accountId)
     {
-        return ApiRequestor::get(
-            Config::getBaseUrl() . '/v2/pay/account/' . $accountId,
-            Config::$serverKey,
-            false
-        );
+        return ApiRequestor::get(Config::getBaseUrl() . '/v2/pay/account/' . $accountId, Config::$serverKey, false);
     }
 
     /**
@@ -168,11 +133,7 @@ class CoreApi
      */
     public static function unlinkPaymentAccount($accountId)
     {
-        return ApiRequestor::post(
-            Config::getBaseUrl() . '/v2/pay/account/' . $accountId . '/unbind',
-            Config::$serverKey,
-            false
-        );
+        return ApiRequestor::post(Config::getBaseUrl() . '/v2/pay/account/' . $accountId . '/unbind', Config::$serverKey, false);
     }
 
     /**
@@ -184,11 +145,7 @@ class CoreApi
      */
     public static function createSubscription($param)
     {
-        return ApiRequestor::post(
-            Config::getBaseUrl() . '/v1/subscriptions',
-            Config::$serverKey,
-            $param
-        );
+        return ApiRequestor::post(Config::getBaseUrl() . '/v1/subscriptions', Config::$serverKey, $param);
     }
 
     /**
@@ -200,11 +157,7 @@ class CoreApi
      */
     public static function getSubscription($SubscriptionId)
     {
-        return ApiRequestor::get(
-            Config::getBaseUrl() . '/v1/subscriptions/' . $SubscriptionId,
-            Config::$serverKey,
-            false
-        );
+        return ApiRequestor::get(Config::getBaseUrl() . '/v1/subscriptions/' . $SubscriptionId, Config::$serverKey, false);
     }
 
     /**
@@ -216,11 +169,7 @@ class CoreApi
      */
     public static function disableSubscription($SubscriptionId)
     {
-        return ApiRequestor::post(
-            Config::getBaseUrl() . '/v1/subscriptions/' . $SubscriptionId . '/disable',
-            Config::$serverKey,
-            false
-        );
+        return ApiRequestor::post(Config::getBaseUrl() . '/v1/subscriptions/' . $SubscriptionId . '/disable', Config::$serverKey, false);
     }
 
     /**
@@ -232,11 +181,7 @@ class CoreApi
      */
     public static function enableSubscription($SubscriptionId)
     {
-        return ApiRequestor::post(
-            Config::getBaseUrl() . '/v1/subscriptions/' . $SubscriptionId . '/enable',
-            Config::$serverKey,
-            false
-        );
+        return ApiRequestor::post(Config::getBaseUrl() . '/v1/subscriptions/' . $SubscriptionId . '/enable', Config::$serverKey, false);
     }
 
     /**
@@ -248,10 +193,40 @@ class CoreApi
      */
     public static function updateSubscription($SubscriptionId, $param)
     {
-        return ApiRequestor::patch(
-            Config::getBaseUrl() . '/v1/subscriptions/' . $SubscriptionId,
-            Config::$serverKey,
-            $param
-        );
+        return ApiRequestor::patch(Config::getBaseUrl() . '/v1/subscriptions/' . $SubscriptionId, Config::$serverKey, $param);
+    }
+
+    /**
+     * Cancels a transaction using the Midtrans Core API.
+     *
+     * This function sends a POST request to the Midtrans API endpoint to cancel a specific transaction.
+     * The transaction is identified by its transaction ID (`$trx_id`).
+     *
+     * @param string $trx_id The unique identifier of the transaction to be canceled.
+     *
+     * @return mixed The response from the Midtrans API, containing the cancellation status.
+     *
+     * @throws Exception If there is an error during the API request.
+     */
+    public static function cancelTrx($trx_id)
+    {
+        return ApiRequestor::post(Config::getBaseUrl() . '/v2/' . $trx_id . '/cancel', Config::$serverKey, false);
+    }
+
+    /**
+     * Expires a transaction using the Midtrans Core API.
+     *
+     * This function sends a POST request to the Midtrans API endpoint to expire a specific transaction.
+     * The transaction is identified by its transaction ID (`$trx_id`).
+     *
+     * @param string $trx_id The unique identifier of the transaction to be expired.
+     *
+     * @return mixed The response from the Midtrans API, containing the expiration status.
+     *
+     * @throws Exception If there is an error during the API request.
+     */
+    public static function expireTrx($trx_id)
+    {
+        return ApiRequestor::post(Config::getBaseUrl() . '/v2/' . $trx_id . '/expire', Config::$serverKey, false);
     }
 }

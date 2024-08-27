@@ -2,8 +2,12 @@
 
 include_once '../config/app.php';
 include '../config/fonnte.php';
+require_once '../config/midtrans/Midtrans.php';
 
 header('Content-Type: application/json');
+
+use Midtrans\Config;
+use Midtrans\CoreApi;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['input'])) {
@@ -91,6 +95,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $query .= implode(',', $values);
 
             if (crud($query)) {
+                $isProduction = getenv('MIDTRANS_IS_PRODUCTION') == 0 ?  false : true;
+                $isSanitized = getenv('MIDTRANS_IS_SANITIZED') == 0 ?  false : true;
+                $is3ds = getenv('MIDTRANS_IS_3DS') == 0 ?  false : true;
+                
+                Config::$serverKey = getenv('MIDTRANS_SERVER_KEY');
+                Config::$isProduction = $isProduction;
+                Config::$isSanitized = $isSanitized;
+                Config::$is3ds = $is3ds;
+                
+                // Get midtrans trx id from bills
+                $midtransQuery = "SELECT midtrans_trx_id FROM bills WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'waiting'";
+                $midtransTrxIds = read($midtransQuery);
+                // make the result to be simple array instead of [{}, {}, ...]
+                $midtransTrxIds = array_column($midtransTrxIds,'midtrans_trx_id');
+                
+                // Call Midtrans API to change the status to paid
+                $trxData = [];
+                foreach ($midtransTrxIds as $trx){
+                    try{
+                        $trxData[] = CoreApi::cancelTrx($trx);
+                    } catch (Exception $e){
+                        $response = array(
+                            'status' => 'error',
+                            'error' => $e->getMessage()
+                        );
+                        echo json_encode($response);
+                        exit();
+                    }
+                }
+
                 $updateQuery = "UPDATE bills SET trx_status = 'paid' WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'waiting'";
                 crud($updateQuery);
                 $updateQuery = "UPDATE bills SET trx_status = 'late', late_bills = 0 WHERE nis IN ('". implode("','", $nisList). "') AND trx_status = 'not paid'";

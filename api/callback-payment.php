@@ -8,26 +8,54 @@ $jsonData = file_get_contents('php://input');
 $apiResponse = json_decode($jsonData, true);
 
 if ($apiResponse !== null) {
-    if($apiResponse['status_code'] != "200"){
+
+    $trx_id = $apiResponse['order_id'];
+    [$level, $year, $semester, $month, $nis, $timestamp] = explode('/', $trx_id);
+    $trxid = $level . '/' . $year . '/' . $semester . '/' . $month . '/' . $nis;
+
+    if ($apiResponse['status_code'] == '201') {
+        if ($apiResponse['transaction_status'] == 'pending') {
+            $midtrans_trx_id = $apiResponse['transaction_id'];
+
+            $update_bills = "UPDATE
+            bills set midtrans_trx_id = '$midtrans_trx_id'
+            WHERE trx_id = '$trxid'";
+
+            try {
+                $updateBillsResult = crud($update_bills);
+            } catch (Exception $e) {
+                $data = [
+                   'status' => false,
+                   'message' => 'Failed to update bills',
+                   'error' => $e->getMessage()
+                ];
+                echo json_encode($data);
+                exit();
+            }
+
+            $data = [
+                'status' => true,
+                'message' => 'Updated Midtrans Transaction ID'
+            ];
+            echo json_encode($data);
+            exit();
+        }
+    }
+    if ($apiResponse['status_code'] != '200') {
         $data = [
-            "status" => false,
-            "message" => "Failed to process payment"
+            'status' => false,
+            'message' => 'Failed to process payment',
         ];
         echo json_encode($data);
         exit();
     }
 
-    $trx_id = $apiResponse['order_id'];
-    list($level, $year, $semester, $month, $nis, $timestamp) = explode('/', $trx_id);
-
     $getUser = "SELECT
         u.id, u.nis, u.name, u.virtual_account, u.parent_phone
     FROM users u
     WHERE u.nis = '$nis'";
-    $userResult = read($getUser); 
+    $userResult = read($getUser);
     $user = $userResult[0];
-
-    $trxid = $level."/". $year."/". $semester."/". $month."/". $nis;
 
     $getBills = "SELECT b.id FROM bills b WHERE b.trx_id = '$trxid'";
     $billsResult = read($getBills);
@@ -46,66 +74,64 @@ if ($apiResponse !== null) {
         '', 
         '{$apiResponse['transaction_time']}'
     )";
-    
+
     $payment = crud($insertPayment);
     if (!$payment) {
-        echo json_encode(array(
-            "status" => false,
-            "message" => "Failed to insert payment data"
-        ));
+        echo json_encode([
+            'status' => false,
+            'message' => 'Failed to insert payment data',
+        ]);
         exit();
     }
 
     $updateBillsWaiting = "UPDATE bills SET trx_status = 'paid' WHERE nis = '$nis' AND trx_status = 'waiting'";
     $updateWaiting = crud($updateBillsWaiting);
 
-    if(!$updateWaiting){
-        echo json_encode(array(
-            "status" => false,
-            "message" => "Failed to update bills waiting status"
-        ));
+    if (!$updateWaiting) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Failed to update bills waiting status',
+        ]);
         exit();
     }
 
     $updateBillsUnpaid = "UPDATE bills SET trx_status = 'late', late_bills = 0 WHERE nis = '$nis' AND trx_status = 'not paid'";
     $updateUnpaid = crud($updateBillsUnpaid);
 
-    if(!$updateUnpaid){
-        echo json_encode(array(
-            "status" => false,
-            "message" => "Failed to update bills unpaid status"
-        ));
+    if (!$updateUnpaid) {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Failed to update bills unpaid status',
+        ]);
         exit();
     }
 
-    $sem_month = $semester == "1" ? $month + 6 : $month;
+    $sem_month = $semester == '1' ? $month + 6 : $month;
 
     $bill_month = getMonth($sem_month);
     $formattedAmount = formatToRupiah($trx_amount);
     $now = date('d-m-Y H:i:s');
 
-    $semester_str = $semester == 1 ? "Gasal" : "Genap";
-    
-    $msg = array(
+    $semester_str = $semester == 1 ? 'Gasal' : 'Genap';
+
+    $msg = [
         'target' => $user['parent_phone'],
         'message' => "Pembayaran untuk bulan *$bill_month* Semester *$semester_str* pada tahun ajaran $tahun_ajaran sebesar *$formattedAmount* berhasil! \n\n_Pembayaran diterima pada tanggal $now ._",
-    );
+    ];
 
     sendMessage($msg);
 
-    
-
-    echo json_encode(array(
-        "status" => true,
-        "message" => "Payment has been added successfully"
-    ));
-
+    echo json_encode([
+        'status' => true,
+        'message' => 'Payment has been added successfully',
+    ]);
 } else {
-    echo "Failed to decode JSON or no data received.";
+    echo 'Failed to decode JSON or no data received.';
 }
 
-function getMonth($month) {
-    $months = array(
+function getMonth($month)
+{
+    $months = [
         1 => 'Januari',
         2 => 'Februari',
         3 => 'Maret',
@@ -117,13 +143,13 @@ function getMonth($month) {
         9 => 'September',
         10 => 'Oktober',
         11 => 'November',
-        12 => 'Desember'
-    );
+        12 => 'Desember',
+    ];
     return $months[$month];
 }
 
-function formatToRupiah($number) {
+function formatToRupiah($number)
+{
     return 'Rp ' . number_format($number, 0, ',', '.');
 }
 ?>
-

@@ -9,16 +9,25 @@ header('Content-Type: application/json');
 use Midtrans\Config;
 use Midtrans\CoreApi;
 
-// Masukin Admin Log per bulan, jalan tiap awal bulan hari kerja
+$monthQuery = "SELECT MIN(MONTH(payment_due)) AS month FROM bills WHERE trx_status = 'waiting'";
 
-$admin_code = $tahun_ajaran.'-'.$semester.'-'.$month."-create-bills";
+$curr_month_admin = read($monthQuery)[0]['month'];
+
+if ($curr_month_admin < 10) {
+    $curr_month_admin = '0'. $curr_month_admin;
+}
+
+$admin_code = $tahun_ajaran.'-'.$semester.'-'.$curr_month_admin."-create-bills";
 
 $read = "SELECT admin_code FROM administrations WHERE admin_code='$admin_code'";
 
 $readResult = read($read);
 
 if ($readResult) {
-    echo json_encode(['message' => 'Tagihan sudah ada']);
+    echo json_encode([
+        'status' => false,
+        'message' => 'Tagihan sudah ada'
+    ]);
     exit();
 }
 
@@ -31,11 +40,37 @@ Config::$isProduction = $isProduction;
 Config::$isSanitized = $isSanitized;
 Config::$is3ds = $is3ds;
 
+$expiredPayment = "SELECT midtrans_trx_id, trx_id FROM bills WHERE LOWER(trx_status) IN ('not paid', 'waiting');";
+
+$expiredPaymentResult = read($expiredPayment);
+
+$curr_smt = "";
+$curr_month = "";
+$expired = [];
+
+foreach ($expiredPaymentResult as $trx){
+    [$level, $year, $curr_smt, $curr_month, $nis] = explode('/', $trx['trx_id']);
+    try{
+        if($trx['midtrans_trx_id'] != null){
+            $expired[] = CoreApi::expireTrx($trx['midtrans_trx_id']);
+        }
+    } catch (Exception $e){
+        $result = array(
+            'status' => false,
+            'message' => 'Gagal melakukan pembatalan transaksi: '. $e->getMessage()
+        );
+        echo json_encode($result);
+        exit();
+    }
+}
+
+$month = $curr_smt == '1' ? (int)$curr_month + 6 : (int)$curr_month;
+
 $data = [];
 
 $sql = "SELECT
     MAX(b.trx_id) AS trx_id,
-    b.student_name, b.parent_phone, b.virtual_account,
+    b.student_name, b.parent_phone, b.virtual_account, MAX(b.payment_due) AS payment_due,
     SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) AS monthly_total,
     COUNT(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE NULL END) AS monthly_count,
     SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS late_total,
@@ -61,11 +96,21 @@ if(empty($bills)){
 
 foreach ($bills as $bill){
     $date = date("c");
+
+    $dueDate = new DateTime($bill['payment_due']);
+    $nowDate = new DateTime();
+    $interval = $dueDate->diff($nowDate);
+    $interval = $interval->format('%a');
+
     $data[] = array(
         'payment_type' => 'bank_transfer',
         'transaction_details' => array(
-            'order_id' => $bill['trx_id']."/".$date,
-            'gross_amount' => $bill['monthly_total'] + $bill['late_total'], 
+            'order_id' => $bill['trx_id'].'/'.$date,
+            'gross_amount' => $bill['monthly_total'] + $bill['late_total'],
+        ),
+        'custom_expiry' => array(
+            'unit' => 'days',
+            'expiry_duration' => (int)$interval+1, 
         ),
         'customer_details' => array(
             'first_name' => $bill['student_name'],
@@ -77,6 +122,7 @@ foreach ($bills as $bill){
         'bni_va' => array(
             'va_number' => $bill['virtual_account'],
         ), 
+        "custom_field1" => "Pembayaran SPP ".$bill['student_name'] 
     );
 }
 
@@ -87,7 +133,7 @@ foreach ($data as $charge) {
         $chargeResponse[] = CoreApi::charge($charge);
     } catch (Exception $e) {
         $response = [
-            'status' => 'error',
+            'status' => false,
             'message' => $e->getMessage(),
 
         ];
@@ -100,4 +146,10 @@ $adminLog = "INSERT INTO administrations(admin_code, type) VALUES ('$admin_code'
 
 crud($adminLog);
 
-echo json_encode($chargeResponse);
+$response = array(
+    'status' => true,
+    'message' => 'Berhasil menambahakan tagihan',
+    'data' => $chargeResponse
+);
+
+echo json_encode($response);

@@ -88,7 +88,8 @@ CREATE TABLE `bills` (
   `class` INT NOT NULL,
   `period` VARCHAR(9) NOT NULL,
   `semester` VARCHAR(5) NOT NULL,
-  `payment_due` datetime NOT NULL
+  `payment_due` datetime NOT NULL,
+  `midtrans_trx_id` VARCHAR(50)
 );
 
 CREATE TABLE `payments` (
@@ -114,12 +115,12 @@ INSERT INTO users(
   period, semester, password, role
 ) VALUES 
 (
-  '0000', 'Admin', 'Semarang', NOW(), 'Inactive',
-  1, '', '', '087731335955', 'admin',
+  '0000', 'Admin', 'Semarang', '2024-08-05', 'Inactive',
+  1, '', '', '081329171920', 'admin',
   '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu', 'ADMIN'
 ),
 (
-  '5048', 'Angel Ravelynta', 'Semarang', NOW(), 'Active',
-  25, '', '', '087731335955', '9881105622235048',
+  '5048', 'Angel Ravelynta', 'Semarang', '2008-02-12', 'Active',
+  25, '', '', '081329171920', '9881105622235048',
   '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu', 'STUDENT'
 );
