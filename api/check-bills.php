@@ -3,9 +3,14 @@
 include_once '../config/app.php';
 header('Content-Type: application/json');
 
-$level_query = "SELECT CONCAT(level, '-',name, '-',major) AS name, late_bills FROM classes";
+$level_query = "SELECT TRIM(CONCAT(
+        COALESCE(level, ''), 
+        CASE WHEN COALESCE(level, '') = '' THEN '' ELSE '-' END,
+        COALESCE(name, ''), 
+        CASE WHEN COALESCE(name, '') = '' THEN '' ELSE '-' END,
+        COALESCE(major, '')
+    )) AS name, late_bills FROM classes";
 $late_bill_list = read($level_query);
-
 foreach ($late_bill_list as $late_bill){
     $late_bills[$late_bill['name']] = $late_bill['late_bills'];
 }
@@ -23,7 +28,7 @@ $sql_create_temp_table = "
             AND nb.trx_status != 'waiting'
         )
     WHERE 
-        b.trx_status = 'waiting' 
+        b.trx_status IN ('waiting', 'paid') 
         AND b.payment_due < DATE_SUB(NOW(), INTERVAL 24 HOUR)
 ";
 
@@ -35,12 +40,24 @@ $sql_update = "
     LEFT JOIN bills next_b ON next_b.id = t.next_b_id
     LEFT JOIN classes c ON c.id = t.class
     SET 
-        b.trx_status = 'not paid', 
-        b.late_bills = COALESCE(c.late_bills, 0),
-        b.payment_due = t.payment_due,
-        next_b.trx_status = 'waiting'
+        b.trx_status = CASE
+            WHEN b.trx_status = 'waiting' THEN 'not paid'
+            ELSE b.trx_status
+        END,
+        b.late_bills = CASE
+            WHEN b.trx_status = 'waiting' THEN COALESCE(c.late_bills, 0)
+            ELSE b.late_bills
+        END,
+        next_b.trx_status = CASE
+            WHEN b.trx_status IN ('waiting', 'paid') THEN 'waiting'
+            ELSE next_b.trx_status
+        END,
+        b.payment_due = CASE
+            WHEN b.trx_status = 'waiting' THEN t.payment_due
+            ELSE b.payment_due
+        END
     WHERE 
-        b.trx_status = 'waiting' 
+        b.trx_status IN ('waiting', 'paid') 
         AND b.payment_due < DATE_SUB(NOW(), INTERVAL 24 HOUR)
 ";
 

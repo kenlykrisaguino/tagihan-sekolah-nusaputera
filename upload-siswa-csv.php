@@ -40,10 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email_address = $data['email_address'];
                 $parent_phone = $data['parent_phone'];
 
-                $va = "988110562223" . $nis;
+                $va = getenv('MIDTRANS_PREFIX_VA_BNI')."2223" . $nis;
 
-                $classQuery = "SELECT id from classes WHERE level = '$level' AND name = '$class' AND major = '$major';";
-                $class_id = read($classQuery)[0]['id'] ?? 1;
+                $classQuery = "SELECT id from classes WHERE TRUE ";
+                $classQuery.= $level? " AND level = '$level'" : "";
+                $classQuery.= $class? " AND name = '$class'" : "";
+                $classQuery.= $major? " AND major = '$major'" : "";
+                $class_id = read($classQuery)[0]['id']?? 1;
 
                 $password = password_hash($va, PASSWORD_DEFAULT);
 

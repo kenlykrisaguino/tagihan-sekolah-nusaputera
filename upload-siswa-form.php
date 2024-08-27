@@ -6,19 +6,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $nis = $_POST['nis'] ?? null;
     $name = $_POST['nama'] ?? null;
-    $level = $_POST['level'] ?? null;
-    $class = $_POST['class'] ?? null;
-    $major = $_POST['major']?? null;
+    $level = $_POST['jenjang'] ?? null;
+    $class = $_POST['tingkat'] ?? null;
+    $major = $_POST['kelas']?? null;
     $birthdate = $_POST['birth_date']?? null;
     $phone_number = $_POST['phone_number'] ?? "";
     $email_address = $_POST['email_address']?? "";
     $parent_phone = $_POST['parent_phone'] ?? null;
     $address = $_POST['address'] ?? null;
 
-    $va = "988110562223" . $nis;
+    $va = getenv('MIDTRANS_PREFIX_VA_BNI')."2223" . $nis;
     $password = password_hash($nis, PASSWORD_DEFAULT);
 
-    $classQuery = "SELECT id from classes WHERE level = '$level' AND name = '$class' AND major = '$major';";
+    $classQuery = "SELECT id from classes WHERE TRUE";
+    $classQuery.= $level? " AND level = '$level'" : "";
+    $classQuery.= $class? " AND name = '$class'" : "";
+    $classQuery.= $major? " AND major = '$major'" : "";
     $class_id = read($classQuery)[0]['id']?? 1;
 
     $userQuery = "INSERT INTO users(
@@ -31,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     '$birthdate', 'Active', '$class_id', 
     '$phone_number', '$email_address', '$parent_phone', 
     '$va', '$tahun_ajaran', '$semester', '$password')";
+
     if(crud($userQuery)){
         $_SESSION['success'] = "Berhasil menambahkan $name ke data siswa.";
         header('Location: ./rekap-siswa.php');

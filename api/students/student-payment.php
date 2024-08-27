@@ -8,9 +8,24 @@ $tahun_ajaran = isset($_GET['tahun_ajaran']) ? $_GET['tahun_ajaran'] : '';
 $semester = isset($_GET['semester']) ? $_GET['semester'] : '';
 $virtual_account = isset($_GET['user']) ? $_GET['user'] : '';
 
+$month_translate = [
+    'January' => 'Januari',
+    'February' => 'Februari',
+    'March' => 'Maret',
+    'April' => 'April',
+    'May' => 'Mei',
+    'June' => 'Juni',
+    'July' => 'Juli',
+    'August' => 'Agustus',
+    'September' => 'September',
+    'October' => 'Oktober',
+    'November' => 'November',
+    'December' => 'Desember',
+];
+
 $sql = "SELECT
 u.nis, u.name, u.virtual_account,
-CONCAT(c.level, ' ',c.name, ' ', c.major) AS jenjang
+CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS jenjang
 FROM users u INNER JOIN classes c ON u.class = c.id
 WHERE u.virtual_account = '$virtual_account'
 ";
@@ -44,6 +59,10 @@ ORDER BY
 
 $trx = read($sql);
 
+foreach ($trx as &$trx_item) {
+    $trx_item['month'] = translateMonthToIndonesia($trx_item['month']);
+}
+
 $data = [
     'status' => true,
     'message' => 'Get Student Payment Data',
@@ -54,3 +73,8 @@ $data = [
 ];
 
 echo json_encode($data);
+
+function translateMonthToIndonesia($englishDate) {
+    global $month_translate;
+    return strtr($englishDate, $month_translate);
+}

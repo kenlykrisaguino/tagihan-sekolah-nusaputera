@@ -51,6 +51,43 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             showHideTransition: 'plain',
                             icon: 'success'
                         })
+                        refreshData();
+                    } else {
+                        $.toast({
+                            heading: 'Gagal',
+                            text: response.message,
+                            showHideTransition: 'plain',
+                            icon: 'error'
+                        })
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr);
+                    console.error(status);
+                    console.error(error);
+                    $.toast({
+                        heading: 'Gagal',
+                        text: 'Terjadi kesalahan saat membuat tagihan',
+                        showHideTransition: 'plain',
+                        icon: 'error'
+                    })
+                }
+            })
+        }
+
+        const createCharge = () => {
+            $.ajax({
+                url: 'api/create-charge.php',
+                type: 'GET',
+                success: function(response) {
+                    if (response.status) {
+                        $.toast({
+                            heading: 'Berhasil',
+                            text: 'Berhasil mengirimkan tagihan ke siswa',
+                            showHideTransition: 'plain',
+                            icon: 'success'
+                        })
+                        refreshData();
                     } else {
                         $.toast({
                             heading: 'Gagal',
@@ -86,6 +123,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             showHideTransition: 'plain',
                             icon: 'success'
                         })
+                        refreshData();
                     } else {
                         $.toast({
                             heading: 'Gagal',
@@ -130,7 +168,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             Bills</a></li>
                     <li><a class="dropdown-item" id="m-create-bills" onclick="createBills()" href="#">Create
                             Bills</a></li>
-                    <li><a class="dropdown-item" id="m-notify" href="#">Notify Parents</a></li>
+                    <li><a class="dropdown-item" id="m-notify" href="#" onclick="createCharge()">Create Charge</a></li>
                 </ul>
             </div>
         </div>

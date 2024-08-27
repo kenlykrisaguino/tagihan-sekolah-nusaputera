@@ -70,8 +70,8 @@ if($semester == 'Genap') {
 $sql = "SELECT
     b.nis, 
     b.virtual_account,
-    b.student_name, CONCAT(c.level, ' ', c.name, ' ', c.major) AS level, b.parent_phone, b.period,
-    SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
+    b.student_name, CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS level, b.parent_phone, b.period,
+    SUM(CASE WHEN b.trx_status = 'late' THEN c.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
     $sql_semester, 
     (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis AND MONTH(bills.payment_due) <= $final_month AND YEAR(bills.payment_due)<=$academic_year)  AS tunggakan
     FROM 
@@ -84,7 +84,7 @@ $sql = "SELECT
     GROUP BY 
         b.nis, 
         b.virtual_account,
-        b.student_name, CONCAT(c.level, ' ', c.name, ' ', c.major), 
+        b.student_name, CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')), 
         b.parent_phone, b.period;
     ";
 

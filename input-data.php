@@ -26,7 +26,8 @@ $semester_options = read($query_semester);
                     <input type="file" name="file" id="file" accept=".csv" class="mb-2">
                     <div class="d-flex my-2">
                         <input type="submit" value="Upload" class="mr-2 btn btn-primary">
-                        <input onclick="downloadCSV()" type="button" value="Download Template" class="ml-2 btn btn-outline-primary">
+                        <input onclick="downloadCSV()" type="button" value="Download Template"
+                            class="ml-2 btn btn-outline-primary">
                     </div>
                 </form>
             </div>
@@ -38,53 +39,62 @@ $semester_options = read($query_semester);
     <div class="col-9">
         <h2 class="">Input Data</h2>
     </div>
-    <div class="col-3">        
+    <div class="col-3">
         <button id="uploadBtn" class="btn btn-outline-primary w-100">Tambahkan</button>
     </div>
 </div>
 
-<div class="d-flex mb-4 flex-wrap">
-    <!-- Form untuk filter berdasarkan bulan -->
-    <div class="col-6">
-        <div class="form-row">
-            <div class="form-group col-9">
-                <label for="bulan" class="d-block">Filter Bulan</label>
-                <select class="form-control" id="filter-bulan" name="filter-bulan">
-                    <option value="">-- Pilih Bulan --</option>
-                    <?php
-                    foreach ($months as $bulan => $nama_bulan) {
-                        echo "<option value='$bulan'>$nama_bulan</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-            <div class="form-group col-3 align-self-end">
-                <button type="submit" class="btn btn-primary" onclick="getData()">Filter</button>
-                <!-- <a href="export_csv.php?bulan=<?= isset($_GET['bulan']) ? $_GET['bulan'] : '' ?>" class="btn btn-success">Export CSV</a> -->
-            </div>
-        </div>
+<div class="d-flex mb-4">
+    <div class="form-group col-5">
+        <label for="bulan" class="d-block">Filter Bulan</label>
+        <select class="form-control" id="filter-bulan" name="filter-bulan">
+            <option value="" selected>Pilih Bulan</option>
+            <?php
+            foreach ($months as $bulan => $nama_bulan) {
+                echo "<option value='$bulan'>$nama_bulan</option>";
+            }
+            ?>
+        </select>
+    </div>
+    <div class="form-group col-5">
+        <label for="tahun_ajaran">Tahun Ajaran:</label>
+        <select name="tahun_ajaran" id="tahun_ajaran" class="form-control">
+            <!-- <option selected disabled>Pilih Tahun Ajaran</option> -->
+            <?php foreach ($tahun_ajaran_options as $option) { ?>
+            <option value="<?php echo $option['period']; ?>" <?php echo $tahun_ajaran == $option['period'] ? 'selected' : ''; ?>><?php echo $option['period']; ?></option>
+            <?php } ?>
+        </select>
+    </div>
+    <div class="form-group col-2 align-self-end">
+        <button type="submit" class="btn btn-primary w-100" onclick="getData()">Filter</button>
     </div>
 </div>
-
-<table class="table table-bordered table-striped">
-    <thead class="thead-dark">
-        <tr>
-            <th>Virtual Account</th>
-            <th>Nama Pelanggan</th>
-            <th>Jumlah Pembayaran</th>
-            <th>Tanggal Pembayaran</th>
-        </tr>
-    </thead>
-    <tbody id="input-data-table"></tbody>
-</table>
+<div class="table-responsive" style="max-height: 50vh;">
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Virtual Account</th>
+                <th>Nama Pelanggan</th>
+                <th>Jumlah Pembayaran</th>
+                <th>Tanggal Pembayaran</th>
+            </tr>
+        </thead>
+        <tbody id="input-data-table"></tbody>
+    </table>
+</div>
 
 <script>
+    const refreshData = () => {
+        getData();
+    }
+
     const getData = () => {
         var month = $('#filter-bulan').find(':selected').val();
+        var period = $('#tahun_ajaran').find(':selected').val();
         if (month == "") {
             var url = 'api/input-data.php'
         } else {
-            var url = `api/input-data.php?month=${month}`
+            var url = `api/input-data.php?month=${month}&period=${period}`
         }
         fetch(url)
             .then(response => response.json())
@@ -147,6 +157,7 @@ $semester_options = read($query_semester);
                         showHideTransition: 'plain',
                         icon: 'success'
                     })
+                    $('#uploadModal').modal('hide');
                 } else {
                     $.toast({
                         heading: 'Gagal',
@@ -168,7 +179,7 @@ $semester_options = read($query_semester);
                     showHideTransition: 'plain',
                     icon: 'error'
                 })
-                
+
             }
         });
     }

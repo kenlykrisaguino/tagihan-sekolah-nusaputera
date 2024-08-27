@@ -20,22 +20,30 @@ if($level != '') {
     }
 }
 
-$getClass = "SELECT id FROM classes WHERE TRUE ";
+$classID = '';
 
-$getClass .= $level != "" ? " AND level = '$level' " :"";
+if ($level != ''){
+    $getClass = "SELECT id FROM classes WHERE TRUE ";
+    
+    $getClass .= $level != "" ? " AND level = '$level' " : "";
+    $getClass .= $class != "" ? " AND name = '$class' " : "";
+    $getClass .= $major != "" ? " AND major = '$major' " : "";
+    
+    $classIDs = array_column(read($getClass), 'id');
+}
 
-$getClass.= $class!= ""? " AND name = '$class' " :"";
+$getStudents = "SELECT nis, name FROM users WHERE nis != '0000'";
+if (!empty($classIDs)) {
+    $classIDList = implode(',', $classIDs);
+    $getStudents .= " AND class IN ($classIDList)";
+}
 
-$getClass.= $major!= ""? " AND major = '$major' " :"";
-
-$classID = read($getClass)[0]['id'];
-
-$getStudents = "SELECT nis, name FROM users WHERE class = '$classID';";
 $students = read($getStudents);
 
 $data = array(
     'status' => true,
     'message' => 'Get Filter Classes successfull',
+    'c' => $classID,
     'data' => array(
         'levels' => $levels ?? null,
         'classes'=> $classes ?? null,

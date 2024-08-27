@@ -8,18 +8,33 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 $tahun_ajaran = isset($_GET['tahun_ajaran']) ? $_GET['tahun_ajaran'] : '';
 $semester = isset($_GET['semester']) ? $_GET['semester'] : '';
 $month = isset($_GET['month']) ? $_GET['month'] : '';
+$level = isset($_GET['level']) ? $_GET['level'] : '';
+$class = isset($_GET['class']) ? $_GET['class'] : '';
+$major = isset($_GET['major']) ? $_GET['major'] : '';
 
-$month_query = '';
+$additional_query = '';
 
 if ($month != '' ){
-    $month_query = "AND MONTH(b.payment_due) = $month";
+    $additional_query = "AND MONTH(b.payment_due) = $month";
+}
+
+if ($level!= ''){
+    $additional_query.= " AND c.level = '$level'";
+}
+
+if ($class!= ''){
+    $additional_query.= " AND c.name = '$class'";
+}
+
+if ($major!= ''){
+    $additional_query.= " AND c.major = '$major'";
 }
 
 $sql = "SELECT
     u.virtual_account,
-    u.name AS student_name, CONCAT(c.level, ' ', c.name, ' ', c.major) AS class, u.parent_phone,
-    SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
-    SUM(CASE WHEN b.trx_status = 'late' OR b.trx_status = 'not paid' THEN c.late_bills ELSE 0 END) AS tunggakan
+    u.name AS student_name, CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS class, u.parent_phone,
+    SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'late' THEN c.late_bills ELSE 0 END) AS penerimaan, 
+    SUM(CASE WHEN b.trx_status = 'not paid' THEN c.late_bills ELSE 0 END) AS tunggakan
     FROM 
         bills b
         JOIN users u ON b.nis = u.nis
@@ -28,11 +43,11 @@ $sql = "SELECT
         b.period = '$tahun_ajaran' AND 
         b.semester = '$semester' AND
         b.student_name LIKE '%$search%'
-        $month_query
+        $additional_query
     GROUP BY 
         b.nis, 
         b.virtual_account,
-        b.student_name, CONCAT(c.level, ' ', c.name, ' ', c.major), b.parent_phone, b.period;
+        b.student_name, CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')), b.parent_phone, b.period;
     ";
 $result = read($sql);
 

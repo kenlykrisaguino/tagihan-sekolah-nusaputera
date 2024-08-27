@@ -26,7 +26,7 @@ if(isset($_SESSION['level'])){
             <div class="card-body pt-3">
                 <form action="auth.php" method="post">
                 <div class="mb-4">
-                  <label for="username" class="form-label">Username/Email</label>
+                  <label for="username" class="form-label">Virtual Account / Username</label>
                   <input type="text" class="form-control" id="username" name="username"/>
                   <?php if (isset($_SESSION['error_message'])){
                     echo '<small class="text-danger">'.$_SESSION['error_message'].'</small>';
@@ -37,11 +37,7 @@ if(isset($_SESSION['level'])){
                   <label for="password" class="form-label">Password</label>
                   <input type="password" class="form-control" id="password" name="password"/>
                 </div>
-                <div class="mb-4">
-                  <input type="checkbox" class="form-check-input" id="remember" />
-                  <label for="remember" class="form-label">Remember Me</label>
-                </div>
-                <div class="d-grid">
+                <div class="d-grid mt-5">
                   <button type="submit" class="btn btn-primary">Login</button>
                 </div>
               </form>

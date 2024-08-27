@@ -9,7 +9,7 @@ $virtual_account = isset($_GET['user']) ? $_GET['user'] : '';
 $sql = "SELECT
     u.nis, u.name, u.virtual_account,
     u.parent_phone, u.period, u.semester,
-    CONCAT(c.level, ' ', c.name, ' ', c.major) AS level, c.monthly_bills, c.late_bills,
+    CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS level, c.monthly_bills, c.late_bills,
     SUM(
         CASE 
             WHEN b.trx_status = 'paid' 

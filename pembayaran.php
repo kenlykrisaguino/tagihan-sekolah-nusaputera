@@ -110,6 +110,5 @@ $semester_options = read($query_semester);
     $(document).ready(() => {
         getData();
         $(document).on('click', '#filter-btn', getData);
-
     });
 </script>

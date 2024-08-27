@@ -22,10 +22,14 @@ if ($readResult) {
     exit();
 }
 
+$isProduction = getenv('MIDTRANS_IS_PRODUCTION') == 0 ?  false : true;
+$isSanitized = getenv('MIDTRANS_IS_SANITIZED') == 0 ?  false : true;
+$is3ds = getenv('MIDTRANS_IS_3DS') == 0 ?  false : true;
+
 Config::$serverKey = getenv('MIDTRANS_SERVER_KEY');
-Config::$isProduction = false;
-Config::$isSanitized = true;
-Config::$is3ds = true;
+Config::$isProduction = $isProduction;
+Config::$isSanitized = $isSanitized;
+Config::$is3ds = $is3ds;
 
 $data = [];
 
@@ -46,8 +50,17 @@ GROUP BY
 
 $bills = read($sql);
 
+if(empty($bills)){
+    $response = array(
+        'status' => false,
+        'message' => 'Data tagihan bulan ini kosong'
+    );
+    echo json_encode($response);
+    exit();
+}
+
 foreach ($bills as $bill){
-    $date = date("Y-m-d H:i:s");
+    $date = date("c");
     $data[] = array(
         'payment_type' => 'bank_transfer',
         'transaction_details' => array(
@@ -60,7 +73,6 @@ foreach ($bills as $bill){
         ),
         'bank_transfer' => array(
             'bank' => 'bni',
-            'va_number' => $bill['virtual_account'],
         ),
         'bni_va' => array(
             'va_number' => $bill['virtual_account'],
@@ -70,8 +82,18 @@ foreach ($bills as $bill){
 
 $chargeResponse = [];
 
-foreach ($data as $charge){
-    $chargeResponse[] = CoreApi::charge($charge);
+foreach ($data as $charge) {
+    try {
+        $chargeResponse[] = CoreApi::charge($charge);
+    } catch (Exception $e) {
+        $response = [
+            'status' => 'error',
+            'message' => $e->getMessage(),
+
+        ];
+        echo json_encode($response);
+        exit();
+    }
 }
 
 $adminLog = "INSERT INTO administrations(admin_code, type) VALUES ('$admin_code', 'charge')";

@@ -52,6 +52,24 @@ $semester_options = read($query_semester);
             ?>
         </select>
     </div>
+    <div class="form-group col-12 col-md-4">
+        <label for="jenjang">Jenjang</label>
+        <select name="jenjang" id="jenjang" class="form-control" onchange="filterLevel()">
+            <option value='' selected>Semua Jenjang</option>
+        </select>
+    </div>
+    <div class="form-group col-12 col-md-4">
+        <label for="tingkat">Tingkat</label>
+        <select name="tingkat" id="tingkat" class="form-control" onchange="filterLevel()">
+            <option value='' selected>Semua Tingkat</option>
+        </select>
+    </div>
+    <div class="form-group col-12 col-md-4">
+        <label for="kelas">Kelas</label>
+        <select name="kelas" id="kelas" class="form-control" onchange="filterLevel()">
+            <option value='' selected>Semua Kelas</option>
+        </select>
+    </div>
     <div class="form-group col-12">
         <button class="btn btn-primary w-100" onclick="getData()">Filter</button>
     </div>
@@ -76,18 +94,95 @@ $semester_options = read($query_semester);
 </div>
 
 <script>
+    const refreshData = () => {
+        getData();
+        filterLevel();
+    }
+    
+    const filterLevel = () => {
+        getData();
+        var url = 'api/classes-filter.php';
+        var jenjang = document.getElementById('jenjang').value;
+        var tingkat = document.getElementById('tingkat').value;
+        var kelas = document.getElementById('kelas').value;
+
+        var params = new URLSearchParams({
+            level: jenjang,
+            class: tingkat,
+            major: kelas
+        });
+        url += '?' + params.toString();
+
+        console.log(url);
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(data) {
+                console.log(data);
+                $('#jenjang').empty();
+                $('#jenjang').append("<option selected value='' selected>Pilih Jenjang</option>");
+
+                if (data.data.levels != null) {
+                    data.data.levels.forEach((l) => {
+                        if (l.level != null) {
+                            $('#jenjang').append(
+                                `<option value="${l.level}" ${l.level == jenjang ? 'selected' : ''}>${l.level}</option>`
+                            );
+                        }
+                    });
+                }
+
+                $('#tingkat').empty();
+                $('#tingkat').append("<option selected value='' selected>Pilih Tingkat</option>");
+
+                if (data.data.classes != null) {
+                    data.data.classes.forEach((l) => {
+                        if (l.name != null) {
+                            $('#tingkat').append(
+                                `<option value="${l.name}" ${l.name == tingkat ? 'selected' : ''}>${l.name}</option>`
+                                )
+                        }
+                    });
+                }
+
+                $('#kelas').empty();
+                $('#kelas').append("<option selected value='' selected>Pilih Kelas</option>");
+
+                if (data.data.majors != null) {
+                    data.data.majors.forEach((l) => {
+                        if (l.major != null) {
+                            $('#kelas').append(
+                                `<option value="${l.major}" ${l.major == kelas? 'selected' : ''}>${l.major}</option>`
+                                );
+                        }
+                    });
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+        })
+    }
+
     const getData = () => {
         var url = 'api/rekap-data.php';
         var search = document.getElementById('search').value;
         var tahunAjaran = document.getElementById('tahun_ajaran').value;
         var semester = document.getElementById('semester').value;
         var month = document.getElementById('filter-bulan').value;
+        var jenjang = document.getElementById('jenjang').value;
+        var tingkat = document.getElementById('tingkat').value;
+        var kelas = document.getElementById('kelas').value;
 
         var params = new URLSearchParams({
             search: search,
             tahun_ajaran: tahunAjaran,
             semester: semester,
-            month: month
+            month: month,
+            level: jenjang,
+            class: tingkat,
+            major: kelas
         });
 
         url += '?' + params.toString();
@@ -112,6 +207,6 @@ $semester_options = read($query_semester);
 
     $(document).ready(() => {
         getData();
-
+        filterLevel();
     });
 </script>

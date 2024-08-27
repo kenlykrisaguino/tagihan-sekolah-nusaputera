@@ -18,7 +18,7 @@ include './headers/admin.php';
 </h2>
 
 <div class="filter d-flex flex-wrap">
-    <div class="form-group col-6">
+    <div class="form-group col-4">
         <label for="tahun_ajaran">Tahun Ajaran:</label>
         <select name="tahun_ajaran" id="tahun_ajaran" class="form-control">
             <!-- <option selected disabled>Pilih Tahun Ajaran</option> -->
@@ -28,7 +28,7 @@ include './headers/admin.php';
         </select>
     </div>
 
-    <div class="form-group col-6">
+    <div class="form-group col-4">
         <label for="semester">Semester:</label>
         <select name="semester" id="semester" class="form-control">
             <!-- <option selected disabled>Pilih Semester</option> -->
@@ -37,25 +37,32 @@ include './headers/admin.php';
             <?php } ?>
         </select>
     </div>
-    <div class="form-group col-6">
+
+    <div class="form-group col-4">
+        <label for="month">Bulan:</label>
+        <select name="month" id="month" class="form-control" onchange="filterMonth()">
+
+        </select>
+    </div>
+    <div class="form-group col-4">
         <label for="jenjang">Jenjang</label>
         <select name="jenjang" id="jenjang" class="form-control" onchange="filterUser()">
             <option value='' selected>Semua Jenjang</option>
         </select>
     </div>
-    <div class="form-group col-6">
+    <div class="form-group col-4">
         <label for="tingkat">Tingkat</label>
         <select name="tingkat" id="tingkat" class="form-control" onchange="filterUser()">
             <option value='' selected>Semua Tingkat</option>
         </select>
     </div>
-    <div class="form-group col-6">
+    <div class="form-group col-4">
         <label for="kelas">Kelas</label>
         <select name="kelas" id="kelas" class="form-control" onchange="filterUser()">
             <option value='' selected>Semua Kelas</option>
         </select>
     </div>
-    <div class="form-group col-6">
+    <div class="form-group col-12">
         <label for="nis">Nama</label>
         <select name="nis" id="nis" class="form-control" onchange="filterUser()">
             <option value='' selected>Semua Siswa/i</option>
@@ -74,6 +81,83 @@ include './headers/admin.php';
 </div>
 
 <script>
+    const refreshData = () => {
+        getData();
+        filterMonth();
+        filterUser();
+    }
+
+    const filterMonth = () => {
+        getData();
+        var semester = document.getElementById('semester').value;
+        var month = document.getElementById('month').value;
+
+        var months = [
+            [
+                {
+                    value: 1,
+                    text: 'Januari'
+                },
+                {
+                    value: 2,
+                    text: 'Februari'
+                },
+                {
+                    value: 3,
+                    text: 'Maret'
+                },
+                {
+                    value: 4,
+                    text: 'April'
+                },
+                {
+                    value: 5,
+                    text: 'Mei'
+                },
+                {
+                    value: 6,
+                    text: 'Juni'
+                }
+            ],
+            [
+                {
+                    value: 7,
+                    text: 'Juli'
+                },
+                {
+                    value: 8,
+                    text: 'Agustus'
+                },
+                {
+                    value: 9,
+                    text: 'September'
+                },
+                {
+                    value: 10,
+                    text: 'Oktober'
+                },
+                {
+                    value: 11,
+                    text: 'November'
+                },{
+                    value: 12,
+                    text: 'Desember'
+                }
+            ]
+        ]
+
+        $('#month').empty()
+        $('#month').append("<option value='' selected>Semua Bulan</option>");
+
+        var month_array = semester == 'Gasal' ? months[1] : months[0]
+
+        month_array.forEach((m) => {
+            $('#month').append(
+                `<option value="${m.value}" ${m.value == month? 'selected' : ''}>${m.text}</option>`
+            );
+        });
+    }
+
     const filterUser = () => {
         getData();
 
@@ -159,6 +243,7 @@ include './headers/admin.php';
         var url = 'api/penjurnalan.php';
         var tahun_ajaran = document.getElementById('tahun_ajaran').value;
         var semester = document.getElementById('semester').value;
+        var bulan = document.getElementById('month').value;
         var jenjang = document.getElementById('jenjang').value;
         var tingkat = document.getElementById('tingkat').value;
         var kelas = document.getElementById('kelas').value;
@@ -167,6 +252,7 @@ include './headers/admin.php';
         var params = new URLSearchParams({
             period: tahun_ajaran,
             semester: semester,
+            bulan: bulan,
             level: jenjang,
             class: tingkat,
             major: kelas,
@@ -195,5 +281,6 @@ include './headers/admin.php';
     $(document).ready(() => {
         getData();
         filterUser();
+        filterMonth();
     })
 </script>

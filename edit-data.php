@@ -16,11 +16,12 @@ $semester_options = read($query_semester);
 <div class="d-flex flex-wrap">
     <div class="form-group col-12">
         <label for="tahun_ajaran">Search</label>
-        <input type="search" class="form-control" oninput="getData()" placeholder="Search Name" id="search" name="search" value="">
+        <input type="search" class="form-control" oninput="getData()" placeholder="Search Name" id="search" name="search"
+            value="">
     </div>
     <div class="form-group col-6">
         <label for="tahun_ajaran">Tahun Ajaran:</label>
-        <select name="tahun_ajaran" id="tahun_ajaran" class="form-control">
+        <select name="tahun_ajaran" id="tahun_ajaran" class="form-control" onchange="getData()">
             <!-- <option selected disabled>Pilih Tahun Ajaran</option> -->
             <?php foreach ($tahun_ajaran_options as $option) { ?>
             <option value="<?php echo $option['period']; ?>" <?php echo $tahun_ajaran == $option['period'] ? 'selected' : ''; ?>><?php echo $option['period']; ?></option>
@@ -30,21 +31,20 @@ $semester_options = read($query_semester);
 
     <div class="form-group col-6">
         <label for="semester">Semester:</label>
-        <select name="semester" id="semester" class="form-control">
+        <select name="semester" id="semester" class="form-control" onchange="getData()">
             <!-- <option selected disabled>Pilih Semester</option> -->
             <?php foreach ($semester_options as $option) { ?>
             <option value="<?php echo $option['semester']; ?>" <?php echo $semester == $option['semester'] ? 'selected' : ''; ?>><?php echo $option['semester']; ?></option>
             <?php } ?>
         </select>
     </div>
-    <div class="form-group col-12">
-        <button class="btn btn-primary w-100" onclick="getData()">Filter</button>
-    </div>
 </div>
+
+<hr>
 
 <div id="total-table" class="mb-5"></div>
 
-<div class="table-responsive" id="table">
+<div class="table-responsive" id="table" style="max-height: 50vh;">
     <table class="table table-bordered table-striped" id="edit-table">
 
     </table>
@@ -52,6 +52,44 @@ $semester_options = read($query_semester);
 
 
 <script>
+    const refreshData = async () => {
+        try {
+            await getTahunAjaranOptions();
+            await getSemesterOptions();
+            getData();
+        } catch (error) {
+            console.error('Error refreshing data:', error);
+        }
+    }
+
+    const getTahunAjaranOptions = () => {
+        $.ajax({
+            url: 'api/get-tahun-ajaran.php',
+            type: 'GET',
+            success: (data) => {
+                const tahunAjaranSelect = $('#tahun_ajaran');
+                tahunAjaranSelect.empty();
+                data.forEach(option => {
+                    tahunAjaranSelect.append(new Option(option.period, option.period));
+                });
+            }
+        });
+    }
+
+    const getSemesterOptions = () => {
+        $.ajax({
+            url: 'api/get-semester.php',
+            type: 'GET',
+            success: (data) => {
+                const semesterSelect = $('#semester');
+                semesterSelect.empty();
+                data.forEach(option => {
+                    semesterSelect.append(new Option(option.semester, option.semester));
+                });
+            }
+        });
+    }
+
     const getData = () => {
         var url = 'api/edit-data.php';
         var search = document.getElementById('search').value;
@@ -109,14 +147,14 @@ $semester_options = read($query_semester);
         var month = $(this).data('month');
         var payment = $(this).data('payment');
 
-        if(payment === true){
+        if (payment === true) {
             originalContent = fromIDRtoNum(originalContent);
         }
 
         $(this).addClass('cellEditing');
-        
+
         $(this).html('<input type="text" value="' + originalContent + '" />');
-        
+
         $(this).children().first().focus();
 
         $(this).children().first().keypress(function(e) {
@@ -153,7 +191,7 @@ $semester_options = read($query_semester);
                                     heading: 'Berhasil',
                                     text: `Berhasil mengupdate data pembayaran bulan ${month}`,
                                     showHideTransition: 'plain',
-                                    icon:'success'
+                                    icon: 'success'
                                 })
                             }
                             getData();
@@ -183,18 +221,18 @@ $semester_options = read($query_semester);
                                     heading: 'Berhasil',
                                     text: `Berhasil mengupdate data`,
                                     showHideTransition: 'plain',
-                                    icon:'success'
+                                    icon: 'success'
                                 })
                             }
                             getData();
                         }
                     });
                 }
-            } 
+            }
         });
 
         $(this).children().first().blur(function() {
-            if(payment === true){
+            if (payment === true) {
                 originalContent = formatToIDR(originalContent);
             }
             $(this).parent().text(originalContent);
@@ -203,15 +241,21 @@ $semester_options = read($query_semester);
     }
 
     const statusColor = (status) => {
-        if (status === 'paid') { return 'txt-green'; }
-        else if (status === 'late') { return 'txt-yellow';} 
-        else if (status === 'not paid') { return 'txt-red';} 
-        else if (status === 'waiting') { return '';} 
-        else { return 'txt-grey';}
+        if (status === 'paid') {
+            return 'txt-green';
+        } else if (status === 'late') {
+            return 'txt-yellow';
+        } else if (status === 'not paid') {
+            return 'txt-red';
+        } else if (status === 'waiting') {
+            return '';
+        } else {
+            return 'txt-grey';
+        }
     }
 
     $(document).ready(() => {
-        getData();
+        refreshData();
         $(document).on('dblclick', '.editable', editTable);
     });
 </script>

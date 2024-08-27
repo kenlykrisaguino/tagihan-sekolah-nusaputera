@@ -39,16 +39,22 @@ include './headers/admin.php';
         <input type="text" class="form-control" id="nama" name="nama" required>
     </div>
     <div class="form-group col-12 col-md-4">
-        <label for="level">Jenjang</label>
-        <input type="text" class="form-control" id="level" name="level" required>
+        <label for="jenjang">Jenjang</label>
+        <select name="jenjang" id="jenjang" class="form-control" onchange="filterLevel()">
+            <option disabled selected value='' selected>Pilih Jenjang</option>
+        </select>
     </div>
     <div class="form-group col-12 col-md-4">
-        <label for="class">Tingkat</label>
-        <input type="text" class="form-control" id="class" name="class" required>
+        <label for="tingkat">Tingkat</label>
+        <select name="tingkat" id="tingkat" class="form-control" onchange="filterLevel()">
+            <option disabled selected value='' selected>Pilih Tingkat</option>
+        </select>
     </div>
     <div class="form-group col-12 col-md-4">
-        <label for="major">Kelas</label>
-        <input type="text" class="form-control" id="major" name="major" required>
+        <label for="kelas">Kelas</label>
+        <select name="kelas" id="kelas" class="form-control" onchange="filterLevel()">
+            <option disabled selected value='' selected>Pilih Kelas</option>
+        </select>
     </div>
     <div class="form-group col-12">
         <label for="birth_date">Ulang Tahun</label>
@@ -71,7 +77,7 @@ include './headers/admin.php';
         <input type="address" class="form-control" id="address" name="address" required>
     </div>
 
-    <div class="form-group col-12">
+    <div class="form-group col-12 mt-3 mb-5">
         <button type="submit" class="btn btn-primary">Tambahkan</button>
     </div>
 
@@ -101,6 +107,71 @@ include './headers/admin.php';
         })
     }
 
+    const filterLevel = () => {
+        var url = 'api/classes-filter.php';
+        var jenjang = document.getElementById('jenjang').value;
+        var tingkat = document.getElementById('tingkat').value;
+        var kelas = document.getElementById('kelas').value;
+
+        var params = new URLSearchParams({
+            level: jenjang,
+            class: tingkat,
+            major: kelas
+        });
+        url += '?' + params.toString();
+
+        console.log(url);
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(data) {
+                console.log(data);
+                $('#jenjang').empty();
+                $('#jenjang').append("<option selected value='' selected>Pilih Jenjang</option>");
+
+                if (data.data.levels != null) {
+                    data.data.levels.forEach((l) => {
+                        if (l.level != null) {
+                            $('#jenjang').append(
+                                `<option value="${l.level}" ${l.level == jenjang ? 'selected' : ''}>${l.level}</option>`
+                            );
+                        }
+                    });
+                }
+
+                $('#tingkat').empty();
+                $('#tingkat').append("<option selected value='' selected>Pilih Tingkat</option>");
+
+                if (data.data.classes != null) {
+                    data.data.classes.forEach((l) => {
+                        if (l.name != null) {
+                            $('#tingkat').append(
+                                `<option value="${l.name}" ${l.name == tingkat ? 'selected' : ''}>${l.name}</option>`
+                                )
+                        }
+                    });
+                }
+
+                $('#kelas').empty();
+                $('#kelas').append("<option selected value='' selected>Pilih Kelas</option>");
+
+                if (data.data.majors != null) {
+                    data.data.majors.forEach((l) => {
+                        if (l.major != null) {
+                            $('#kelas').append(
+                                `<option value="${l.major}" ${l.major == kelas? 'selected' : ''}>${l.major}</option>`
+                                );
+                        }
+                    });
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+        })
+    }
+
     
     const showToast = (status, message) => {
         const icon = status == true ? 'success' : 'error'
@@ -111,6 +182,13 @@ include './headers/admin.php';
             showHideTransition: 'plain',
             icon: icon
         })
+    }
+
+    $(document).ready(() => {
+        filterLevel();
+    })
+    const refreshData = () => {
+        filterLevel();
     }
 
     $(document).ready(() => {

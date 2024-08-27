@@ -18,18 +18,18 @@ include './headers/admin.php';
         <input type="search" class="form-control" oninput="getData()" placeholder="Search Name" id="search"
             name="search" value="">
     </div>
-    <div class="form-group col-4">
+    <div class="form-group col-12 col-md-4">
         <label for="jenjang">Jenjang</label>
         <select name="jenjang" id="jenjang" class="form-control" onchange="filterUser()">
         </select>
     </div>
-    <div class="form-group col-4">
+    <div class="form-group col-12 col-md-4">
         <label for="tingkat">Tingkat</label>
         <select name="tingkat" id="tingkat" class="form-control" onchange="filterUser()">
             <option value='' selected>Semua Tingkat</option>
         </select>
     </div>
-    <div class="form-group col-4">
+    <div class="form-group col-12 col-md-4">
         <label for="kelas">Kelas</label>
         <select name="kelas" id="kelas" class="form-control" onchange="filterUser()">
             <option value='' selected>Semua Kelas</option>
@@ -37,7 +37,7 @@ include './headers/admin.php';
     </div>
 </div>
 
-<div class="table-responsive" id="table">
+<div class="table-responsive" id="table" style="max-height: 50vh;">
     <table class="table table-bordered table-striped" id="table-siswa">
         <thead class="thead-dark">
             <tr>
@@ -59,6 +59,10 @@ include './headers/admin.php';
 </div>
 
 <script>
+    const refreshData = () => {
+        getData();
+        filterUser();
+    }
     const showAddUser = () => {
         $('#tambahSiswa').modal('show');
     };
