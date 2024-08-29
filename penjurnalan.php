@@ -15,7 +15,7 @@ include './headers/admin.php';
 
 <div class="d-flex my-4">
     <div class="col-9">
-        <h2 class="">Penjurnalan`</h2>
+        <h2 class="">Penjurnalan</h2>
     </div>
     <div class="col-3">
         <button onclick="downloadPDF()" class="btn btn-outline-primary w-100">Download</button>
@@ -104,7 +104,7 @@ include './headers/admin.php';
     const downloadPDF = () => {
         var tahun_ajaran = document.getElementById('tahun_ajaran').value;
         var semester = document.getElementById('semester').value;
-        var month = document.getElementById('month').value;
+        var month = parseInt(document.getElementById('month').value, 10);
         var jenjang = document.getElementById('jenjang').value;
         var tingkat = document.getElementById('tingkat').value;
         var kelas = document.getElementById('kelas').value;
@@ -114,12 +114,18 @@ include './headers/admin.php';
         var tunggakan = document.getElementById('data-tunggakan').textContent.trim();
         var pendapatan = document.getElementById('data-keseluruhan').textContent.trim();
 
+        var monthNames = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        var monthName = monthNames[month - 1];
         $.ajax({
             url: './api/pdf/download-journal.php',
             method: 'POST',
             data: {
                 tahun_ajaran: tahun_ajaran,
-                semester: `${semester} ${month}`,
+                semester: `${semester} ${monthName ?? ''}`,
                 kelas: `${jenjang} ${tingkat} ${kelas}`,
                 nis: nis,
                 bank: bank,

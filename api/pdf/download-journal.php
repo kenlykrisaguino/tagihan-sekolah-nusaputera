@@ -1,17 +1,25 @@
 <?php
 
-require_once dirname(dirname(__DIR__)).'/config/dompdf/autoload.inc.php';
+require_once dirname(dirname(__DIR__)) . '/config/dompdf/autoload.inc.php';
+require_once dirname(dirname(__DIR__)) . '/config/app.php';
 
 use Dompdf\Dompdf;
 
 $semester = $_POST['semester'] ?? '-';
 $tahunAjaran = $_POST['tahun_ajaran'] ?? '-';
 $kelas = $_POST['kelas'] ?? '-';
-$nama = $_POST['nama'] ?? '-';
+$nis = $_POST['nis'] ?? '-';
 $bank = $_POST['bank'] ?? '0';
 $tunggakan = $_POST['tunggakan'] ?? '0';
 $total = $_POST['total'] ?? '0';
 
+if($_POST['nis']){
+    $query = "SELECT name FROM users WHERE nis = '$nis'";
+    $nama = read($query)[0]['name'];
+    $nis = "(".$nis.") - ".$nama;
+} else {
+    $nis = '-';
+}
 
 $dompdf = new Dompdf();
 
@@ -19,7 +27,6 @@ $options = $dompdf->getOptions();
 $options->setDefaultFont('Courier');
 $dompdf->setOptions($options);
 
-// Load the HTML content as a string from the file
 $html = "<!DOCTYPE html>
 <html lang='en'>
 
@@ -82,10 +89,12 @@ $html = "<!DOCTYPE html>
             margin-top: 64px;
         }
 
-        .data tr,
-        .data th,
-        .data td {
-            text-align: start;
+        .text-left{
+            text-align: left;
+        }
+
+        .text-right{
+            text-align: right;
         }
     </style>
 </head>
@@ -119,7 +128,7 @@ $html = "<!DOCTYPE html>
             </thead>
             <tbody>
                 <tr>
-                    <td>$nama</td>
+                    <td>$nis</td>
                 </tr>
             </tbody>
         </table>
@@ -127,16 +136,16 @@ $html = "<!DOCTYPE html>
     <section class='data'>
         <table>
             <tr>
-                <td>Bank</td>
-                <td>$bank</td>
+                <td class='text-left'>Bank</td>
+                <td class='text-left'>$bank</td>
             </tr>
             <tr>
-                <td>Tunggakan</td>
-                <td>$tunggakan</td>
+                <td class='text-left'>Tunggakan</td>
+                <td class='text-left'>$tunggakan</td>
             </tr>
             <tr class='bold'>
-                <td>Total</td>
-                <td>$total</td>
+                <td class='text-right'>Total</td>
+                <td class='text-right'>$total</td>
             </tr>
         </table>
     </section>
@@ -144,6 +153,7 @@ $html = "<!DOCTYPE html>
 
 </html>
 ";
+
 $dompdf->loadHtml($html);
 
 // Set paper size and orientation
