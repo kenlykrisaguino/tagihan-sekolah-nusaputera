@@ -13,6 +13,8 @@ $monthQuery = "SELECT MIN(MONTH(payment_due)) AS month FROM bills WHERE trx_stat
 
 $curr_month_admin = read($monthQuery)[0]['month'];
 
+$last_month_int = $curr_month_admin == 0 ? 12 : $curr_month_admin;
+
 if ($curr_month_admin < 10) {
     $curr_month_admin = '0'. $curr_month_admin;
 }
@@ -40,9 +42,14 @@ Config::$isProduction = $isProduction;
 Config::$isSanitized = $isSanitized;
 Config::$is3ds = $is3ds;
 
-$expiredPayment = "SELECT midtrans_trx_id, trx_id FROM bills WHERE LOWER(trx_status) IN ('not paid', 'waiting');";
+$expiredPayment = "SELECT midtrans_trx_id, trx_id FROM bills WHERE LOWER(trx_status) IN ('not paid') AND MONTH(payment_due) = '$last_month_int'";
 
 $expiredPaymentResult = read($expiredPayment);
+
+if(empty($expiredPaymentResult)){
+    $expiredPayment = "SELECT midtrans_trx_id, trx_id FROM bills WHERE LOWER(trx_status) IN ('waiting') AND MONTH(payment_due) = '$last_month_int'";
+    $expiredPaymentResult = read($expiredPayment);
+}
 
 $curr_smt = "";
 $curr_month = "";
@@ -74,7 +81,8 @@ $sql = "SELECT
     SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) AS monthly_total,
     COUNT(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE NULL END) AS monthly_count,
     SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS late_total,
-    COUNT(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE NULL END) AS late_count
+    COUNT(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE NULL END) AS late_count,
+    SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS total_charge
 FROM
     bills b
 WHERE
@@ -84,6 +92,7 @@ GROUP BY
 ";
 
 $bills = read($sql);
+
 
 if(empty($bills)){
     $response = array(
@@ -106,7 +115,7 @@ foreach ($bills as $bill){
         'payment_type' => 'bank_transfer',
         'transaction_details' => array(
             'order_id' => $bill['trx_id'].'/'.$date,
-            'gross_amount' => $bill['monthly_total'] + $bill['late_total'],
+            'gross_amount' => $bill['total_charge'],
         ),
         'custom_expiry' => array(
             'unit' => 'days',

@@ -31,10 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // Consolidate all required NIS values
         $nisList = array_unique(array_column($csvData, 'nis'));
 
-        // Combine the queries to fetch user and bill data in a single query
         $userBillQuery = "
             SELECT u.id AS user_id, u.nis, u.parent_phone, c.level, b.id AS bill_id, MONTH(b.payment_due) AS bill_month, b.midtrans_trx_id
             FROM users u
@@ -89,7 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     '{$data['trx_timestamp']}'
                 )";
 
-                // Prepare message data
                 $msgData[] = [
                     'target' => $parentPhone,
                     'message' => "Pembayaran untuk bulan *$bill_month* Semester *$semester* pada tahun ajaran $tahun_ajaran sebesar *$formattedAmount* berhasil! \n\n_Pembayaran diterima pada tanggal $now ._",
@@ -104,13 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES " . implode(',', $values);
             
             if (crud($query)) {
-                // Midtrans API Configuration
                 Config::$serverKey = getenv('MIDTRANS_SERVER_KEY');
                 Config::$isProduction = getenv('MIDTRANS_IS_PRODUCTION') == 1;
                 Config::$isSanitized = getenv('MIDTRANS_IS_SANITIZED') == 1;
                 Config::$is3ds = getenv('MIDTRANS_IS_3DS') == 1;
 
-                // Process Midtrans transactions in parallel (if possible)
                 foreach ($midtransTrxIds as $trx) {
                     try {
                         CoreApi::cancelTrx($trx);
@@ -123,7 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                // Update bill status
                 $updateQuery = "UPDATE bills 
                     SET trx_status = 'paid' 
                     WHERE nis IN ('" . implode("','", $nisList) . "') AND trx_status = 'waiting'";
@@ -134,7 +128,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     WHERE nis IN ('" . implode("','", $nisList) . "') AND trx_status = 'not paid'";
                 crud($updateQueryLate);
 
-                // Send messages
                 sendMessage(['data' => json_encode($msgData)]);
 
                 echo json_encode([

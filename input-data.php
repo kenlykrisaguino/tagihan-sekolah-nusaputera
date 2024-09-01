@@ -136,6 +136,7 @@ $semester_options = read($query_semester);
     }
 
     const uploadCSV = (e) => {
+        showLoader(true);
         e.preventDefault();
 
         var formData = new FormData();
@@ -157,6 +158,7 @@ $semester_options = read($query_semester);
                         showHideTransition: 'plain',
                         icon: 'success'
                     })
+                    showLoader(false);
                     $('#uploadModal').modal('hide');
                 } else {
                     $.toast({
@@ -165,6 +167,7 @@ $semester_options = read($query_semester);
                         showHideTransition: 'plain',
                         icon: 'error'
                     })
+                    showLoader(false);
                     console.error(response.message);
                 }
                 getData();
@@ -179,7 +182,7 @@ $semester_options = read($query_semester);
                     showHideTransition: 'plain',
                     icon: 'error'
                 })
-
+                showLoader(false);
             }
         });
     }

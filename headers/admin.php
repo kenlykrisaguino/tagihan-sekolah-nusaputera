@@ -19,12 +19,20 @@ $current_page = basename($_SERVER['PHP_SELF']);
             text-align: center;
         }
     </style>
+    <link rel="stylesheet" href="assets/css/loader.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/jquery.toast.css">
 
     <script src="assets/js/jquery-3.7.1.min.js"></script>
     <script src="assets/js/jquery.toast.js"></script>
     <script>
+        const showLoader = (status) => {
+            if (status) {
+                $('#loader').removeClass('d-none');
+            } else {
+                $('#loader').addClass('d-none');
+            }
+        };
         const formatToIDR = (number) => {
             return new Intl.NumberFormat('id-ID', {
                 style: 'currency',
@@ -40,6 +48,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         }
 
         const createBills = () => {
+            showLoader(true);
             $.ajax({
                 url: 'api/create-bills.php',
                 type: 'GET',
@@ -50,7 +59,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             text: 'Data tagihan berhasil dibuat, silahkan reload halaman untuk melihat perubahan',
                             showHideTransition: 'plain',
                             icon: 'success'
-                        })
+                        });
                         refreshData();
                     } else {
                         $.toast({
@@ -58,7 +67,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             text: response.message,
                             showHideTransition: 'plain',
                             icon: 'error'
-                        })
+                        });
                     }
                 },
                 error: function(xhr, status, error) {
@@ -70,12 +79,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         text: 'Terjadi kesalahan saat membuat tagihan',
                         showHideTransition: 'plain',
                         icon: 'error'
-                    })
+                    });
+                },
+                complete: function() {
+                    showLoader(false);
                 }
-            })
+            });
         }
 
         const createCharge = () => {
+            showLoader(true);
             $.ajax({
                 url: 'api/create-charge.php',
                 type: 'GET',
@@ -87,6 +100,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             showHideTransition: 'plain',
                             icon: 'success'
                         })
+                        showLoader(false);
                         refreshData();
                     } else {
                         $.toast({
@@ -95,6 +109,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             showHideTransition: 'plain',
                             icon: 'error'
                         })
+                        showLoader(false);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -107,11 +122,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         showHideTransition: 'plain',
                         icon: 'error'
                     })
+                    showLoader(false);
                 }
             })
         }
 
         const checkBills = () => {
+            showLoader(true);
             $.ajax({
                 url: 'api/check-bills.php',
                 type: 'GET',
@@ -123,6 +140,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             showHideTransition: 'plain',
                             icon: 'success'
                         })
+                        showLoader(false);
                         refreshData();
                     } else {
                         $.toast({
@@ -131,6 +149,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             showHideTransition: 'plain',
                             icon: 'error'
                         })
+                        showLoader(false);
+
                     }
                 },
                 error: function(xhr, status, error) {
@@ -143,6 +163,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         showHideTransition: 'plain',
                         icon: 'error'
                     })
+                    showLoader(false);
                 }
             })
         }
@@ -157,6 +178,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <body>
     <div class="container">
+        <div class="position-absolute d-none" id="loader">
+            <span class="loader"></span>
+        </div>
         <div class="position-fixed" style="bottom: 20px; right: 20px;">
             <div class="btn-group dropup">
                 <button type="button" class="btn btn-outline-primary btn-floating rounded-circle" data-mdb-ripple-init
@@ -168,7 +192,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             Bills</a></li>
                     <li><a class="dropdown-item" id="m-create-bills" onclick="createBills()" href="#">Create
                             Bills</a></li>
-                    <li><a class="dropdown-item" id="m-notify" href="#" onclick="createCharge()">Create Charge</a></li>
+                    <li><a class="dropdown-item" id="m-notify" href="#" onclick="createCharge()">Create
+                            Charge</a></li>
                 </ul>
             </div>
         </div>
