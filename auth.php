@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
     $hashed_password = $results[0]['password'];
-    $check_password = password_verify($inputPassword, $hashed_password);
+    $check_password = (md5($inputPassword) === $hashed_password);
     
     if (!$check_password) {
         $_SESSION['error_message'] = 'Password salah';

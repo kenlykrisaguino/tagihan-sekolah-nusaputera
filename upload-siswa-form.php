@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $address = $_POST['address'] ?? null;
 
     $va = getenv('MIDTRANS_PREFIX_VA_BNI') . '2223' . $nis;
-    $password = password_hash($nis, PASSWORD_DEFAULT);
+    $password = md5($nis);
 
     $classQuery = 'SELECT id from classes WHERE TRUE';
     $classQuery .= $level ? " AND level = '$level'" : '';

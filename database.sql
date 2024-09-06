@@ -117,10 +117,10 @@ INSERT INTO users(
 (
   '0000', 'Admin', 'Semarang', '2024-08-05', 'Inactive',
   1, '', '', '081329171920', 'admin',
-  '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu', 'ADMIN'
+  '2024/2025', 'Gasal', '25d55ad283aa400af464c76d713c07ad', 'ADMIN'
 ),
 (
   '5048', 'Angel Ravelynta', 'Semarang', '2008-02-12', 'Active',
   25, '', '', '081329171920', '9881105622235048',
-  '2024/2025', 'Gasal', '$2y$10$nzDoKrPD37M3E3xivsR7H.K6W4o1q28L3T11aB6ia3EVtxbc2tTsu', 'STUDENT'
+  '2024/2025', 'Gasal', '0b5088399ae4e9992ebcfb83bfd1da73', 'STUDENT'
 );
