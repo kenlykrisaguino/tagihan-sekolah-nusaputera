@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $sql = rtrim($sql, ', ');
 
-    $result = crud($sql);
+    // $result = crud($sql);
 
     $_SESSION['success'] = "Berhasil menambahkan $name ke data siswa.";
     header('Location: ./rekap-siswa.php');

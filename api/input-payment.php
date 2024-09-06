@@ -95,6 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        $errors = [];
+
         if (!empty($values)) {
             $query = "INSERT INTO payments 
                 (sender, virtual_account, bill_id, trx_id, trx_amount, notes, trx_timestamp) 
@@ -110,11 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     try {
                         CoreApi::cancelTrx($trx);
                     } catch (Exception $e) {
-                        echo json_encode([
-                            'status' => 'error',
-                            'error' => $e->getMessage()
-                        ]);
-                        exit;
+                        $errors[] = $e->getMessage();
+                        continue;
                     }
                 }
 
@@ -134,7 +133,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'status' => true,
                     'message' => 'Payment has been added successfully',
                     'fonnte' => $msgData,
-                    'data' => $csvData
+                    'data' => $csvData,
+                    'errors' => $errors
                 ]);
             } else {
                 echo json_encode([

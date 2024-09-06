@@ -23,7 +23,7 @@ $semester_options = read($query_semester);
     </div>
     <div class="form-group col-4">
         <label for="tahun_ajaran">Tahun Ajaran:</label>
-        <select name="tahun_ajaran" id="tahun_ajaran" class="form-control">
+        <select name="tahun_ajaran" id="tahun_ajaran" class="form-control" onchange="getData()">
             <!-- <option selected disabled>Pilih Tahun Ajaran</option> -->
             <?php foreach ($tahun_ajaran_options as $option) { ?>
             <option value="<?php echo $option['period']; ?>" <?php echo $tahun_ajaran == $option['period'] ? 'selected' : ''; ?>><?php echo $option['period']; ?></option>
@@ -33,7 +33,7 @@ $semester_options = read($query_semester);
 
     <div class="form-group col-4">
         <label for="semester">Semester:</label>
-        <select name="semester" id="semester" class="form-control">
+        <select name="semester" id="semester" class="form-control" onchange="getData()">
             <!-- <option selected disabled>Pilih Semester</option> -->
             <?php foreach ($semester_options as $option) { ?>
             <option value="<?php echo $option['semester']; ?>" <?php echo $semester == $option['semester'] ? 'selected' : ''; ?>><?php echo $option['semester']; ?></option>
@@ -43,7 +43,7 @@ $semester_options = read($query_semester);
 
     <div class="form-group col-4">
         <label for="semester">Bulan:</label>
-        <select class="form-control" id="filter-bulan" name="filter-bulan">
+        <select class="form-control" id="filter-bulan" name="filter-bulan" onchange="getData()">
             <option value="">Semua Bulan</option>
             <?php
             foreach ($months as $bulan => $nama_bulan) {
@@ -69,9 +69,6 @@ $semester_options = read($query_semester);
         <select name="kelas" id="kelas" class="form-control" onchange="filterLevel()">
             <option value='' selected>Semua Kelas</option>
         </select>
-    </div>
-    <div class="form-group col-12">
-        <button class="btn btn-primary w-100" onclick="getData()">Filter</button>
     </div>
 </div>
 

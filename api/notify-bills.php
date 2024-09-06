@@ -5,6 +5,8 @@ include_once '../config/fonnte.php';
 
 header('Content-Type: application/json');
 
+$force_notify = $_GET['type'] ?? '';
+
 $currentDate = new DateTime();
 
 $now = $currentDate->format('Y-m-d');
@@ -59,13 +61,23 @@ $currentMonth = $months[intval($currentDate->format('m')) - 1];
 $message = "Pembayaran SPP bulan $currentMonth ";
 $msgValid = false;
 
-if($now == $firstDate){
+if($force_notify != ''){
+    $ifFirstDate = $force_notify == 'first_day';
+    $ifWeekBefore = $force_notify == 'week_before';
+    $ifDayBefore = $force_notify == 'day_before';
+} else {
+    $ifFirstDate = $now == $firstDate;
+    $ifWeekBefore = $now == $weekBefore;
+    $ifDayBefore = $now == $dayBefore;
+}
+
+if($ifFirstDate){
     $message .= "telah dibuka.";
     $msgValid = true;
-} else if($now == $weekBefore){
+} else if($ifWeekBefore){
     $message .= "akan berakhir minggu depan.";
     $msgValid = true;
-} else if($now == $dayBefore){
+} else if($ifDayBefore){
     $message .= "akan berakhir besok.";
     $msgValid = true;
 }

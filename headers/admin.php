@@ -22,9 +22,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="stylesheet" href="assets/css/loader.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/jquery.toast.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.5/css/dataTables.dataTables.min.css">
 
     <script src="assets/js/jquery-3.7.1.min.js"></script>
     <script src="assets/js/jquery.toast.js"></script>
+    <script src="https://cdn.datatables.net/2.1.5/js/dataTables.min.js"></script>
     <script>
         const showLoader = (status) => {
             if (status) {
@@ -167,6 +169,48 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 }
             })
         }
+
+        const notifyParents = (forceNotify) => {
+            showLoader(true);
+            url = 'api/notify-bills.php?type='+forceNotify
+            console.warn(url);
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    if (response.status) {
+                        $.toast({
+                            heading: 'Success',
+                            text: response.message,
+                            showHideTransition: 'plain',
+                            icon: 'success'
+                        })
+                        showLoader(false);
+                    } else {
+                        $.toast({
+                            heading: 'Gagal',
+                            text: response.message,
+                            showHideTransition: 'plain',
+                            icon: 'error'
+                        })
+                        showLoader(false);
+
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr);
+                    console.error(status);
+                    console.error(error);
+                    $.toast({
+                        heading: 'Gagal',
+                        text: 'Terjadi kesalahan saat pengiriman notifikasi',
+                        showHideTransition: 'plain',
+                        icon: 'error'
+                    })
+                    showLoader(false);
+                }
+            })
+        }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -194,6 +238,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             Bills</a></li>
                     <li><a class="dropdown-item" id="m-notify" href="#" onclick="createCharge()">Create
                             Charge</a></li>
+                    <li><a class="dropdown-item" id="m-notify" href="#" onclick="notifyParents('first_day')">Nofity 1st</a></li>
+                    <li><a class="dropdown-item" id="m-notify" href="#" onclick="notifyParents('week_before')">Nofity 2nd</a></li>
+                    <li><a class="dropdown-item" id="m-notify" href="#" onclick="notifyParents('day_before')">Nofity 3rd</a></li>
                 </ul>
             </div>
         </div>
