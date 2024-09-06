@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $classQuery.= $major? " AND major = '$major'" : "";
                 $class_id = read($classQuery)[0]['id']?? 1;
 
-                $password = password_hash($va, PASSWORD_DEFAULT);
+                $password = md5($va);
 
                 $users[] = "('$nis', '$name', '$address', 
                 '$birthdate', 'Active', '$class_id', 

@@ -29,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $results = read($query);
     $result = $results[0];
 
-    $_SESSION['user_id'] = $results['id'];
-    $_SESSION['nis'] = $results['nis'];
+    $_SESSION['user_id'] = $result['id'];
+    $_SESSION['nis'] = $result['nis'];
     $_SESSION['username'] = $inputUsername;
     $_SESSION['class'] = $result['class'];
     $_SESSION['role'] = $result['role'];

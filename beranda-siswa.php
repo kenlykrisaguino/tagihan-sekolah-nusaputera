@@ -9,6 +9,37 @@ include './headers/siswa.php';
 
 <h2 class="my-4">Informasi Siswa</h2>
 
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Ganti Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm" class="col-12" method="POST" action="./change-password.php">
+                    <div class="form-group w-100">
+                        <label for="exampleInputEmail1">Password Lama</label>
+                        <input name="old_password" type="password" class="form-control w-100" id="oldPassword" aria-describedby="oldPasswordDesc" placeholder="Masukan Password Lama">
+                    </div>
+                    <div class="form-group w-100">
+                        <label for="exampleInputEmail1">Password Baru</label>
+                        <input name="new_password" type="password" class="form-control w-100" id="newPassword" aria-describedby="newPasswordDesc" placeholder="Masukan Password Baru">
+                    </div>
+                    <div class="form-group w-100">
+                        <label for="exampleInputEmail1">Konfirmasi</label>
+                        <input name="confirm_password" type="password" class="form-control w-100" id="confirmPassword" aria-describedby="confirmPasswordDesc" placeholder="Konfirmasi Password Baru">
+                    </div>
+
+                    <div class="w-100 d-flex mb-5">
+                        <button type="submit" class="btn btn-outline-primary">Ganti Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <table class="table table-bordered my-4">
     <tbody>
         <tr><td>NIS</td><td id="data-nis"></td></tr>
@@ -24,7 +55,16 @@ include './headers/siswa.php';
     </tbody>
 </table>
 
+<div class="d-flex justify-content-center">
+    <button class="btn btn-outline-primary" onclick="toggleModal()">Change Password</button>
+</div>
+
 <script>
+
+    const toggleModal = () => {
+        $('#changePasswordModal').modal('toggle');
+    }
+    
     const getData = () => {
         var url = 'api/students/rekap-siswa.php';
 
@@ -52,9 +92,32 @@ include './headers/siswa.php';
             });
     }
 
+    const showToast = (status, message) => {
+        const icon = status == true ? 'success' : 'error'
+        const heading = status == true ? 'Berhasil' : 'Gagal'
+        $.toast({
+            heading: heading,
+            text: message,
+            showHideTransition: 'plain',
+            icon: icon
+        })
+    }
+
     $(document).ready(() => {
         getData();
         $(document).on('click', '#filter-btn', getData);
 
+        <?php
+            if(isset($_SESSION['success_message'])){
+                echo 'showToast(true, "'.$_SESSION['success_message'].'")';
+                unset($_SESSION['success_message']);
+            }
+
+            if(isset($_SESSION['error_message'])){
+                echo 'showToast(false, "'.$_SESSION['error_message'].'")';
+                unset($_SESSION['error_message']);
+            }
+        ?>
     });
+
 </script>
