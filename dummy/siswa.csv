@@ -1,6 +1,6 @@
 nis,name,jenjang,tingkat,kelas,alamat,birthdate,phone_number,email_address,parent_phone
 "5051","Aditya Ramadhan","TK","PG","","Jakarta","2020-05-12","081234567890","aditya@example.com","081329171920"
-"5052","Maria Angela","TK","A","","Bandung","2019-07-23","081298765432","maria@example.com","081329171920"
+"5052","Maria Angela","TK","B","","Bandung","2019-07-23","081298765432","maria@example.com","081329171920"
 "5053","Raditya Bayu","SD","4","A","Yogyakarta","2015-03-15","081276543210","raditya@example.com","081329171920"
 "5054","Nadia Putri","SD","4","B","Surabaya","2014-09-30","081254678921","nadia@example.com","081329171920"
 "5055","Dani Permana","SMP","7","A","Semarang","2010-12-05","081298765123","dani@example.com","081329171920"

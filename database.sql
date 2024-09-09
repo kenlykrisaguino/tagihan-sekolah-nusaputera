@@ -103,6 +103,21 @@ CREATE TABLE `payments` (
   `trx_timestamp` datetime DEFAULT NOW()
 );
 
+
+CREATE TABLE `student_history` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `nis` VARCHAR(10) NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `class` int NOT NULL,
+  `phone_number` VARCHAR(16) DEFAULT NULL,
+  `email_address` VARCHAR(255) DEFAULT NULL,
+  `parent_phone` VARCHAR(16) NOT NULL,
+  `virtual_account` VARCHAR(16) NOT NULL,
+  `period` VARCHAR(9) NOT NULL,
+  `semester` VARCHAR(5) NOT NULL,
+  `updated_at` DATETIME NOT NULL
+);
+
 ALTER TABLE `users` ADD FOREIGN KEY (`class`) REFERENCES `classes` (`id`);
 
 ALTER TABLE `payments` ADD FOREIGN KEY (`sender`) REFERENCES `users` (`id`);

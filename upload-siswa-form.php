@@ -55,6 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usersResult = read($users);
     $input = '';
 
+    $curr_month = $month;
+
     foreach ($usersResult as $user) {
         foreach ($semester_month as $month_num) {
             $num_padded = str_pad($month_num, 2, '0', STR_PAD_LEFT);
@@ -74,17 +76,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $trx_status = '';
             $lateBills = 0;
-            if ($month_num < $first_month) {
+            if ($month_num < $curr_month) {
                 $trx_status = 'not paid';
                 $lateBills = $user['late_bills'];
-            } elseif ($month_num > $first_month) {
+            } elseif ($month_num > $curr_month) {
                 $trx_status = 'inactive';
             } else {
                 $trx_status = 'waiting';
             }
-
-            var_dump($month_num);
-            exit();
 
             $trx_id = generateTrxID($user['level'], $user['nis'], $month_num);
             $input .= "(
@@ -92,8 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             '{$user['name']}', '$user[parent_phone]', '$user[phone_number]',
             '{$user['email_address']}', '{$user['monthly_bills']}', '$trx_status',
             'Pembayaran tahun ajaran $tahun_ajaran Semester $semester bulan $months[$num_padded]', '{$user['class']}', '$tahun_ajaran',
-            '$semester', '$query_duedate', '$lateBills'
-        ), ";
+            '$semester', '$query_duedate', '$lateBills'), ";
         }
     }
 
@@ -108,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $sql = rtrim($sql, ', ');
 
-    // $result = crud($sql);
+    $result = crud($sql);
 
     $_SESSION['success'] = "Berhasil menambahkan $name ke data siswa.";
     header('Location: ./rekap-siswa.php');
