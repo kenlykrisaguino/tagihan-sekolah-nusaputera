@@ -3,6 +3,8 @@
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     include_once './config/app.php';
 
+    $admin_code = $tahun_ajaran . '-' . $semester . '-create';
+
     $nis = $_POST['nis'] ?? null;
     $name = $_POST['nama'] ?? null;
     $level = $_POST['jenjang'] ?? null;
@@ -57,56 +59,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $curr_month = $month;
 
-    foreach ($usersResult as $user) {
-        foreach ($semester_month as $month_num) {
-            $num_padded = str_pad($month_num, 2, '0', STR_PAD_LEFT);
+    $read = "SELECT admin_code FROM administrations WHERE admin_code='$admin_code'";
 
-            $due_date = new DateTime("$year-$num_padded-01");
-            $due_date->modify('last day of this month');
+    $readResult = read($read)[0] ?? null;
 
-            $dayOfWeek = $due_date->format('N');
+    if (isset($readResult)){
+        foreach ($usersResult as $user) {
+            $BillQuery = "UPDATE bills SET trx_status = 'disabled' WHERE nis = $user[nis] AND trx_status = 'waiting'";
+            crud($BillQuery);
+            $BillQuery = "UPDATE bills SET trx_status = 'disabled' WHERE nis = $user[nis] AND trx_status = 'inactive'";
+            crud($BillQuery);
+            foreach ($semester_month as $month_num) {
+                $num_padded = str_pad($month_num, 2, '0', STR_PAD_LEFT);
 
-            if ($dayOfWeek == 6) {
-                $due_date->modify('-1 day');
-            } elseif ($dayOfWeek == 7) {
-                $due_date->modify('-2 days');
+                $due_date = new DateTime("$year-$num_padded-01");
+                $due_date->modify('last day of this month');
+
+                $dayOfWeek = $due_date->format('N');
+
+                if ($dayOfWeek == 6) {
+                    $due_date->modify('-1 day');
+                } elseif ($dayOfWeek == 7) {
+                    $due_date->modify('-2 days');
+                }
+
+                $query_duedate = $due_date->format('Y-m-d') . ' 23:59:59';
+
+                $trx_status = '';
+                $lateBills = 0;
+                if ($month_num < $curr_month) {
+                    $query = "SELECT trx_status FROM bills WHERE nis = $user[nis] AND MONTH(payment_due) = $month_num";
+                    $trx_result = read($query)[0]['trx_status']?? null;
+                    if ($trx_result == 'not paid') {
+                        $trx_status = 'disabled';
+                    } else {
+                        $trx_status = 'not paid';
+                    }
+                    $lateBills = $user['late_bills'];
+                } elseif ($month_num > $curr_month) {
+                    $trx_status = 'inactive';
+                } else {
+                    $trx_status = 'waiting';
+                }
+
+                $trx_id = generateTrxID($user['level'], $user['nis'], $month_num);
+                $input .= "(
+                    '$user[nis]', '$trx_id', '$user[virtual_account]',
+                    '{$user['name']}', '$user[parent_phone]', '$user[phone_number]',
+                    '{$user['email_address']}', '{$user['monthly_bills']}', '$trx_status',
+                    'Pembayaran tahun ajaran $tahun_ajaran Semester $semester bulan $months[$num_padded]', '{$user['class']}', '$tahun_ajaran',
+                    '$semester', '$query_duedate', '$lateBills'), ";
             }
-
-            $query_duedate = $due_date->format('Y-m-d') . ' 23:59:59';
-
-            $trx_status = '';
-            $lateBills = 0;
-            if ($month_num < $curr_month) {
-                $trx_status = 'not paid';
-                $lateBills = $user['late_bills'];
-            } elseif ($month_num > $curr_month) {
-                $trx_status = 'inactive';
-            } else {
-                $trx_status = 'waiting';
-            }
-
-            $trx_id = generateTrxID($user['level'], $user['nis'], $month_num);
-            $input .= "(
-            '$user[nis]', '$trx_id', '$user[virtual_account]',
-            '{$user['name']}', '$user[parent_phone]', '$user[phone_number]',
-            '{$user['email_address']}', '{$user['monthly_bills']}', '$trx_status',
-            'Pembayaran tahun ajaran $tahun_ajaran Semester $semester bulan $months[$num_padded]', '{$user['class']}', '$tahun_ajaran',
-            '$semester', '$query_duedate', '$lateBills'), ";
         }
+
+        $sql = "INSERT INTO bills(
+                nis, trx_id, virtual_account,
+                student_name, parent_phone, student_phone,
+                student_email, trx_amount, trx_status,
+                description, class, period,
+                semester, payment_due, late_bills
+            ) VALUES
+            $input";
+
+        $sql = rtrim($sql, ', ');
+
+        $result = crud($sql);
     }
-
-    $sql = "INSERT INTO bills(
-        nis, trx_id, virtual_account,
-        student_name, parent_phone, student_phone,
-        student_email, trx_amount, trx_status,
-        description, class, period,
-        semester, payment_due, late_bills
-    ) VALUES
-    $input";
-
-    $sql = rtrim($sql, ', ');
-
-    $result = crud($sql);
 
     $_SESSION['success'] = "Berhasil menambahkan $name ke data siswa.";
     header('Location: ./rekap-siswa.php');

@@ -7,6 +7,9 @@ header('Content-Type: application/json');
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $tahun_ajaran = isset($_GET['tahun_ajaran']) ? $_GET['tahun_ajaran'] : '';
 $semester = isset($_GET['semester']) ? $_GET['semester'] : '';
+$hidden = isset($_GET['hidden']) ? $_GET['hidden'] : 0;
+
+$hiddenQuery = $hidden == 0 ? '' : 'b.bill_disabled IS NULL AND';
 
 if($semester == 'Genap') {
     $sql_semester = "
@@ -80,6 +83,7 @@ $sql = "SELECT
     WHERE 
         b.period = '$tahun_ajaran' AND 
         b.semester = '$semester' AND
+        $hiddenQuery
         b.student_name LIKE '%$search%'
     GROUP BY 
         b.nis, 

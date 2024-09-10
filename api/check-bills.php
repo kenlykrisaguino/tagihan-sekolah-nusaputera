@@ -42,18 +42,22 @@ $sql_update = "
     SET 
         b.trx_status = CASE
             WHEN b.trx_status = 'waiting' THEN 'not paid'
+            WHEN b.trx_status = 'disabled' THEN 'disabled'
             ELSE b.trx_status
         END,
         b.late_bills = CASE
             WHEN b.trx_status = 'waiting' THEN COALESCE(c.late_bills, 0)
+            WHEN b.trx_status = 'disabled' THEN 0
             ELSE b.late_bills
         END,
         next_b.trx_status = CASE
             WHEN b.trx_status IN ('waiting', 'paid') THEN 'waiting'
+            WHEN b.trx_status = 'disabled' THEN next_b.trx_status
             ELSE next_b.trx_status
         END,
         b.payment_due = CASE
             WHEN b.trx_status = 'waiting' THEN t.payment_due
+            WHEN b.trx_status = 'disabled' THEN b.payment_due
             ELSE b.payment_due
         END
     WHERE 

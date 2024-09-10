@@ -89,6 +89,7 @@ CREATE TABLE `bills` (
   `period` VARCHAR(9) NOT NULL,
   `semester` VARCHAR(5) NOT NULL,
   `payment_due` datetime NOT NULL,
+  `bill_disabled` datetime DEFAULT NULL, 
   `midtrans_trx_id` VARCHAR(50)
 );
 

@@ -11,7 +11,7 @@ $sql = "
         u.name, 
         c.level AS jenjang, 
         c.name AS tingkat, 
-        c.level AS kelas, 
+        c.major AS kelas, 
         u.address AS alamat, 
         u.birthdate, 
         u.phone_number, 

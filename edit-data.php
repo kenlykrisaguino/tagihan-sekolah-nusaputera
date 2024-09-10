@@ -42,16 +42,33 @@ $semester_options = read($query_semester);
 
 <hr>
 
-<div id="total-table" class="mb-5"></div>
+<div id="total-table"></div>
 
+<div class="d-flex my-3 justify-content-end">
+    <button id="toggle-button" type="button" class="btn btn-outline-secondary btn-sm" onclick="hiddenToggle()">Hide Data</button>
+</div>
 <div class="table-responsive" id="table" style="max-height: 50vh;">
     <table class="table table-bordered table-striped" id="edit-table">
 
     </table>
 </div>
 
-
 <script>
+    let isHidden = true;
+
+    const hiddenToggle = () => {
+        isHidden = !isHidden; 
+
+        const toggleButton = document.getElementById('toggle-button');
+        if (isHidden) {
+            toggleButton.textContent = 'Show Data'; 
+        } else {
+            toggleButton.textContent = 'Hide Data'; 
+        }
+
+        getData(); 
+    }
+
     const refreshData = async () => {
         try {
             await getTahunAjaranOptions();
@@ -99,7 +116,8 @@ $semester_options = read($query_semester);
         var params = new URLSearchParams({
             search: search,
             tahun_ajaran: tahunAjaran,
-            semester: semester
+            semester: semester,
+            hidden: isHidden ? 1 : 0 // Pass the hidden state as a parameter
         });
 
         url += '?' + params.toString();
@@ -249,6 +267,8 @@ $semester_options = read($query_semester);
             return 'txt-red';
         } else if (status === 'waiting') {
             return '';
+        } else if (status === 'disabled') {
+            return 'txt-disabled';
         } else {
             return 'txt-grey';
         }
