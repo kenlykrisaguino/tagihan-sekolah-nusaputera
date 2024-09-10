@@ -15,6 +15,7 @@ $sql = "SELECT
             WHEN b.trx_status = 'paid' 
             OR b.trx_status = 'late' 
             OR b.trx_status = 'inactive'
+            OR b.trx_status = 'disabled'
             THEN 
                 0 
             WHEN b.trx_status = 'not paid'
@@ -37,7 +38,8 @@ FROM
     JOIN classes c ON u.class = c.id
     JOIN bills b ON u.nis = b.nis
 WHERE 
-    b.virtual_account = '$virtual_account'
+    b.virtual_account = '$virtual_account' AND
+    b.trx_status != 'disabled'
 GROUP BY
     u.nis, u.name, u.virtual_account,
     c.name, c.monthly_bills

@@ -1,5 +1,6 @@
 <tr>
     <td>${trx.month}</td>
+    <td>${trx.class}</td>
     <td>${formatToIDR(trx.bills)}</td>
     <td>${formatToIDR(trx.late_bills)}</td>
     <td>${formatToIDR(trx.payment_amount)}</td>

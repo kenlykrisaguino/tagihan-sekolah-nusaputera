@@ -55,6 +55,7 @@ $semester_options = read($query_semester);
         <thead class="thead-dark text-center">
             <tr>
                 <th>Bulan</th>
+                <th>Jenjang</th>
                 <th>Tagihan</th>
                 <th>Tunggakan</th>
                 <th>Pembayaran</th>
