@@ -1,6 +1,8 @@
 <?php
 
 include_once './config/app.php';
+use Midtrans\Config;
+use Midtrans\CoreApi;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['data']) && $_FILES['data']['error'] === UPLOAD_ERR_OK) {
@@ -35,8 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $nis_list[] = $nis;
             }
 
-            // check if user is already registered, 
-            // then move to student_history table            
+            // check if user is already registered,
+            // then move to student_history table
 
             $nis_all = implode(', ', $nis_list);
 
@@ -52,32 +54,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $checkUsers = read($checkQuery);
 
             $histories = [];
-            
+
             // if checkUsers is not empty
             if (!empty($checkUsers)) {
-                foreach ($checkUsers as $user) {
-                    $user_id = $user['id'];
-                    $registered_nis[] = $user['nis'];
-
-                    
-
-                    $histories[] = "('$user[nis]', '$user[name]','$user[class]', 
-                    '$user[phone_number]', '$user[email_address]', '$user[parent_phone]',
-                    '$user[virtual_account]','$user[period]', '$user[semester]', now())";
+                // Preload class data into an associative array
+                $classQuery = 'SELECT id, level, name, major FROM classes';
+                $classData = read($classQuery);
+                $classes = [];
+                foreach ($classData as $class) {
+                    $classes[$class['level']][$class['name']][$class['major']] = $class['id'];
                 }
-
+            
+                $updateQuery = "UPDATE users SET 
+                    name = CASE id ";
+                $addressCase = "address = CASE id ";
+                $birthdateCase = "birthdate = CASE id ";
+                $phoneNumberCase = "phone_number = CASE id ";
+                $emailAddressCase = "email_address = CASE id ";
+                $parentPhoneCase = "parent_phone = CASE id ";
+                $classCase = "class = CASE id ";
+            
+                $userIds = [];
+                $histories = [];
+            
+                foreach ($checkUsers as $user) {
+                    foreach ($csvData as $new) {
+                        if ($user['nis'] == $new['nis']) {
+                            $user_id = $user['id'];
+                            $registered_nis[] = $user['nis'];
+                            $userIds[] = $user_id;
+            
+                            $histories[] = "('$user[nis]', '$user[name]','$user[class]', 
+                            '$user[phone_number]', '$user[email_address]', '$user[parent_phone]',
+                            '$user[virtual_account]','$user[period]', '$user[semester]', now())";
+            
+                            // Get the class id from the preloaded class data
+                            $class_id = $classes[$new['jenjang']][$new['tingkat']][$new['kelas']] ?? 1;
+            
+                            // Build the CASE statements for batch update
+                            $updateQuery .= "WHEN $user_id THEN '$new[name]' ";
+                            $addressCase .= "WHEN $user_id THEN '$new[alamat]' ";
+                            $birthdateCase .= "WHEN $user_id THEN '$new[birthdate]' ";
+                            $phoneNumberCase .= "WHEN $user_id THEN '$new[phone_number]' ";
+                            $emailAddressCase .= "WHEN $user_id THEN '$new[email_address]' ";
+                            $parentPhoneCase .= "WHEN $user_id THEN '$new[parent_phone]' ";
+                            $classCase .= "WHEN $user_id THEN '$class_id' ";
+                        }
+                    }
+                }
+            
+                $updateQuery .= "END, ";
+                $updateQuery .= "$addressCase END, ";
+                $updateQuery .= "$birthdateCase END, ";
+                $updateQuery .= "$phoneNumberCase END, ";
+                $updateQuery .= "$emailAddressCase END, ";
+                $updateQuery .= "$parentPhoneCase END, ";
+                $updateQuery .= "$classCase END ";
+                $updateQuery .= "WHERE id IN (" . implode(', ', $userIds) . ")";
+            
+                crud($updateQuery);
+            
+                // Insert the student history
                 $historyQuery = "INSERT INTO student_history(
                     nis, name, class, 
                     phone_number, email_address, parent_phone,
                     virtual_account, period, semester, updated_at
                 ) VALUES";
-                $historyQuery.= implode(', ', $histories);
+                $historyQuery .= implode(', ', $histories);
                 crud($historyQuery);
             }
 
             $query_runnable = false;
 
-            foreach ($csvData as $data){
+            foreach ($csvData as $data) {
                 $nis = $data['nis'];
                 $name = $data['name'];
                 $level = $data['jenjang'];
@@ -110,7 +159,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 '$phone_number', '$email_address', '$parent_phone',
                 '$va', '$tahun_ajaran', '$semester', '$password')";
             }
-            
 
             $query = "INSERT INTO users(
                 nis, name, address,
@@ -141,24 +189,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $first_month = $semester_month[0];
             $curr_month = $month;
 
-
             foreach ($usersResult as $user) {
                 foreach ($semester_month as $month_num) {
                     $num_padded = str_pad($month_num, 2, '0', STR_PAD_LEFT);
-        
+
                     $due_date = new DateTime("$year-$num_padded-01");
                     $due_date->modify('last day of this month');
-        
+
                     $dayOfWeek = $due_date->format('N');
-        
+
                     if ($dayOfWeek == 6) {
                         $due_date->modify('-1 day');
                     } elseif ($dayOfWeek == 7) {
                         $due_date->modify('-2 days');
                     }
-        
+
                     $query_duedate = $due_date->format('Y-m-d') . ' 23:59:59';
-        
+
                     $trx_status = '';
                     $lateBills = 0;
                     if ($month_num < $curr_month) {
@@ -169,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         $trx_status = 'waiting';
                     }
-        
+
                     $trx_id = generateTrxID($user['level'], $user['nis'], $month_num);
                     $input .= "(
                     '$user[nis]', '$trx_id', '$user[virtual_account]',
@@ -190,16 +237,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $input";
 
             $sql = rtrim($sql, ', ');
-            if(crud($sql)){
+            if (crud($sql)) {
                 $totalData = count($csvData);
                 $_SESSION['success'] = "Berhasil menambahkan $totalData data siswa.";
                 header('Location: ./rekap-siswa.php');
             } else {
                 $_SESSION['error'] = 'Data gagal disimpan.';
-                header('Location: '. $_SERVER['HTTP_REFERER']);
+                header('Location: ' . $_SERVER['HTTP_REFERER']);
                 exit();
             }
-
         } else {
             // Redirect back if file processing fails
             $_SESSION['error'] = 'Failed to process the uploaded file.';

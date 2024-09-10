@@ -16,7 +16,7 @@ $sql = "SELECT
     FROM users u
     INNER JOIN classes c ON u.class = c.id
     LEFT JOIN payments p ON u.id = p.sender
-    WHERE u.role != 'ADMIN' 
+    WHERE u.role != 'ADMIN' AND u.status = 'Active'
     ";
 
 if ($search) {

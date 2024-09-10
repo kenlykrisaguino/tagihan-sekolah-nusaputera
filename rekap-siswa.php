@@ -6,12 +6,15 @@ RoleAllowed(7) ? null : returnError();
 include './headers/admin.php';
 
 ?>
-
 <div class="d-flex my-4">
     <div class="col-9">
         <h2 class="">Data Siswa</h2>
     </div>
+    <div class="col-3">
+        <button onclick="downloadStudent()" class="btn btn-outline-primary w-100">Download</button>
+    </div>
 </div>
+
 <div class="d-flex flex-wrap my-4">
     <div class="form-group col-12">
         <label for="tahun_ajaran">Search</label>
@@ -41,6 +44,7 @@ include './headers/admin.php';
     <table class="table table-bordered table-striped" id="table-siswa">
         <thead class="thead-dark">
             <tr>
+                <th>Action</th>
                 <th>NIS</th>
                 <th>Nama</th>
                 <th>Jenjang</th>
@@ -59,6 +63,9 @@ include './headers/admin.php';
 </div>
 
 <script>
+    const downloadStudent = () => {
+        window.location.href = 'api/download-students.php';
+    }
     const refreshData = () => {
         getData();
         filterUser();
@@ -177,6 +184,30 @@ include './headers/admin.php';
             showHideTransition: 'plain',
             icon: icon
         })
+    }
+    
+    const deleteStudent = (element) => {
+        var id = $(element).data('id');
+        console.log(id);
+        $.ajax({
+            url: 'api/delete-student.php',
+            method: 'POST',
+            data: { id: id },
+            success: function(response) {
+                console.log(response);
+                if (response.status) {
+                    showToast(true, 'Data siswa berhasil dihapus.');
+                    refreshData();
+                } else {
+                    showToast(false, 'Gagal menghapus data siswa.');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
     }
 
     $(document).ready(() => {
