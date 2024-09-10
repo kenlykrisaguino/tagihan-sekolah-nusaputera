@@ -8,6 +8,8 @@ $search = isset($_GET['search']) ? $_GET['search'] : null;
 $level = isset($_GET['jenjang']) ? $_GET['jenjang'] : null;
 $class = isset($_GET['tingkat']) ? $_GET['tingkat'] : null;
 $major = isset($_GET['kelas']) ? $_GET['kelas'] : null;
+$sort_by = isset($_GET['sortBy']) ? $_GET['sortBy'] : 'virtual_account';
+$sort_direction = isset($_GET['sortDir']) && strtolower($_GET['sortDir']) === 'asc' ? 'ASC' : 'DESC'; 
 
 $sql = "SELECT
     u.nis, u.name, c.level AS level, c.name AS class, c.major, u.phone_number,
@@ -37,7 +39,8 @@ if ($major) {
 
 $sql .= "GROUP BY 
     u.nis, u.name, c.level, c.name, c.major, u.phone_number,
-    u.email_address, u.parent_phone, u.virtual_account, u.status";
+    u.email_address, u.parent_phone, u.virtual_account, u.status
+    ORDER BY $sort_by $sort_direction;";
 $result = read($sql);
 
 $data = [

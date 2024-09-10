@@ -91,11 +91,88 @@ $semester_options = read($query_semester);
 </div>
 
 <script>
+    let recapTable = new DataTable('#table-rekap', {
+        paging: false,
+        info: false,
+        ordering: true,
+        searching: false,
+        serverSide: true,
+        ajax: (data, callback) => {
+            let dataOrder = data.order && data.order.length > 0 ? data.order[0].column : 0;
+            let sortBy = data.columns[dataOrder]?.data ||
+            'virtual_account';
+            let sortDir = data.order && data.order.length > 0 ? data.order[0].dir : "asc";
+
+            var url = 'api/rekap-data.php';
+            var search = document.getElementById('search').value;
+            var tahunAjaran = document.getElementById('tahun_ajaran').value;
+            var semester = document.getElementById('semester').value;
+            var month = document.getElementById('filter-bulan').value;
+            var jenjang = document.getElementById('jenjang').value;
+            var tingkat = document.getElementById('tingkat').value;
+            var kelas = document.getElementById('kelas').value;
+
+            var params = new URLSearchParams({
+                search: search,
+                tahun_ajaran: tahunAjaran,
+                semester: semester,
+                month: month,
+                level: jenjang,
+                class: tingkat,
+                major: kelas,
+                sortBy: sortBy,
+                sortDir: sortDir,
+            });
+
+            url += '?' + params.toString();
+
+            console.log(url);
+
+            fetch(url)
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.status) {
+                        data.data.forEach(trx => {
+                            trx.penerimaan = formatToIDR(trx.penerimaan);
+                            trx.tunggakan = formatToIDR(trx.tunggakan);
+                        });
+                        callback({
+                            data: data.data
+                        });
+                    } else {
+                        callback({
+                            data: []
+                        })
+                    }
+                });
+        },
+        columns: [
+            {
+                data: 'virtual_account',
+            },
+            {
+                data: 'student_name'
+            },
+            {
+                data: 'class'
+            },
+            {
+                data: 'parent_phone'
+            },
+            {
+                data: 'penerimaan'
+            },
+            {
+                data: 'tunggakan'
+            },
+        ]
+    });
+
     const refreshData = () => {
         getData();
         filterLevel();
     }
-    
+
     const filterLevel = () => {
         getData();
         var url = 'api/classes-filter.php';
@@ -110,13 +187,11 @@ $semester_options = read($query_semester);
         });
         url += '?' + params.toString();
 
-        console.log(url);
 
         $.ajax({
             url: url,
             method: 'GET',
             success: function(data) {
-                console.log(data);
                 $('#jenjang').empty();
                 $('#jenjang').append("<option selected value='' selected>Pilih Jenjang</option>");
 
@@ -138,7 +213,7 @@ $semester_options = read($query_semester);
                         if (l.name != null) {
                             $('#tingkat').append(
                                 `<option value="${l.name}" ${l.name == tingkat ? 'selected' : ''}>${l.name}</option>`
-                                )
+                            )
                         }
                     });
                 }
@@ -151,7 +226,7 @@ $semester_options = read($query_semester);
                         if (l.major != null) {
                             $('#kelas').append(
                                 `<option value="${l.major}" ${l.major == kelas? 'selected' : ''}>${l.major}</option>`
-                                );
+                            );
                         }
                     });
                 }

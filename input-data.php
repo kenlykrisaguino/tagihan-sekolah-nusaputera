@@ -45,9 +45,9 @@ $semester_options = read($query_semester);
 </div>
 
 <div class="d-flex mb-4">
-    <div class="form-group col-5">
+    <div class="form-group col-6">
         <label for="bulan" class="d-block">Filter Bulan</label>
-        <select class="form-control" id="filter-bulan" name="filter-bulan">
+        <select class="form-control" id="filter-bulan" name="filter-bulan" onchange="getData()">
             <option value="" selected>Pilih Bulan</option>
             <?php
             foreach ($months as $bulan => $nama_bulan) {
@@ -56,21 +56,18 @@ $semester_options = read($query_semester);
             ?>
         </select>
     </div>
-    <div class="form-group col-5">
+    <div class="form-group col-6">
         <label for="tahun_ajaran">Tahun Ajaran:</label>
-        <select name="tahun_ajaran" id="tahun_ajaran" class="form-control">
+        <select name="tahun_ajaran" id="tahun_ajaran" class="form-control" onchange="getData()">
             <!-- <option selected disabled>Pilih Tahun Ajaran</option> -->
             <?php foreach ($tahun_ajaran_options as $option) { ?>
             <option value="<?php echo $option['period']; ?>" <?php echo $tahun_ajaran == $option['period'] ? 'selected' : ''; ?>><?php echo $option['period']; ?></option>
             <?php } ?>
         </select>
     </div>
-    <div class="form-group col-2 align-self-end">
-        <button type="submit" class="btn btn-primary w-100" onclick="getData()">Filter</button>
-    </div>
 </div>
 <div class="table-responsive" style="max-height: 50vh;">
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-striped" id="payment-table">
         <thead class="thead-dark">
             <tr>
                 <th>Virtual Account</th>
@@ -84,6 +81,52 @@ $semester_options = read($query_semester);
 </div>
 
 <script>
+
+let paymentTable = new DataTable('#payment-table', {
+    paging: false,
+    info: false,
+    ordering: true,
+    searching: false,
+    serverSide: true, 
+    ajax: (data, callback) => {
+        let dataOrder = data.order[0].column ?? 3;
+
+        let sortBy = data.columns[dataOrder].data;
+        let sortDir = data.order[0].dir ?? "asc"; 
+
+        var month = $('#filter-bulan').find(':selected').val();
+        var period = $('#tahun_ajaran').find(':selected').val();
+        if (month == "") {
+            var url = `api/input-data.php?sort_by=${sortBy}&sort_direction=${sortDir}`
+        } else {
+            var url = `api/input-data.php?month=${month}&period=${period}&sort_by=${sortBy}&sort_direction=${sortDir}`
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status) {
+                    data.data.forEach(trx => {
+                        trx.trx_amount = formatToIDR(trx.trx_amount);
+                    });
+                    callback({
+                        data: data.data                      
+                    });
+                } else {
+                    callback({
+                        data: [] 
+                    });
+                }
+            });
+    },
+    columns: [
+        { data: 'virtual_account' },
+        { data: 'user' },
+        { data: 'trx_amount' },
+        { data: 'trx_timestamp' }
+    ]
+});
+
     const refreshData = () => {
         getData();
     }
@@ -91,17 +134,25 @@ $semester_options = read($query_semester);
     const getData = () => {
         var month = $('#filter-bulan').find(':selected').val();
         var period = $('#tahun_ajaran').find(':selected').val();
+        var sort_by = paymentTable.order()[0][0]; // Get sorting column index
+        var sort_direction = paymentTable.order()[0][1]; // Get sorting direction
+
+        if (sort_by == 0) sort_by = 'virtual_account';
+        else if (sort_by == 1) sort_by = 'user';
+        else if (sort_by == 2) sort_by = 'trx_amount';
+        else if (sort_by == 3) sort_by = 'trx_timestamp';
+
         if (month == "") {
-            var url = 'api/input-data.php'
+            var url = `api/input-data.php?sort_by=${sort_by}&sort_direction=${sort_direction}`
         } else {
-            var url = `api/input-data.php?month=${month}&period=${period}`
+            var url = `api/input-data.php?month=${month}&period=${period}&sort_by=${sort_by}&sort_direction=${sort_direction}`
         }
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
                 $('#input-data-table').empty();
-                data.data.forEach(trx => {
+                data.data.forEach(trx => { 
                     $('#input-data-table').append(`<?php include_once './tables/input-data.php'; ?>`);
                 })
 

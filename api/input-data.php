@@ -6,6 +6,8 @@ header('Content-Type: application/json');
 
 $month = isset($_GET['month']) ? $_GET['month'] : '';
 $period = isset($_GET['period']) ? $_GET['period'] : '';
+$sort_by = isset($_GET['sort_by']) ? $_GET['sort_by'] : 'trx_timestamp'; // Default sort column
+$sort_direction = isset($_GET['sort_direction']) && strtolower($_GET['sort_direction']) === 'asc' ? 'ASC' : 'DESC'; // Default direction
 
 $month_to_num = array(
     '01' => 1,
@@ -24,7 +26,7 @@ $month_to_num = array(
 
 $academic_year = substr($tahun_ajaran, -4);
 
-if($period != ''){
+if($month != ''){
     $monthnum = $month_to_num[$month];
     if ($monthnum >= 6){
         $academic_year -= 1;
@@ -46,7 +48,7 @@ if ($period != '') {
     $sql .= " AND YEAR(trx_timestamp) = '$academic_year'";
 }
 
-$sql .= " ORDER BY trx_timestamp DESC";
+$sql .= " ORDER BY $sort_by $sort_direction";
 
 $result = read($sql);
 

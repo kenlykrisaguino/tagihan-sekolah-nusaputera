@@ -63,6 +63,110 @@ include './headers/admin.php';
 </div>
 
 <script>
+    let tableSiswa = new DataTable('#table-siswa', {
+        paging: false,
+        info: false,
+        ordering: true,
+        searching: false,
+        serverSide: true,
+        ajax: (data, callback) => {
+            let dataOrder = data.order && data.order.length > 0 ? data.order[0].column : 0;
+            let sortBy = data.columns[dataOrder]?.data ||
+                'nis';
+            let sortDir = data.order && data.order.length > 0 ? data.order[0].dir : "asc";
+
+
+            var url = 'api/get-students.php';
+            var search = document.getElementById('search').value;
+            var jenjang = document.getElementById('jenjang').value;
+            var tingkat = document.getElementById('tingkat').value;
+            var kelas = document.getElementById('kelas').value;
+
+            var params = new URLSearchParams({
+                search: search,
+                jenjang: jenjang,
+                tingkat: tingkat,
+                kelas: kelas,
+                sortBy: sortBy,
+                sortDir: sortDir,
+            });
+            url += '?' + params.toString();
+
+            fetch(url)
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    if (data.status) {
+                        callback({
+                            data: data.data
+                        });
+                    } else {
+                        callback({
+                            data: []
+                        })
+                    }
+                });
+        },
+        columns: [{
+                data: 'nis', // Assuming the student NIS is in the 'nis' column
+                render: function(data, type, row) {
+                    return `
+                    <td data-id="${data}" style="cursor: pointer;" onclick="deleteStudent(this)">
+                        <svg data-id="${data}" style="cursor: pointer;" onclick="deleteStudent(this)" xmlns="http://www.w3.org/2000/svg" height="20" width="24" viewBox="0 0 640 512">
+                            <path fill="#991111" d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304l91.4 0C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7L29.7 512C13.3 512 0 498.7 0 482.3zM472 200l144 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-144 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z"/>
+                        </svg>
+                    </td>
+                `;
+                },
+                orderable: false
+            },
+            {
+                data: 'nis',
+                orderable: true
+            },
+            {
+                data: 'name',
+                orderable: true
+            },
+            {
+                data: 'level',
+                orderable: true
+            },
+            {
+                data: 'class',
+                orderable: true
+            },
+            {
+                data: 'major',
+                orderable: true
+            },
+            {
+                data: 'phone_number',
+                orderable: false
+            },
+            {
+                data: 'email_address',
+                orderable: false
+            },
+            {
+                data: 'parent_phone',
+                orderable: false
+            },
+            {
+                data: 'virtual_account',
+                orderable: false
+            },
+            {
+                data: 'latest_payment',
+                orderable: true
+            },
+            {
+                data: 'status',
+                orderable: false
+            }
+        ]
+    })
+
     const downloadStudent = () => {
         window.location.href = 'api/download-students.php';
     }
@@ -117,7 +221,7 @@ include './headers/admin.php';
                         if (l.name != null) {
                             $('#tingkat').append(
                                 `<option value="${l.name}" ${l.name == tingkat ? 'selected' : ''}>${l.name}</option>`
-                                )
+                            )
                         }
                     });
                 }
@@ -130,7 +234,7 @@ include './headers/admin.php';
                         if (l.major != null) {
                             $('#kelas').append(
                                 `<option value="${l.major}" ${l.major == kelas? 'selected' : ''}>${l.major}</option>`
-                                );
+                            );
                         }
                     });
                 }
@@ -185,14 +289,16 @@ include './headers/admin.php';
             icon: icon
         })
     }
-    
+
     const deleteStudent = (element) => {
         var id = $(element).data('id');
         console.log(id);
         $.ajax({
             url: 'api/delete-student.php',
             method: 'POST',
-            data: { id: id },
+            data: {
+                id: id
+            },
             success: function(response) {
                 console.log(response);
                 if (response.status) {
@@ -215,18 +321,16 @@ include './headers/admin.php';
         filterUser();
 
         <?php
-
-            if(isset($_SESSION['success'])){
-                echo 'showToast(true, "'.$_SESSION['success'].'")';
-                unset($_SESSION['success']);
-            }
-            
-            if(isset($_SESSION['error'])){
-                echo 'showToast(false, "'.$_SESSION['error'].'")';
-                unset($_SESSION['error']);
-            }
+        
+        if (isset($_SESSION['success'])) {
+            echo 'showToast(true, "' . $_SESSION['success'] . '")';
+            unset($_SESSION['success']);
+        }
+        
+        if (isset($_SESSION['error'])) {
+            echo 'showToast(false, "' . $_SESSION['error'] . '")';
+            unset($_SESSION['error']);
+        }
         ?>
     });
 </script>
-
-

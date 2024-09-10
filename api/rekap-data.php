@@ -11,6 +11,8 @@ $month = isset($_GET['month']) ? $_GET['month'] : '';
 $level = isset($_GET['level']) ? $_GET['level'] : '';
 $class = isset($_GET['class']) ? $_GET['class'] : '';
 $major = isset($_GET['major']) ? $_GET['major'] : '';
+$sort_by = isset($_GET['sortBy']) ? $_GET['sortBy'] : 'virtual_account';
+$sort_direction = isset($_GET['sortDir']) && strtolower($_GET['sortDir']) === 'asc' ? 'ASC' : 'DESC'; 
 
 $additional_query = '';
 
@@ -47,7 +49,8 @@ $sql = "SELECT
     GROUP BY 
         b.nis, 
         b.virtual_account,
-        b.student_name, CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')), b.parent_phone, b.period;
+        b.student_name, CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')), b.parent_phone, b.period
+    ORDER BY $sort_by $sort_direction;
     ";
 $result = read($sql);
 
