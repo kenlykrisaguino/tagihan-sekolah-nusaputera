@@ -82,9 +82,9 @@ include './headers/admin.php';
                 <td class="w-50">Bank</td>
                 <td id="data-pemasukan"></td>
             </tr>
-            <tr>
+            <tr class="d-none">
                 <td class="w-50">Tunggakan</td>
-                <td id="data-tunggakan"></td>
+                <td></td>
             </tr>
             <tr class="font-weight-bold text-right">
                 <td class="w-50">Pendapatan</td>
@@ -92,6 +92,7 @@ include './headers/admin.php';
             </tr>
         </tbody>
     </table>
+    <p>Total Denda : <span id="data-tunggakan" style="font-weight: bold;"></span></p>
 </div>
 
 <script>

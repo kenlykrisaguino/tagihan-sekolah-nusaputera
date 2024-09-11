@@ -139,15 +139,12 @@ $html = "<!DOCTYPE html>
                 <td class='text-left'>Bank</td>
                 <td class='text-left'>$bank</td>
             </tr>
-            <tr>
-                <td class='text-left'>Tunggakan</td>
-                <td class='text-left'>$tunggakan</td>
-            </tr>
             <tr class='bold'>
                 <td class='text-right'>Total</td>
                 <td class='text-right'>$total</td>
             </tr>
         </table>
+        <p>Total Denda : $tunggakan</p>
     </section>
 </body>
 

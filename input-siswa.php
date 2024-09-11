@@ -57,7 +57,7 @@ include './headers/admin.php';
         </select>
     </div>
     <div class="form-group col-12">
-        <label for="birth_date">Ulang Tahun</label>
+        <label for="birth_date">Tanggal Lahir</label>
         <input type="date" class="form-control" id="birth_date" name="birth_date" required>
     </div>
     <div class="form-group col-12">
