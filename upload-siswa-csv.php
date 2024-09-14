@@ -147,13 +147,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $query_runnable = true;
 
-                $va = getenv('MIDTRANS_PREFIX_VA_BNI') . '2223' . $nis;
 
-                $classQuery = 'SELECT id from classes WHERE TRUE ';
+                $classQuery = 'SELECT id, va_identifier from classes WHERE TRUE ';
                 $classQuery .= $level ? " AND level = '$level'" : '';
                 $classQuery .= $class ? " AND name = '$class'" : '';
                 $classQuery .= $major ? " AND major = '$major'" : '';
-                $class_id = read($classQuery)[0]['id'] ?? 1;
+                $class_detail = read($classQuery)[0] ?? null;
+                $va_identifier = $class_detail['va_identifier']?? 2220;
+                $class_id = $class_detail['id'] ?? 1;
+                
+                $va = getenv('MIDTRANS_PREFIX_VA_BNI') . $va_identifier . $nis;
 
                 $password = md5($va);
 

@@ -2,7 +2,7 @@
     <thead>
         <tr class="">
             <th>Total Penerimaan</th>
-            <th>Total Tunggakan</th>
+            <th>Total Denda</th>
         </tr>
     </thead>
     <tbody>

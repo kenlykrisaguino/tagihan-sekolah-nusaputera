@@ -3,6 +3,7 @@
     <td class="editable" data-id="${trx.nis}" data-column='student_name'>${trx.student_name}</td>
     <td data-id="${trx.nis}" data-column='level'>${trx.level}</td>
     <td class="editable" data-id="${trx.nis}" data-column='parent_phone'>${trx.parent_phone}</td>
+    <td>${formatToIDR(trx.tagihan)}</td>
     
     <td class="hl-green">${formatToIDR(trx.penerimaan)}</td>
 

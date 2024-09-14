@@ -77,22 +77,21 @@ $data = [];
 
 $sql = "SELECT
     MAX(b.trx_id) AS trx_id,
-    b.student_name, b.parent_phone, b.virtual_account, MAX(b.payment_due) AS payment_due,
+    CONCAT(c.va_prefix_name ,b.student_name) AS student_name, b.parent_phone, b.virtual_account, MAX(b.payment_due) AS payment_due,
     SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) AS monthly_total,
     COUNT(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE NULL END) AS monthly_count,
     SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS late_total,
     COUNT(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE NULL END) AS late_count,
     SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS total_charge
 FROM
-    bills b
+    bills b JOIN classes c on b.class = c.id
 WHERE
     MONTH(b.payment_due) <= '$month'
 GROUP BY
-    b.student_name, b.parent_phone, b.virtual_account
+    CONCAT(c.va_prefix_name ,b.student_name), b.parent_phone, b.virtual_account
 ";
 
 $bills = read($sql);
-
 
 if(empty($bills)){
     $response = array(
@@ -131,7 +130,7 @@ foreach ($bills as $bill){
         'bni_va' => array(
             'va_number' => $bill['virtual_account'],
         ), 
-        "custom_field1" => "Pembayaran SPP ".$bill['student_name'] 
+        "custom_field1" => "Pembayaran ".$bill['student_name'] 
     );
 }
 

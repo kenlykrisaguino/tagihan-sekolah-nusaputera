@@ -57,7 +57,7 @@ $semester_options = read($query_semester);
                 <th>Bulan</th>
                 <th>Jenjang</th>
                 <th>Tagihan</th>
-                <th>Tunggakan</th>
+                <th>Denda</th>
                 <th>Pembayaran</th>
                 <th>Status</th>
                 <th>Tanggal Pembayaran</th>

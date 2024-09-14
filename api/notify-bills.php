@@ -92,14 +92,14 @@ if(!$msgValid){
 }
 
 $query = "SELECT
-b.virtual_account, b.student_name, 
+b.virtual_account, CONCAT(c.va_prefix_name, b.student_name) AS student_name, 
 b.parent_phone,
 SUM(CASE WHEN b.trx_status = 'not paid' OR b.trx_status = 'waiting' THEN b.trx_amount ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'not paid' THEN c.late_bills ELSE 0 END) as total_payment
 FROM bills b
 JOIN classes c ON b.class = c.id
 WHERE b.payment_due = '$lastDate 23:59:59' AND b.trx_status = 'waiting' 
 GROUP BY
-b.virtual_account, b.student_name, 
+b.virtual_account, CONCAT(c.va_prefix_name, b.student_name), 
 b.parent_phone
 ";
 
@@ -110,7 +110,7 @@ $msgData = [];
 foreach($result as $row){
     $msgData[] = array(
         'target' => $row['parent_phone'],
-        'message' => $message." Diharapkan dapat membayar sebesar ".formatToRupiah($row['total_payment'])." ke nomor virtual account ".$row['virtual_account'],
+        'message' => $message." Diharapkan dapat membayar sebesar *".formatToRupiah($row['total_payment'])."* ke nomor virtual account *".$row['virtual_account']."* Atas Nama *".$row['student_name']."*",
         'delay' => '1'
     );
 }

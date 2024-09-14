@@ -4,6 +4,7 @@
     <td data-id="${trx.nis}" data-column='level'>${trx.level}</td>
     <td class="editable" data-id="${trx.nis}" data-column='parent_phone'>${trx.parent_phone}</td>
     
+    <td>${formatToIDR(trx.tagihan)}</td>
     <td class="hl-green">${formatToIDR(trx.penerimaan)}</td>
 
     <td class="editable ${statusColor(trx.statusJanuari)}" data-id="${trx.nis}" data-month="Januari"  data-column='trx_amount' data-payment=true>${formatToIDR(trx.Januari)}</td>

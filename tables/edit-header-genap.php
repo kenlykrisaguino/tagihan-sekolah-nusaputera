@@ -4,6 +4,7 @@
         <th>Nama</th>
         <th>Kelas</th>
         <th>No. Ortu</th>
+        <th>Tagihan</th>
 
         <th>Penerimaan</th>
         <th>Januari</th>
@@ -14,7 +15,7 @@
         <th>Juni</th>
 
 
-        <th>Tunggakan</th>
+        <th>Denda</th>
         <th>Januari</th>
         <th>Februari</th>
         <th>Maret</th>

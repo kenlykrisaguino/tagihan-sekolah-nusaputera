@@ -83,7 +83,7 @@ include './headers/admin.php';
                 <td id="data-pemasukan"></td>
             </tr>
             <tr class="d-none">
-                <td class="w-50">Tunggakan</td>
+                <td class="w-50">Denda</td>
                 <td></td>
             </tr>
             <tr class="font-weight-bold text-right">

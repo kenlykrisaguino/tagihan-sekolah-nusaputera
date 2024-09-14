@@ -81,7 +81,7 @@ $semester_options = read($query_semester);
                 <th>Jenjang</th>
                 <th>No. Ortu</th>
                 <th>Pembayaran</th>
-                <th>Tunggakan</th>
+                <th>Denda</th>
             </tr>
         </thead>
         <tbody id="body-rekap">
