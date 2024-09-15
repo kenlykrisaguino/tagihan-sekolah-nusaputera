@@ -13,7 +13,7 @@ include './headers/admin.php';
         <div class="position-fixed d-none" id="loader">
             <span class="loader"></span>
         </div>
-        <div class="position-fixed" style="bottom: 20px; right: 20px;">
+        <div class="position-fixed" style="bottom: 20px; right: 20px; z-index:1000;">
             <div class="btn-group dropup">
                 <button type="button" class="btn btn-outline-primary btn-floating rounded-circle" data-mdb-ripple-init
                     data-mdb-ripple-color="dark" data-bs-toggle="dropdown" aria-expanded="false">
