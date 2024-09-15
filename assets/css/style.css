@@ -27,3 +27,36 @@
 .txt-disabled{
     color: #EBEBE4;
 }
+
+.h-screen{
+    max-height: 100vh;
+}
+
+.h-half{
+    max-height: 50vh;
+}
+
+.h-3_5{
+    max-height: 60vh;
+}
+.h-2_5{
+    max-height: 40vh;
+}
+
+.custom-table{
+    width: 100%;
+    overflow: scroll;
+}
+
+.table-responsive {
+    position: relative;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.table thead {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: white; /* Atur warna latar belakang header agar tetap terlihat */
+}
