@@ -40,7 +40,7 @@ include './headers/admin.php';
     </div>
     <div class="form-group col-12 col-md-4">
         <label for="jenjang">Jenjang</label>
-        <select name="jenjang" id="jenjang" class="form-control" onchange="filterLevel()">
+        <select name="jenjang" id="jenjang" class="form-control" onchange="filterLevel()" required>
             <option disabled selected value='' selected>Pilih Jenjang</option>
         </select>
     </div>
@@ -58,7 +58,7 @@ include './headers/admin.php';
     </div>
     <div class="form-group col-12">
         <label for="birth_date">Tanggal Lahir</label>
-        <input type="date" class="form-control" id="birth_date" name="birth_date" required>
+        <input type="date" class="form-control" id="birth_date" name="birth_date">
     </div>
     <div class="form-group col-12">
         <label for="phone_number">Nomor Telepon</label>
@@ -70,11 +70,11 @@ include './headers/admin.php';
     </div>
     <div class="form-group col-12">
         <label for="parent_phone">Telepon Orang Tua</label>
-        <input type="phone" class="form-control" id="parent_phone" name="parent_phone" required>
+        <input type="phone" class="form-control" id="parent_phone" name="parent_phone">
     </div>
     <div class="form-group col-12">
         <label for="address">Alamat Rumah</label>
-        <input type="address" class="form-control" id="address" name="address" required>
+        <input type="address" class="form-control" id="address" name="address">
     </div>
 
     <div class="form-group col-12 mt-3 mb-5">

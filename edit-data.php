@@ -157,6 +157,7 @@ $semester_options = read($query_semester);
             });
     }
 
+    <?php if($_SESSION['role'] == 'ADMIN'):?>
     const editTable = function() {
         var originalContent = $(this).text();
         var dataId = $(this).data('id');
@@ -257,6 +258,7 @@ $semester_options = read($query_semester);
             $(this).parent().removeClass('cellEditing');
         });
     }
+    <?php endif ?>
 
     const statusColor = (status) => {
         if (status === 'paid') {

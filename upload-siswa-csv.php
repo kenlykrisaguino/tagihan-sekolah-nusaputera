@@ -8,6 +8,10 @@ use Midtrans\CoreApi;
 
 $admin_code = $tahun_ajaran . '-' . $semester . '-create';
 
+$total_count = 0;
+$edit_count = 0;
+$add_count = 0;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['data']) && $_FILES['data']['error'] === UPLOAD_ERR_OK) {
         // Check if file upload was successful
@@ -39,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($csvData as $data) {
                 $nis = $data['nis'];
                 $nis_list[] = $nis;
+                $total_count++;
             }
 
             // check if user is already registered,
@@ -83,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach ($checkUsers as $user) {
                     foreach ($csvData as $new) {
                         if ($user['nis'] == $new['nis']) {
+                            $edit_count++;
                             $user_id = $user['id'];
                             $registered_nis[] = $user['nis'];
                             $userIds[] = $user_id;
@@ -115,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $updateQuery .= "$classCase END ";
                 $updateQuery .= 'WHERE id IN (' . implode(', ', $userIds) . ')';
 
-                crud($updateQuery);
+                $_SESSION['role'] == 'ADMIN' ? crud($updateQuery) : null;
 
                 // Insert the student history
                 $historyQuery = "INSERT INTO student_history(
@@ -124,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     virtual_account, period, semester, updated_at
                 ) VALUES";
                 $historyQuery .= implode(', ', $histories);
-                crud($historyQuery);
+                $_SESSION['role'] == 'ADMIN' ? crud($historyQuery) : null;
             }
 
             $query_runnable = false;
@@ -144,6 +150,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (in_array($nis, $registered_nis)) {
                     continue;
                 }
+
+                $add_count++;
 
                 $query_runnable = true;
 
@@ -269,11 +277,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $totalData = count($csvData);
-                $_SESSION['success'] = "Berhasil menambahkan $totalData data siswa.";
+                $_SESSION['success'] = "Berhasil mengolah $total_count data siswa (tambah $add_count, edit $edit_count).";
                 header('Location: ./rekap-siswa.php');
             } else {
                 $totalData = count($csvData);
-                $_SESSION['success'] = "Berhasil menambahkan $totalData data siswa.";
+                $_SESSION['success'] = "Berhasil mengolah $total_count data siswa (tambah $add_count, edit $edit_count).";
                 header('Location: ./rekap-siswa.php');
             }
         } else {

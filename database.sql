@@ -60,8 +60,8 @@ CREATE TABLE `users` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `nis` VARCHAR(10) UNIQUE,
   `name` VARCHAR(255) NOT NULL,
-  `address` VARCHAR(255) NOT NULL,
-  `birthdate` DATE NOT NULL,
+  `address` VARCHAR(255) DEFAULT NULL,
+  `birthdate` DATE DEFAULT NULL,
   `status` VARCHAR(10) NOT NULL,
   `class` int NOT NULL,
   `phone_number` VARCHAR(16) DEFAULT NULL,
@@ -136,6 +136,11 @@ INSERT INTO users(
   '0000', 'Admin', 'Semarang', '2024-08-05', 'Inactive',
   1, '', '', '081329171920', 'admin',
   '2024/2025', 'Gasal', '25d55ad283aa400af464c76d713c07ad', 'ADMIN'
+),
+(
+  '0001', 'Subadmin', 'Semarang', '2024-08-05', 'Inactive',
+  1, '', '', '081329171920', 'subadmin',
+  '2024/2025', 'Gasal', '25d55ad283aa400af464c76d713c07ad', 'SUBADMIN'
 ),
 (
   '5048', 'Angel Ravelynta', 'Semarang', '2008-02-12', 'Active',

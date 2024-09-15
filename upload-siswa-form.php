@@ -10,11 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $level = $_POST['jenjang'] ?? null;
     $class = $_POST['tingkat'] ?? null;
     $major = $_POST['kelas'] ?? null;
-    $birthdate = $_POST['birth_date'] ?? null;
+    $birthdate = $_POST['birth_date'] == '' ? "NULL" : "'$_POST[birth_date]'";
     $phone_number = $_POST['phone_number'] ?? '';
     $email_address = $_POST['email_address'] ?? '';
-    $parent_phone = $_POST['parent_phone'] ?? null;
-    $address = $_POST['address'] ?? null;
+    $parent_phone = $_POST['parent_phone'] ?? '';
+    $address = $_POST['address'] ?? '';
 
     $classQuery = 'SELECT id, va_identifier from classes WHERE TRUE';
     $classQuery .= $level ? " AND level = '$level'" : '';
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         virtual_account, period, semester, password
     ) VALUES
     ('$nis', '$name', '$address',
-    '$birthdate', 'Active', '$class_id',
+    $birthdate, 'Active', '$class_id',
     '$phone_number', '$email_address', '$parent_phone',
     '$va', '$tahun_ajaran', '$semester', '$password')";
 

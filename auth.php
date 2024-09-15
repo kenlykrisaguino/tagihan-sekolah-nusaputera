@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $_SESSION['class'] = $result['class'];
     $_SESSION['role'] = $result['role'];
 
-    if ($_SESSION['role'] == 'ADMIN'){
+    if ($_SESSION['role'] == 'ADMIN' || $_SESSION['role'] == 'SUBADMIN' ){
         header('Location: rekap-siswa.php');
         exit();
     } else if ($_SESSION['role'] == 'STUDENT'){

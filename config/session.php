@@ -8,7 +8,7 @@ function IsLoggedIn() {
 }
 
 function RoleAllowed($level = null) {
-    if ($_SESSION['role'] == 'ADMIN') {
+    if ($_SESSION['role'] == 'ADMIN' || $_SESSION['role'] == 'SUBADMIN') {
         return $level === null ? false : true;
     } else {
         return $level === null ? true : false;

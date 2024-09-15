@@ -51,25 +51,25 @@ include './headers/admin.php';
     </div>
     <div class="form-group col-4">
         <label for="jenjang">Jenjang</label>
-        <select name="jenjang" id="jenjang" class="form-control" onchange="filterUser()">
+        <select name="jenjang" id="jenjang" class="form-control" onchange="filterClass()">
             <option value='' selected>Semua Jenjang</option>
         </select>
     </div>
     <div class="form-group col-4">
         <label for="tingkat">Tingkat</label>
-        <select name="tingkat" id="tingkat" class="form-control" onchange="filterUser()">
+        <select name="tingkat" id="tingkat" class="form-control" onchange="filterClass()">
             <option value='' selected>Semua Tingkat</option>
         </select>
     </div>
     <div class="form-group col-4">
         <label for="kelas">Kelas</label>
-        <select name="kelas" id="kelas" class="form-control" onchange="filterUser()">
+        <select name="kelas" id="kelas" class="form-control" onchange="filterClass()">
             <option value='' selected>Semua Kelas</option>
         </select>
     </div>
     <div class="form-group col-12">
         <label for="nis">Nama</label>
-        <select name="nis" id="nis" class="form-control" onchange="filterUser()">
+        <select name="nis" id="nis" class="form-control" onchange="filterClass()">
             <option value='' selected>Semua Siswa/i</option>
         </select>
     </div>
@@ -99,6 +99,7 @@ include './headers/admin.php';
     const refreshData = () => {
         getData();
         filterMonth();
+        filterClass();
         filterUser();
     }
 
@@ -169,6 +170,7 @@ include './headers/admin.php';
 
     const filterMonth = () => {
         getData();
+        filterUser();
         var semester = document.getElementById('semester').value;
         var month = document.getElementById('month').value;
 
@@ -236,14 +238,15 @@ include './headers/admin.php';
         });
     }
 
-    const filterUser = () => {
+    const filterClass = () => {
         getData();
+        filterUser();
 
         var url = 'api/classes-filter.php';
+
         var jenjang = document.getElementById('jenjang').value;
         var tingkat = document.getElementById('tingkat').value;
         var kelas = document.getElementById('kelas').value;
-        var nis = document.getElementById('nis').value;
 
         var params = new URLSearchParams({
             level: jenjang,
@@ -297,22 +300,51 @@ include './headers/admin.php';
                         }
                     });
                 }
-
-                $('#nis').empty();
-                $('#nis').append("<option value='' selected>Semua Siswa/i</option>");
-
-                if (data.data.students != null) {
-                    data.data.students.forEach((l) => {
-                        if (l.name != null) {
-                            $('#nis').append(
-                                `<option value="${l.nis}" ${l.nis == nis? 'selected' : ''}>${l.name}</option>`
-                            );
-                        }
-                    });
-                }
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(errorThrown);
+            }
+        })
+    }
+
+    const filterUser = () => {
+        var tahun_ajaran = document.getElementById('tahun_ajaran').value;
+        var semester = document.getElementById('semester').value;
+        var bulan = document.getElementById('month').value;
+        var jenjang = document.getElementById('jenjang').value;
+        var tingkat = document.getElementById('tingkat').value;
+        var kelas = document.getElementById('kelas').value;
+        var nis = document.getElementById('nis').value;
+
+        getData();
+        
+        var userParam = new URLSearchParams({
+            period: tahun_ajaran,
+            semester: semester,
+            bulan: bulan,
+            level: jenjang,
+            class: tingkat,
+            major: kelas,
+        })
+        userUrl = 'api/journal-filter.php';
+        userUrl += '?' + userParam.toString();
+
+        $.ajax({
+            url: userUrl,
+            method: 'GET',
+            success: function(data) {
+                $('#nis').empty();
+                $('#nis').append("<option value='' selected>Semua Siswa/i</option>");
+
+                data.data.forEach((l) => {
+                    if(l.name != null){
+                        $('#nis').append(`<option value="${l.nis}" ${l.nis == nis? 'selected' : ''}>${l.name}</option>`)
+                    }
+                })
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+
             }
         })
     }
@@ -358,7 +390,7 @@ include './headers/admin.php';
 
     $(document).ready(() => {
         getData();
-        filterUser();
+        filterClass();
         filterMonth();
     })
 </script>
