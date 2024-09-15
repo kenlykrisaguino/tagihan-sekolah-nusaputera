@@ -12,7 +12,6 @@ use Midtrans\CoreApi;
 $monthQuery = "SELECT MIN(MONTH(payment_due)) AS month FROM bills WHERE trx_status = 'waiting'";
 
 $curr_month_admin = read($monthQuery)[0]['month'];
-
 $last_month_int = $curr_month_admin == 0 ? 12 : $curr_month_admin;
 
 if ($curr_month_admin < 10) {
@@ -71,7 +70,8 @@ foreach ($expiredPaymentResult as $trx){
     }
 }
 
-$month = $curr_smt == '1' ? (int)$curr_month + 6 : (int)$curr_month;
+$month = ($curr_smt == '1' ? (int)$curr_month + 6 : (int)$curr_month) + 1;
+$month = $month % 12;
 
 $data = [];
 
@@ -86,7 +86,8 @@ $sql = "SELECT
 FROM
     bills b JOIN classes c on b.class = c.id
 WHERE
-    MONTH(b.payment_due) <= '$month'
+    MONTH(b.payment_due) <= '$month' AND
+    YEAR(b.payment_due) <= '20$year'
 GROUP BY
     CONCAT(c.va_prefix_name ,b.student_name), b.parent_phone, b.virtual_account
 ";

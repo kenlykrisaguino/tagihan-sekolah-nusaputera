@@ -34,15 +34,8 @@ foreach ($usersResult as $user) {
         $num_padded = str_pad($month_num, 2, '0', STR_PAD_LEFT);
 
         $due_date = new DateTime("$year-$num_padded-01");
-        $due_date->modify('last day of this month');
-
-        $dayOfWeek = $due_date->format('N');
-
-        if ($dayOfWeek == 6) {
-            $due_date->modify('-1 day'); 
-        } elseif ($dayOfWeek == 7) {
-            $due_date->modify('-2 days'); 
-        }
+        $due_date->modify('first day of next month');
+        $due_date->modify('+9 days');
 
         $query_duedate = $due_date->format('Y-m-d') . " 23:59:59";
 
