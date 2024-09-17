@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         foreach ($userBills as $entry) {
             $nis = $entry['nis'];
+            $billMonth = (int)$entry['bill_month'] - 1 == -1 ? 12 : (int)$entry['bill_month'] - 1;
             $userMap[$nis] = [
                 "id" => $entry['user_id'], 
                 "level" => $entry['level'], 
@@ -56,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($entry['bill_id']) {
                 $billMap[$nis] = [
                     "id" => $entry['bill_id'],
-                    "bill_month" => $entry['bill_month']
+                    "bill_month" => $billMonth
                 ];
                 $midtransTrxIds[] = $entry['midtrans_trx_id'];
             }
@@ -71,7 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user = $userMap[$nis];
                 $bill = $billMap[$nis];
 
-                $trx_id = generateTrxId($user['level'], $nis);
+                $timestamp = $data['trx_timestamp'];
+                // get month from trx timestamp
+                $month = (int)date('m', strtotime($timestamp));
+
+                $trx_id = generateTrxId($user['level'], $nis, $month);
                 $parentPhone = $user['parent_phone'];
                 $bill_month = $months[str_pad($bill['bill_month'], 2, '0', STR_PAD_LEFT)];
                 $formattedAmount = formatToRupiah($data['trx_amount']);
@@ -161,10 +166,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
 }
 
-function generateTrxId($level, $nis) {
-    return "$level/11/5/1/$nis";
+
+// Fungsi untuk menghasilkan trx_id berdasarkan level, NIS, dan bulan
+function generateTrxID($level, $nis, $month){
+    global $year;
+    global $semester;
+
+    // Mengambil dua digit terakhir dari tahun ajaran
+    $trimmed_year = substr($year, -2);
+    // Menentukan semester (1 untuk Gasal, 2 untuk Genap)
+    $curr_semester = $semester == 'Gasal' ? "1" : "2";
+    // Menghitung bulan semester (berdasarkan 6 bulan dalam semester)
+    $semester_month = (($month-1) % 6)+1;
+
+    // Menyusun trx_id berdasarkan level, tahun, semester, bulan, dan NIS
+    $trx_id = "$level/$trimmed_year/$curr_semester/$semester_month/$nis";
+
+    return $trx_id; // Mengembalikan trx_id yang dihasilkan
 }
 
-function formatToRupiah($number) {
-    return 'Rp ' . number_format($number, 0, ',', '.');
-}

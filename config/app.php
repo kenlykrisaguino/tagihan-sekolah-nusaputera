@@ -87,7 +87,29 @@ function crud($query) {
     return $conn->query($query);
 }
 
+/**
+ * This function sends a 404 Not Found HTTP response and terminates the script execution.
+ * It is used to handle cases where a requested resource or page is not found.
+ *
+ * @return void This function does not return a value. It sends an HTTP response and terminates the script execution.
+ */
 function returnError() {
     header("HTTP/1.1 404 Not Found");
     exit(404);
+}
+
+/**
+ * Formats a number into a currency format with the Rupiah symbol.
+ *
+ * This function takes a number as input and returns a string representing that number formatted with the Rupiah symbol.
+ * The number is formatted using PHP's number_format function, with 0 decimal places, a comma as the thousands separator,
+ * and a period as the decimal separator.
+ *
+ * @param float $number The number to be formatted.
+ *
+ * @return string The formatted number with the Rupiah symbol.
+ */
+function formatToRupiah($number)
+{
+    return 'Rp ' . number_format($number, 0, ',', '.');
 }

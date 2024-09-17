@@ -1,14 +1,15 @@
 <?php
 
+// Memasukkan konfigurasi aplikasi
 include_once '../config/app.php'; 
 
+// Mengatur header konten sebagai JSON
 header('Content-Type: application/json');
 
-// get the id from post request and delete users
+// Mengambil ID dari permintaan POST dan menghapus pengguna
 $id = $_POST['id'];
 
-// get user data and move it to history
-
+// Query untuk mendapatkan data pengguna berdasarkan ID
 $getUser = "SELECT
 nis, name, class,
 phone_number, email_address, parent_phone,
@@ -17,6 +18,7 @@ FROM users WHERE nis = '$id'";
 
 $userData = read($getUser)[0] ?? null;
 
+// Memeriksa apakah data pengguna ditemukan
 if (!$userData) {
     $output = [
         'status' => false,
@@ -24,9 +26,10 @@ if (!$userData) {
         'data' => $userData
     ];
     echo json_encode($output);
-    exit();
+    exit(); // Menghentikan eksekusi lebih lanjut
 }
 
+// Menyiapkan data pengguna untuk dimasukkan ke tabel history
 $data = [
     'nis' => $userData['nis'],
     'name' => $userData['name'],
@@ -37,10 +40,10 @@ $data = [
     'virtual_account' => $userData['virtual_account'],
     'period' => $userData['period'],
     'semester' => $userData['semester'],
-    'updated_at' => date('Y-m-d H:i:s')
+    'updated_at' => date('Y-m-d H:i:s') // Menambahkan timestamp saat ini
 ];
 
-// insert user data to history table
+// Query untuk memasukkan data pengguna ke tabel history
 $historyQuery = "INSERT INTO student_history(
     nis, name, class, phone_number, email_address,
     parent_phone, virtual_account, period, semester, updated_at)
@@ -50,6 +53,7 @@ $historyQuery = "INSERT INTO student_history(
     '{$data['parent_phone']}', '{$data['virtual_account']}',
     '{$data['period']}', '{$data['semester']}', '{$data['updated_at']}')";
     
+// Menjalankan query untuk memasukkan data ke tabel history
 if(!crud($historyQuery)){
     $output = [
         'status' => false,
@@ -57,14 +61,16 @@ if(!crud($historyQuery)){
         'data' => $userData
     ];
     echo json_encode($output);
-    exit();
+    exit(); // Menghentikan eksekusi lebih lanjut
 }
 
-
+// Query untuk memperbarui status pengguna menjadi 'Inactive'
 $sql = "UPDATE users SET status = 'Inactive' WHERE nis = '$id'";
 
+// Menjalankan query untuk memperbarui status pengguna
 $result = crud($sql);
 
+// Menyiapkan output berdasarkan hasil operasi
 $output = [];
 if($result) {
     $output = [
@@ -80,6 +86,7 @@ if($result) {
     ];
 }
 
+// Mengembalikan output dalam format JSON
 echo json_encode($output);
 
 ?>

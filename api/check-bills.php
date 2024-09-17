@@ -1,8 +1,11 @@
 <?php
 
 include_once '../config/app.php';
+
 header('Content-Type: application/json');
 
+// Query untuk mengambil data kelas beserta jumlah tagihan terlambat, 
+// serta menggabungkan level, nama, dan jurusan jika tersedia
 $level_query = "SELECT TRIM(CONCAT(
         COALESCE(level, ''), 
         CASE WHEN COALESCE(level, '') = '' THEN '' ELSE '-' END,
@@ -10,11 +13,16 @@ $level_query = "SELECT TRIM(CONCAT(
         CASE WHEN COALESCE(name, '') = '' THEN '' ELSE '-' END,
         COALESCE(major, '')
     )) AS name, late_bills FROM classes";
+
+// Mengambil hasil query dalam array $late_bill_list
 $late_bill_list = read($level_query);
+
+// Menginisialisasi array untuk menyimpan jumlah tagihan terlambat per kelas
 foreach ($late_bill_list as $late_bill){
     $late_bills[$late_bill['name']] = $late_bill['late_bills'];
 }
 
+// Membuat tabel sementara (temporary) untuk menyimpan data tagihan saat ini dan tagihan selanjutnya
 $sql_create_temp_table = "
     CREATE TEMPORARY TABLE temp_bills AS
     SELECT b.id, next_b.id AS next_b_id, b.class, b.payment_due
@@ -32,8 +40,10 @@ $sql_create_temp_table = "
         AND b.payment_due < DATE_SUB(NOW(), INTERVAL 24 HOUR)
 ";
 
+// Eksekusi perintah SQL untuk membuat tabel sementara
 crud($sql_create_temp_table);
 
+// SQL untuk mengupdate status transaksi dan mengatur tagihan terlambat
 $sql_update = "
     UPDATE bills b
     LEFT JOIN temp_bills t ON b.id = t.id
@@ -65,11 +75,14 @@ $sql_update = "
         AND b.payment_due < DATE_SUB(NOW(), INTERVAL 24 HOUR)
 ";
 
+// Eksekusi query update untuk memperbarui tagihan
 $result = crud($sql_update);
 
+// Menghapus tabel sementara setelah update selesai
 $sql_drop_temp_table = "DROP TEMPORARY TABLE temp_bills";
 crud($sql_drop_temp_table);
 
+// Mengembalikan hasil dalam format JSON
 echo json_encode([
     'status' => true,
     'message' => 'Tagihan berhasil dicek', 

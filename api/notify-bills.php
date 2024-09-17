@@ -1,18 +1,19 @@
 <?php
 
-include_once '../config/app.php';
-include_once '../config/fonnte.php';
+include_once '../config/app.php'; // Memasukkan konfigurasi aplikasi
+include_once '../config/fonnte.php'; // Memasukkan konfigurasi fonnte untuk fungsi pengiriman pesan
 
-header('Content-Type: application/json');
+header('Content-Type: application/json'); // Mengatur header untuk output JSON
 
+// Mengambil parameter 'type' dari query string, jika ada
 $force_notify = $_GET['type'] ?? '';
 
+// Mendapatkan tanggal sekarang
 $modify_month = new DateTime();
-
 $now = $modify_month->format('Y-m-d');
 
+// Menghitung tanggal-tanggal penting untuk notifikasi
 $modify_month->modify('first day of this month');
-
 $firstDate = $modify_month->format('Y-m-d');
 
 $modify_month->modify('+8 days');
@@ -23,66 +24,62 @@ $dayAfter = $modify_month->format('Y-m-d');
 
 $modify_month->modify('first day of next month');
 $modify_month->modify('+9 days');
-
 $lastDate = $modify_month->format('Y-m-d');
 
+// Daftar nama bulan
 $months = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember"
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
-$currentDate = new DateTime();
 
+// Mendapatkan bulan dan hari saat ini
+$currentDate = new DateTime();
 $day_int = intval($currentDate->format('d'));
 $month_int = intval($currentDate->format('m'));
 
+// Menentukan bulan pembayaran berdasarkan tanggal
 $moreThanDue = $day_int > 10;
+$currentMonth = $months[$moreThanDue ? $month_int - 1 : ($month_int - 2  == -1 ? 11 : $month_int - 2)];
 
-$currentMonth = $months[$moreThanDue ? $month_int - 1 : ($month_int - 2  == -1 ? 11 : $month_int -2)];
-
+// Menyiapkan pesan notifikasi
 $message = "Pembayaran SPP bulan $currentMonth ";
 $msgValid = false;
 
-if($force_notify != ''){
+// Menentukan kondisi untuk pengiriman notifikasi berdasarkan parameter atau tanggal
+if ($force_notify != '') {
     $ifFirstDate = $force_notify == 'first_day';
     $ifDayBefore = $force_notify == 'day_before';
-    $ifDayAfter  = $force_notify == 'day_after';
+    $ifDayAfter = $force_notify == 'day_after';
 } else {
     $ifFirstDate = $now == $firstDate;
     $ifDayBefore = $now == $dayBefore;
-    $ifDayAfter  = $now == $dayAfter;
+    $ifDayAfter = $now == $dayAfter;
 }
 
-if($ifFirstDate){
+// Menentukan pesan berdasarkan kondisi yang dipenuhi
+if ($ifFirstDate) {
     $message .= "akan berakhir di tanggal *$lastDate*. ";
     $msgValid = true;
-} else if($ifDayBefore){
+} else if ($ifDayBefore) {
     $message .= "akan berakhir besok. ";
     $msgValid = true;
-} else if($ifDayAfter){
+} else if ($ifDayAfter) {
     $message .= "telah dibuka sampai tanggal *$lastDate*. ";
     $msgValid = true;
 }
-$message .= "Diharapkan dapan melakukan pembayaran sebagai berikut: \n\n";
+$message .= "Diharapkan dapat melakukan pembayaran sebagai berikut: \n\n";
 
-if(!$msgValid){
-    $data = array(
+// Jika tidak valid, mengirimkan respons dengan status false
+if (!$msgValid) {
+    $data = [
         "status" => false,
         "message" => "Tidak mengirimkan notifikasi pembayaran"
-    );
+    ];
     echo json_encode($data);
     exit();
 }
 
+// Query untuk mengambil data pembayaran yang perlu dibayar
 $query = "SELECT
 b.virtual_account, CONCAT(c.va_prefix_name, b.student_name) AS student_name, 
 b.parent_phone,
@@ -95,45 +92,44 @@ b.virtual_account, CONCAT(c.va_prefix_name, b.student_name),
 b.parent_phone
 ";
 
+// Menjalankan query dan mendapatkan hasil
 $result = read($query);
 
+// Menyiapkan data pesan
 $msgData = [];
 
-foreach($result as $row){
+foreach ($result as $row) {
     $paymentInRupiah = formatToRupiah($row['total_payment']);
     $va = $row['virtual_account'];
     $va_name = $row['student_name'];
-    $usermsg = $message."Total Pembayaran: $paymentInRupiah\nVirtual Account: MANDIRI *$va* atas nama *$va_name*";
-    $msgData[] = array(
+    $usermsg = $message . "Total Pembayaran: $paymentInRupiah\nVirtual Account: BNI *$va* atas nama *$va_name*";
+    $msgData[] = [
         'target' => $row['parent_phone'],
         'message' => $usermsg,
         'delay' => '1'
-    );
+    ];
 }
 
-if(empty($msgData)){
-    $data = array(
+// Jika tidak ada data untuk dikirim, mengirimkan respons dengan status false
+if (empty($msgData)) {
+    $data = [
         "status" => false,
         "message" => "Tidak ada pembayaran yang harus dibayar",
-    );
+    ];
     echo json_encode($data);
     exit();
 }
 
+// Mengirimkan pesan
 $messages = json_encode($msgData);
+$a = sendMessage(['data' => $messages]);
 
-$a = sendMessage(array('data'=>$messages));
-
-
-$data = array(
+// Mengirimkan respons dengan status true
+$data = [
     "status" => true,
     "message" => "Notifikasi pembayaran spp bulan $currentMonth berhasil dikirim",
     "data" => $a,
     "s" => $msgData
-);
+];
 
 echo json_encode($data);
-
-function formatToRupiah($number) {
-    return 'Rp ' . number_format($number, 0, ',', '.');
-}
