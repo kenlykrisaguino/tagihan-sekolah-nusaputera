@@ -4,15 +4,44 @@ include_once '../config/app.php';
 
 header('Content-Type: application/json');
 
+$check_query = "SELECT MIN(payment_due) AS payment_due FROM bills WHERE trx_status = 'waiting' AND payment_due <= NOW()";
+
+$check_result = read($check_query)[0]['payment_due'] ?? null;
+
+if(!$check_result){
+    echo json_encode([
+        'status' => false,
+        'message' => 'Tidak ada tagihan yang dapat dicek.', 
+        'data' => null
+    ]);
+    exit();
+}
+
+$payment_due = str_replace(' ', '/', $check_result);
+
+$admin_code = "$payment_due/CHECK-BILLS";
+$read_admin = "SELECT admin_code FROM administrations WHERE admin_code = '$admin_code'";
+
+$read_admin_result = read($read_admin)[0]['admin_code']?? null;
+
+if ($read_admin_result != null){
+    echo json_encode([
+        'status' => false,
+        'message' => 'Telah mengecek tagihan bills',
+        'data' => null
+    ]);
+    exit();
+}
+
 // Query untuk mengambil data kelas beserta jumlah tagihan terlambat, 
 // serta menggabungkan level, nama, dan jurusan jika tersedia
 $level_query = "SELECT TRIM(CONCAT(
-        COALESCE(level, ''), 
-        CASE WHEN COALESCE(level, '') = '' THEN '' ELSE '-' END,
-        COALESCE(name, ''), 
-        CASE WHEN COALESCE(name, '') = '' THEN '' ELSE '-' END,
-        COALESCE(major, '')
-    )) AS name, late_bills FROM classes";
+    COALESCE(level, ''), 
+    CASE WHEN COALESCE(level, '') = '' THEN '' ELSE '-' END,
+    COALESCE(name, ''), 
+    CASE WHEN COALESCE(name, '') = '' THEN '' ELSE '-' END,
+    COALESCE(major, '')
+)) AS name, late_bills FROM classes";
 
 // Mengambil hasil query dalam array $late_bill_list
 $late_bill_list = read($level_query);
@@ -36,7 +65,7 @@ $sql_create_temp_table = "
             AND nb.trx_status != 'waiting'
         )
     WHERE 
-        b.trx_status IN ('waiting', 'paid') 
+        b.trx_status IN ('waiting', 'paid', 'not paid') 
         AND b.payment_due < DATE_SUB(NOW(), INTERVAL 24 HOUR)
 ";
 
@@ -57,6 +86,7 @@ $sql_update = "
         END,
         b.late_bills = CASE
             WHEN b.trx_status = 'waiting' THEN COALESCE(c.late_bills, 0)
+            WHEN b.trx_status = 'not paid' THEN b.late_bills + COALESCE(c.late_bills, 0)
             WHEN b.trx_status = 'disabled' THEN 0
             ELSE b.late_bills
         END,
@@ -71,9 +101,10 @@ $sql_update = "
             ELSE b.payment_due
         END
     WHERE 
-        b.trx_status IN ('waiting', 'paid') 
+        b.trx_status IN ('waiting', 'paid', 'not paid') 
         AND b.payment_due < DATE_SUB(NOW(), INTERVAL 24 HOUR)
 ";
+
 
 // Eksekusi query update untuk memperbarui tagihan
 $result = crud($sql_update);
@@ -82,17 +113,17 @@ $result = crud($sql_update);
 $sql_drop_temp_table = "DROP TEMPORARY TABLE temp_bills";
 crud($sql_drop_temp_table);
 
+// Menambahkan log ke administrations
+
+$sql_add_log = "INSERT INTO administrations(admin_code, type) VALUES ('$admin_code', 'check')";
+crud($sql_add_log);
+
 // Mengembalikan hasil dalam format JSON
 echo json_encode([
     'status' => true,
     'message' => 'Tagihan berhasil dicek', 
     'data' => $late_bills
 ]);
-
-/*  
-    !! NOTES IMPORTANT BUAT BILLS
-    Buat tambahan check bills per bulan
-    Buat temporary table baru yang isinya nis, list bill id yang belum dibayar biar bisa ditambahin
-*/
+exit();
 
 ?>
