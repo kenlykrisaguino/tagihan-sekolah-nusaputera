@@ -29,9 +29,9 @@ include './headers/admin.php';
                     <li><a class="dropdown-item" id="m-notify" href="#"
                             onclick="notifyParents('first_day')">Nofity 1st</a></li>
                     <li><a class="dropdown-item" id="m-notify" href="#"
-                            onclick="notifyParents('week_before')">Nofity 2nd</a></li>
+                            onclick="notifyParents('day_before')">Nofity 2nd</a></li>
                     <li><a class="dropdown-item" id="m-notify" href="#"
-                            onclick="notifyParents('day_before')">Nofity 3rd</a></li>
+                            onclick="notifyParents('day_after')">Nofity 3rd</a></li>
                 </ul>
             </div>
         </div>

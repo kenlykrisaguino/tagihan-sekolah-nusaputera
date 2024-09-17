@@ -7,38 +7,24 @@ header('Content-Type: application/json');
 
 $force_notify = $_GET['type'] ?? '';
 
-$currentDate = new DateTime();
+$modify_month = new DateTime();
 
-$now = $currentDate->format('Y-m-d');
+$now = $modify_month->format('Y-m-d');
 
-$currentDate->modify('first day of this month');
+$modify_month->modify('first day of this month');
 
-$dayOfWeek = $currentDate->format('N');
+$firstDate = $modify_month->format('Y-m-d');
 
-if ($dayOfWeek == 6) {
-    $currentDate->modify('+2 days');
-} elseif ($dayOfWeek == 7) {
-    $currentDate->modify('+1 day');
-}
+$modify_month->modify('+8 days');
+$dayBefore = $modify_month->format('Y-m-d');
 
-$firstDate = $currentDate->format('Y-m-d');
+$modify_month->modify('+2 days');
+$dayAfter = $modify_month->format('Y-m-d');
 
-$currentDate->modify('last day of this month');
+$modify_month->modify('first day of next month');
+$modify_month->modify('+9 days');
 
-$dayOfWeek = $currentDate->format('N');
-
-if ($dayOfWeek == 6) {
-    $currentDate->modify('-1 day');
-} elseif ($dayOfWeek == 7) {
-    $currentDate->modify('-2 days');
-}
-
-$lastDate = $currentDate->format('Y-m-d');
-
-$currentDate->modify('-1 day');
-$dayBefore = $currentDate->format('Y-m-d');
-$currentDate->modify('-6 day');
-$weekBefore = $currentDate->format('Y-m-d');
+$lastDate = $modify_month->format('Y-m-d');
 
 $months = [
     "Januari",
@@ -54,31 +40,36 @@ $months = [
     "November",
     "Desember"
 ];
+$currentDate = new DateTime();
 
-$currentMonth = $months[intval($currentDate->format('m')) - 1];
+$day_int = intval($currentDate->format('d'));
+$month_int = intval($currentDate->format('m'));
 
+$moreThanDue = $day_int > 10;
+
+$currentMonth = $months[$moreThanDue ? $month_int - 1 : ($month_int - 2  == -1 ? 11 : $month_int -2)];
 
 $message = "Pembayaran SPP bulan $currentMonth ";
 $msgValid = false;
 
 if($force_notify != ''){
     $ifFirstDate = $force_notify == 'first_day';
-    $ifWeekBefore = $force_notify == 'week_before';
     $ifDayBefore = $force_notify == 'day_before';
+    $ifDayAfter  = $force_notify == 'day_after';
 } else {
     $ifFirstDate = $now == $firstDate;
-    $ifWeekBefore = $now == $weekBefore;
     $ifDayBefore = $now == $dayBefore;
+    $ifDayAfter  = $now == $dayAfter;
 }
 
 if($ifFirstDate){
-    $message .= "telah dibuka.";
-    $msgValid = true;
-} else if($ifWeekBefore){
-    $message .= "akan berakhir minggu depan.";
+    $message .= "akan berakhir di tanggal *$lastDate*. ";
     $msgValid = true;
 } else if($ifDayBefore){
     $message .= "akan berakhir besok.";
+    $msgValid = true;
+} else if($ifDayAfter){
+    $message .= "telah dibuka sampai tanggal *$lastDate*.";
     $msgValid = true;
 }
 
@@ -94,10 +85,10 @@ if(!$msgValid){
 $query = "SELECT
 b.virtual_account, CONCAT(c.va_prefix_name, b.student_name) AS student_name, 
 b.parent_phone,
-SUM(CASE WHEN b.trx_status = 'not paid' OR b.trx_status = 'waiting' THEN b.trx_amount ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'not paid' THEN c.late_bills ELSE 0 END) as total_payment
+SUM(CASE WHEN b.trx_status = 'not paid' THEN c.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) as total_payment
 FROM bills b
 JOIN classes c ON b.class = c.id
-WHERE b.payment_due = '$lastDate 23:59:59' AND b.trx_status = 'waiting' 
+WHERE b.payment_due <= '$lastDate 23:59:59' 
 GROUP BY
 b.virtual_account, CONCAT(c.va_prefix_name, b.student_name), 
 b.parent_phone
