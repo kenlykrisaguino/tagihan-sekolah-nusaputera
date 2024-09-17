@@ -89,4 +89,10 @@ echo json_encode([
     'data' => $late_bills
 ]);
 
+/*  
+    !! NOTES IMPORTANT BUAT BILLS
+    Buat tambahan check bills per bulan
+    Buat temporary table baru yang isinya nis, list bill id yang belum dibayar biar bisa ditambahin
+*/
+
 ?>
