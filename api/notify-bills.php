@@ -66,12 +66,13 @@ if($ifFirstDate){
     $message .= "akan berakhir di tanggal *$lastDate*. ";
     $msgValid = true;
 } else if($ifDayBefore){
-    $message .= "akan berakhir besok.";
+    $message .= "akan berakhir besok. ";
     $msgValid = true;
 } else if($ifDayAfter){
-    $message .= "telah dibuka sampai tanggal *$lastDate*.";
+    $message .= "telah dibuka sampai tanggal *$lastDate*. ";
     $msgValid = true;
 }
+$message .= "Diharapkan dapan melakukan pembayaran sebagai berikut: \n\n";
 
 if(!$msgValid){
     $data = array(
@@ -99,9 +100,13 @@ $result = read($query);
 $msgData = [];
 
 foreach($result as $row){
+    $paymentInRupiah = formatToRupiah($row['total_payment']);
+    $va = $row['virtual_account'];
+    $va_name = $row['student_name'];
+    $usermsg = $message."Total Pembayaran: $paymentInRupiah\nVirtual Account: MANDIRI *$va* atas nama *$va_name*";
     $msgData[] = array(
         'target' => $row['parent_phone'],
-        'message' => $message." Diharapkan dapat membayar sebesar *".formatToRupiah($row['total_payment'])."* ke nomor virtual account *".$row['virtual_account']."* Atas Nama *".$row['student_name']."*",
+        'message' => $usermsg,
         'delay' => '1'
     );
 }
