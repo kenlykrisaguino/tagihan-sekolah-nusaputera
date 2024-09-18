@@ -60,7 +60,7 @@ $sql = "
     WHERE 
         b.period = '$tahun_ajaran' AND 
         b.semester = '$semester' AND
-        u.student_name LIKE '%$search%'
+        b.student_name LIKE '%$search%'
         $additional_query
     GROUP BY 
         u.virtual_account, 

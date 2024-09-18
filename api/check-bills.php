@@ -4,33 +4,46 @@ include_once '../config/app.php';
 
 header('Content-Type: application/json');
 
-$check_query = "SELECT MIN(payment_due) AS payment_due FROM bills WHERE trx_status = 'waiting' AND payment_due <= NOW()";
-
+$check_query = "SELECT MIN(payment_due) AS payment_due FROM bills WHERE trx_status IN ('paid') AND payment_due <= NOW()";
 $check_result = read($check_query)[0]['payment_due'] ?? null;
 
-if(!$check_result){
-    echo json_encode([
-        'status' => false,
-        'message' => 'Tidak ada tagihan yang dapat dicek.', 
-        'data' => null
-    ]);
-    exit();
+if($check_result){
+    $payment_due = str_replace(' ', '/', $check_result);
+    $admin_code = "$payment_due/CHECK-BILLS";
+    $read_admin = "SELECT admin_code FROM administrations WHERE admin_code = '$admin_code'";
+    
+    $read_admin_result = read($read_admin)[0]['admin_code']?? null;
+} else {
+    $read_admin_result = "not null";
 }
 
-$payment_due = str_replace(' ', '/', $check_result);
-
-$admin_code = "$payment_due/CHECK-BILLS";
-$read_admin = "SELECT admin_code FROM administrations WHERE admin_code = '$admin_code'";
-
-$read_admin_result = read($read_admin)[0]['admin_code']?? null;
-
-if ($read_admin_result != null){
-    echo json_encode([
-        'status' => false,
-        'message' => 'Telah mengecek tagihan bills',
-        'data' => null
-    ]);
-    exit();
+if($read_admin_result != null){
+    $check_query = "SELECT MIN(payment_due) AS payment_due FROM bills WHERE trx_status IN ('waiting') AND payment_due <= NOW()";
+    $check_result = read($check_query)[0]['payment_due'] ?? null;
+    
+    if(!$check_result){
+        echo json_encode([
+            'status' => false,
+            'message' => 'Tidak ada tagihan yang dapat dicek.', 
+            'data' => null
+        ]);
+        exit();
+    }
+    
+    $payment_due = str_replace(' ', '/', $check_result);
+    
+    $admin_code = "$payment_due/CHECK-BILLS";
+    $read_admin = "SELECT admin_code FROM administrations WHERE admin_code = '$admin_code'";
+    $read_admin_result = read($read_admin)[0]['admin_code']?? null;
+    
+    if ($read_admin_result != null){
+        echo json_encode([
+            'status' => false,
+            'message' => 'Telah mengecek tagihan bills',
+            'data' => null
+        ]);
+        exit();
+    }
 }
 
 // Query untuk mengambil data kelas beserta jumlah tagihan terlambat, 

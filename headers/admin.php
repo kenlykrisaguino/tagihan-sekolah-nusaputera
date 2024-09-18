@@ -135,6 +135,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 url: 'api/check-bills.php',
                 type: 'GET',
                 success: function(response) {
+                    console.log(response);
                     if (response.status) {
                         $.toast({
                             heading: 'Success',

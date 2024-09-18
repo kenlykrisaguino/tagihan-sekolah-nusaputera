@@ -13,6 +13,9 @@ $class = $_GET['class'] ?? '';
 $major = $_GET['major'] ?? '';
 $nis = $_GET['nis'] ?? '';
 
+// menambahkan 1 bulan
+$month = $month == '' ? '' : ((int)$month % 12) + 1;
+
 // Menentukan query untuk tunggakan berdasarkan bulan
 $tunggakan_query = $month !== '' ?
     "WHEN b.trx_status = 'not paid' THEN b.late_bills
@@ -27,7 +30,8 @@ $query_bank = "
     FROM payments p
     JOIN bills b ON p.bill_id = b.id
     JOIN classes c ON c.id = b.class
-    WHERE TRUE
+    WHERE TRUE AND
+    b.trx_status IN ('paid', 'late') 
 ";
 
 // Query untuk total tunggakan
@@ -44,7 +48,7 @@ $query_tunggakan = "
 
 // Menambahkan filter untuk bulan jika ada
 if ($month !== '') {
-    $query_bank .= " AND MONTH(p.trx_timestamp) = '$month'";
+    $query_bank .= " AND MONTH(b.payment_due) = '$month'";
     $query_tunggakan .= " AND MONTH(b.payment_due) = '$month'";
 } else {
     // Jika bulan tidak dipilih, cek pembayaran di semester tersebut
@@ -70,7 +74,8 @@ $result_bank = read($query_bank)[0] ?? ['bank' => 0];
 $result_tunggakan = read($query_tunggakan)[0] ?? ['tunggakan' => 0];
 
 // Hitung 'pendapatan' sebagai penjumlahan dari 'bank' dan 'tunggakan'
-$pendapatan = $result_bank['bank'] + $result_tunggakan['tunggakan'];
+$pendapatan = $result_bank['bank'];
+// $pendapatan = $result_bank['bank'] + $result_tunggakan['tunggakan'];
 
 // Output hasil dalam format JSON
 echo json_encode([
