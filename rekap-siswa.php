@@ -110,7 +110,7 @@ include './headers/admin.php';
                     <table class="table table-bordered table-striped custom-table" id="table-siswa">
                         <thead class="thead-dark">
                             <tr>
-                                <th>Action</th>
+                                <?php echo $_SESSION['role'] == 'ADMIN' ? "<th>Action</th>" : "" ?>
                                 <th>NIS</th>
                                 <th>Nama</th>
                                 <th>Jenjang</th>
@@ -176,7 +176,9 @@ include './headers/admin.php';
                         }
                     });
             },
-            columns: [{
+            columns: [
+                
+                {
                     data: 'nis', // Assuming the student NIS is in the 'nis' column
                     render: function(data, type, row) {
                         return `

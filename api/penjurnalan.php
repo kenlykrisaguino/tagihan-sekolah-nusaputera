@@ -13,14 +13,11 @@ $class = $_GET['class'] ?? '';
 $major = $_GET['major'] ?? '';
 $nis = $_GET['nis'] ?? '';
 
-// menambahkan 1 bulan
-$month = $month == '' ? '' : ((int)$month % 12) + 1;
-
 // Menentukan query untuk tunggakan berdasarkan bulan
 $tunggakan_query = $month !== '' ?
     "WHEN b.trx_status = 'not paid' THEN b.late_bills
-     WHEN b.trx_status = 'late' THEN c.late_bills" :
-    "WHEN b.trx_status = 'not paid' THEN c.late_bills
+     WHEN b.trx_status = 'late' THEN b.late_bills" :
+    "WHEN b.trx_status = 'not paid' THEN b.late_bills
      WHEN b.trx_status = 'late' THEN b.late_bills";
 
 // Query untuk total pembayaran dari bank
@@ -74,7 +71,7 @@ $result_bank = read($query_bank)[0] ?? ['bank' => 0];
 $result_tunggakan = read($query_tunggakan)[0] ?? ['tunggakan' => 0];
 
 // Hitung 'pendapatan' sebagai penjumlahan dari 'bank' dan 'tunggakan'
-$pendapatan = $result_bank['bank'];
+$pendapatan = $result_bank['bank'] + $result_tunggakan['tunggakan'];
 // $pendapatan = $result_bank['bank'] + $result_tunggakan['tunggakan'];
 
 // Output hasil dalam format JSON

@@ -40,7 +40,7 @@ $sql = "SELECT
     DATE_FORMAT(b.payment_due, '%M %Y') AS `month`,
     CONCAT(COALESCE(l.level, ''), ' ', COALESCE(l.name, ''), ' ', COALESCE(l.major, '')) AS class,
     b.trx_amount AS `bills`,
-    (CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'waiting' OR b.trx_status = 'inactive' THEN 0 ELSE l.late_bills END) AS `late_bills`,
+    (CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'waiting' OR b.trx_status = 'inactive' THEN 0 ELSE b.late_bills END) AS `late_bills`,
     p.trx_amount AS `payment_amount`,
     b.trx_status AS `trx_status`,
     p.trx_timestamp AS `paid_at`

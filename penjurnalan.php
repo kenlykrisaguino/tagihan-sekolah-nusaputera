@@ -133,8 +133,7 @@ include './headers/admin.php';
                         </div>
                         <div class="form-group col-12">
                             <label for="nis">Nama</label>
-                            <select name="nis" id="nis" class="form-control" onchange="filterClass()">
-                                <option value='' selected>Semua Siswa/i</option>
+                            <select name="nis" id="nis" onchange="filterClass()">
                             </select>
                         </div>
                     </div>
@@ -403,16 +402,30 @@ include './headers/admin.php';
                 url: userUrl,
                 method: 'GET',
                 success: function(data) {
-                    $('#nis').empty();
-                    $('#nis').append("<option value='' selected>Semua Siswa/i</option>");
+                    var $nis = $('#nis');
+                    $nis.empty();
+                    $nis.append("<option value='' selected>Semua Siswa/i</option>");
 
                     data.data.forEach((l) => {
                         if (l.name != null) {
-                            $('#nis').append(
-                                `<option value="${l.nis}" ${l.nis == nis? 'selected' : ''}>${l.name}</option>`
-                            )
+                            $nis.append(
+                                `<option value="${l.nis}" ${l.nis == nis ? 'selected' : ''}>${l.name}</option>`
+                            );
                         }
-                    })
+                    });
+
+                    if ($nis.hasClass('ts-control')) {
+                        $nis[0].tomselect.clearOptions();
+                        $nis[0].tomselect.load(function (callback) {
+                            callback(data.data.map((l) => ({ value: l.nis, text: l.name })));
+                        });
+                    } else {
+                        new TomSelect("#nis", {
+                            create: false,
+                            sortField: { field: "text", direction: "asc" },
+                            maxOptions: 50, // Optional: adjust based on your needs
+                        });
+                    }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.log(errorThrown);

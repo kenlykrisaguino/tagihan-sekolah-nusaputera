@@ -48,7 +48,8 @@ foreach ($usersResult as $user) {
 
         // Menghitung tanggal jatuh tempo (10 hari setelah akhir bulan)
         $due_date = new DateTime("$year-$num_padded-01");
-        $due_date->modify('first day of next month');
+        $due_date->modify('first day of this month');
+
         $due_date->modify('+9 days');
 
         // Mengubah tanggal jatuh tempo ke format yang diinginkan
@@ -117,7 +118,7 @@ function generateTrxID($level, $nis, $month){
     // Menentukan semester (1 untuk Gasal, 2 untuk Genap)
     $curr_semester = $semester == 'Gasal' ? "1" : "2";
     // Menghitung bulan semester (berdasarkan 6 bulan dalam semester)
-    $semester_month = (($month-1) % 6)+1;
+    $semester_month = (($month-1) % 6);
 
     // Menyusun trx_id berdasarkan level, tahun, semester, bulan, dan NIS
     $trx_id = "$level/$trimmed_year/$curr_semester/$semester_month/$nis";

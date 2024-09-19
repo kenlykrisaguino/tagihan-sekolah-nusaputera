@@ -86,8 +86,7 @@ $sql_create_temp_table = "
 crud($sql_create_temp_table);
 
 // SQL untuk mengupdate status transaksi dan mengatur tagihan terlambat
-$sql_update = "
-    UPDATE bills b
+$sql_update = "UPDATE bills b
     LEFT JOIN temp_bills t ON b.id = t.id
     LEFT JOIN bills next_b ON next_b.id = t.next_b_id
     LEFT JOIN classes c ON c.id = t.class
@@ -104,7 +103,8 @@ $sql_update = "
             ELSE b.late_bills
         END,
         next_b.trx_status = CASE
-            WHEN b.trx_status IN ('waiting', 'paid') THEN 'waiting'
+            WHEN b.trx_status IN ('late', 'not paid') AND next_b.trx_status = 'inactive' THEN 'waiting'
+            WHEN b.trx_status IN ('waiting', 'paid') AND next_b.trx_status = 'inactive' THEN 'waiting'
             WHEN b.trx_status = 'disabled' THEN next_b.trx_status
             ELSE next_b.trx_status
         END,

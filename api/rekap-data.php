@@ -46,11 +46,11 @@ $sql = "
             WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount 
             ELSE 0 
         END) + SUM(CASE 
-            WHEN b.trx_status = 'late' THEN c.late_bills 
+            WHEN b.trx_status = 'late' THEN b.late_bills 
             ELSE 0 
         END) AS penerimaan, 
         SUM(CASE 
-            WHEN b.trx_status = 'not paid' THEN c.late_bills 
+            WHEN b.trx_status = 'not paid' THEN b.late_bills 
             ELSE 0 
         END) AS tunggakan
     FROM 
