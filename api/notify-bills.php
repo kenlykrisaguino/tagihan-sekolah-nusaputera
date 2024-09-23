@@ -22,8 +22,7 @@ $dayBefore = $modify_month->format('Y-m-d');
 $modify_month->modify('+2 days');
 $dayAfter = $modify_month->format('Y-m-d');
 
-$modify_month->modify('first day of next month');
-$modify_month->modify('+9 days');
+$modify_month->modify('-1 day');
 $lastDate = $modify_month->format('Y-m-d');
 
 // Daftar nama bulan
@@ -38,11 +37,13 @@ $day_int = intval($currentDate->format('d'));
 $month_int = intval($currentDate->format('m'));
 
 // Menentukan bulan pembayaran berdasarkan tanggal
-$moreThanDue = $day_int > 10;
-$currentMonth = $months[$moreThanDue ? $month_int - 1 : ($month_int - 2  == -1 ? 11 : $month_int - 2)];
+// $moreThanDue = $day_int > 10;
+// $currentMonth = $months[$moreThanDue ? $month_int - 1 : ($month_int - 2  == -1 ? 11 : $month_int - 2)];
+$currentMonth = $months[$month_int - 1];
 
 // Menyiapkan pesan notifikasi
 $message = "Pembayaran SPP bulan $currentMonth ";
+$message_complete = "Pembayaran SPP bulan $currentMonth ";
 $msgValid = false;
 
 // Menentukan kondisi untuk pengiriman notifikasi berdasarkan parameter atau tanggal
@@ -58,13 +59,14 @@ if ($force_notify != '') {
 
 // Menentukan pesan berdasarkan kondisi yang dipenuhi
 if ($ifFirstDate) {
-    $message .= "akan berakhir di tanggal *$lastDate*. ";
+    $message .= "telah dibuka dan akan berakhir di tanggal *$lastDate*. ";
     $msgValid = true;
 } else if ($ifDayBefore) {
-    $message .= "akan berakhir besok. ";
+    $message .= "akan berakhir besok, *$lastDate*. ";
     $msgValid = true;
 } else if ($ifDayAfter) {
-    $message .= "telah dibuka sampai tanggal *$lastDate*. ";
+    $message .= "belum dibayarkan. ";
+    $message_complete .= "telah dibayarkan. ";
     $msgValid = true;
 }
 $message .= "Diharapkan dapat melakukan pembayaran sebagai berikut: \n\n";
@@ -108,6 +110,25 @@ foreach ($result as $row) {
         'message' => $usermsg,
         'delay' => '1'
     ];
+}
+
+
+if ($ifDayAfter) {
+    $payment_due = "$lastDate 23:59:59";
+    $query = "SELECT b.student_name, b.parent_phone, p.trx_timestamp FROM payments p JOIN bills b ON b.id = p.bill_id WHERE b.payment_due IN ('$payment_due')";
+
+    $completed = read($query);
+
+    foreach ($completed as $row) {
+        $student_name = $row['student_name'];
+        $trx_time = $row['trx_timestamp'];
+        $usermsg = $message_complete . "Terima kasih kepada orang tua $student_name yang telah melakukan pembayaran pada tanggal *$trx_time*";
+        $msgData[] = [
+            'target' => $row['parent_phone'],
+            'message' => $usermsg,
+            'delay' => '1'
+        ];
+    }
 }
 
 // Jika tidak ada data untuk dikirim, mengirimkan respons dengan status false
