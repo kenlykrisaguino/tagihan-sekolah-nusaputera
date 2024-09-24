@@ -29,7 +29,7 @@ GROUP BY
     CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')),
     u.virtual_account
 ORDER BY
-    c.id
+    c.id, u.nis
 ";
 
 $result = read($query);
@@ -100,7 +100,7 @@ $html = "<!DOCTYPE html>
         td {
             border: 1px solid black;
             padding: 8px;
-            text-align: right;
+            text-align: left;
         }
         th{
             text-align: center;
@@ -169,7 +169,7 @@ $html = "<!DOCTYPE html>
 $dompdf->loadHtml($html);
 
 // Set paper size and orientation
-$dompdf->setPaper('A4', 'portrait');
+$dompdf->setPaper('A4', 'landscape');
 
 // Render the HTML as PDF
 $dompdf->render();
