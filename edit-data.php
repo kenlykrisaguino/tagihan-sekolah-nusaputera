@@ -75,7 +75,14 @@ $semester_options = read($query_semester);
                     </ul>
                 </div>
                 <div class="col-12">
-                    <h2 class="mt-4 mb-3">Data Penerimaan</h2>
+                    <div class="d-flex my-4">
+                        <div class="col-9">
+                            <h2 class="">Edit Data</h2>
+                        </div>
+                        <div class="col-3">
+                            <button onclick="downloadUnpaid()" class="btn btn-outline-primary w-100">Download</button>
+                        </div>
+                    </div>
                     <div class="d-flex flex-wrap">
                         <div class="form-group col-4">
                             <label for="tahun_ajaran">Search</label>
@@ -172,6 +179,37 @@ $semester_options = read($query_semester);
                     data.forEach(option => {
                         semesterSelect.append(new Option(option.semester, option.semester));
                     });
+                }
+            });
+        }
+
+        const downloadUnpaid = () => {
+            $.ajax({
+                url: './api/pdf/download-unpaid-bills.php',
+                method: 'POST',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(response) {
+                    var blob = new Blob([response], {
+                        type: 'application/pdf'
+                    });
+
+                    var url = window.URL.createObjectURL(blob);
+
+                    var link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'journal.pdf';
+                    document.body.appendChild(link);
+                    link.click();
+
+                    document.body.removeChild(link);
+
+                    window.URL.revokeObjectURL(url);
+                },
+
+                error: function(xhr, status, error) {
+                    console.error('Error generating PDF:', error);
                 }
             });
         }
