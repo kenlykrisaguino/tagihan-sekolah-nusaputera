@@ -42,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // get NIS data from CSV file
             foreach ($csvData as $data) {
                 $nis = $data['nis'];
+                if($nis == ''){
+                    continue;
+                }
                 $nis_list[] = $nis;
                 $total_count++;
             }
@@ -155,7 +158,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $query_runnable = true;
 
-
                 $classQuery = 'SELECT id, va_identifier from classes WHERE TRUE ';
                 $classQuery .= $level ? " AND level = '$level'" : '';
                 $classQuery .= $class ? " AND name = '$class'" : '';
@@ -219,36 +221,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     foreach ($semester_month as $month_num) {
                         $num_padded = str_pad($month_num, 2, '0', STR_PAD_LEFT);
 
-                        $due_date = new DateTime("$year-$num_padded-01");
-                        $due_date->modify('last day of this month');
-
-                        $dayOfWeek = $due_date->format('N');
-
-                        if ($dayOfWeek == 6) {
-                            $due_date->modify('-1 day');
-                        } elseif ($dayOfWeek == 7) {
-                            $due_date->modify('-2 days');
-                        }
+                        $due_date = new DateTime("$year-$num_padded-10");
+                        $last_due_date = new DateTime("$year-$num_padded-10");
+                        $last_due_date->modify('-1 month');
+                        $curr_date = new DateTime();
 
                         $query_duedate = $due_date->format('Y-m-d') . ' 23:59:59';
 
                         $trx_status = '';
                         $lateBills = 0;
-                        if ($month_num < $curr_month) {
+                        
+                        if ($last_due_date < $curr_date && $curr_date < $due_date){
+                            $trx_status = 'waiting';
+                        } elseif ($due_date < $curr_date) {
                             $notPaidQuery = "SELECT 
                             trx_status FROM bills 
                             WHERE 
                                 nis = $user[nis] AND 
                                 payment_due = '$query_duedate'";
-                            $old_status = read($notPaidQuery)[0]['trx_status'];
-                            $trx_status = $old_status == 'paid' || $old_status ==  'not paid' ? 'disabled' : 'not paid'; 
-                            $lateBills = $old_status == 'paid' || $old_status ==  'not paid' ? 0 : $user['late_bills']; 
+                            $old_status = read($notPaidQuery)[0]['trx_status'] ?? 'not paid';
+                            $trx_status = $old_status == 'paid' || $old_status ==  'not paid' || $old_status == 'late' ? 'disabled' : 'not paid'; 
+                            // $lateBills = $old_status == 'paid' || $old_status ==  'not paid' ? 0 : $user['late_bills']; 
                             
-                        } elseif ($month_num > $curr_month) {
-                            $trx_status = 'inactive';
                         } else {
-                            $trx_status = 'waiting';
-                        }
+                            $trx_status = 'inactive';
+                        } 
 
                         $trx_id = generateTrxID($user['level'], $user['nis'], $month_num);
                         $input .= "(
@@ -256,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         '{$user['name']}', '$user[parent_phone]', '$user[phone_number]',
                         '{$user['email_address']}', '{$user['monthly_bills']}', '$trx_status',
                         'Pembayaran tahun ajaran $tahun_ajaran Semester $semester bulan $months[$num_padded]', '{$user['class']}', '$tahun_ajaran',
-                        '$semester', '$query_duedate', '$lateBills'), ";
+                        '$semester', '$query_duedate'), ";
                     }
                 }
 
@@ -265,7 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     student_name, parent_phone, student_phone,
                     student_email, trx_amount, trx_status,
                     description, class, period,
-                    semester, payment_due, late_bills
+                    semester, payment_due
                 ) VALUES
                 $input";
 

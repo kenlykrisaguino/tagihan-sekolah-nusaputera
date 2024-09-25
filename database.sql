@@ -86,6 +86,7 @@ CREATE TABLE `bills` (
   `trx_amount` decimal NOT NULL,
   `trx_status` VARCHAR(15) NOT NULL,
   `late_bills` decimal DEFAULT 0,
+  `stored_late_bills` decimal DEFAULT 0,
   `description` text DEFAULT NULL,
   `class` INT NOT NULL,
   `period` VARCHAR(9) NOT NULL,

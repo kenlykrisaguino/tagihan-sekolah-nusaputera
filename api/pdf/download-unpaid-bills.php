@@ -11,25 +11,38 @@ $currentDate = date('Y-m-d'). " 23:59:59";
 
 $query = "
 SELECT 
-    u.nis, u.name AS student_name, 
-    CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS level, 
+    u.nis, 
+    u.name AS student_name, 
+    c.id AS class_id,  -- Get the max class ID
+    CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS level,  -- Get class details
     u.virtual_account,
     SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) AS tagihan,
     SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS denda,
     SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) AS penerimaan
 FROM 
-    bills b JOIN 
-    users u ON b.nis = u.nis JOIN 
-    classes c ON u.class = c.id 
+    bills b 
+JOIN 
+    users u ON b.nis = u.nis 
+JOIN 
+    (
+        -- Subquery to get the maximum class ID from the bills table for each user
+        SELECT b.nis, MAX(c.id) AS max_class_id
+        FROM bills b
+        JOIN users u ON b.nis = u.nis
+        JOIN classes c ON u.class = c.id
+        GROUP BY b.nis
+    ) mc ON u.nis = mc.nis  -- Join with the subquery result
+JOIN 
+    classes c ON mc.max_class_id = c.id  -- Join with classes to get class details
 WHERE 
     b.trx_status IN ('not paid', 'waiting') AND
     b.payment_due <= '$currentDate'
 GROUP BY
-    u.nis, u.name,
-    CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')),
+    u.nis, u.name, 
+    c.id,  -- Group by class id
     u.virtual_account
 ORDER BY
-    c.id, u.nis
+    c.id, u.nis;
 ";
 
 $result = read($query);

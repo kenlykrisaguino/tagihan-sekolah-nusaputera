@@ -38,9 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     '$phone_number', '$email_address', '$parent_phone',
     '$va', '$tahun_ajaran', '$semester', '$password')";
 
-    if (!crud($userQuery)) {
-        $_SESSION['error'] = 'Data gagal disimpan.';
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
+    // use exception to catch exceptions
+    try {
+        if (!crud($userQuery)) {
+            throw new Exception('Data gagal disimpan.');
+        }
+    } catch (Exception $e) {
+        $_SESSION['error'] = $e->getMessage();
+        header('Location: '. $_SERVER['HTTP_REFERER']);
         exit();
     }
 
@@ -74,22 +79,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($semester_month as $month_num) {
                 $num_padded = str_pad($month_num, 2, '0', STR_PAD_LEFT);
 
-                $due_date = new DateTime("$year-$num_padded-01");
-                $due_date->modify('last day of this month');
-
-                $dayOfWeek = $due_date->format('N');
-
-                if ($dayOfWeek == 6) {
-                    $due_date->modify('-1 day');
-                } elseif ($dayOfWeek == 7) {
-                    $due_date->modify('-2 days');
-                }
+                $due_date = new DateTime("$year-$num_padded-10");
+                $last_due_date = new DateTime("$year-$num_padded-10");
+                $last_due_date->modify('-1 month');
+                $curr_date = new DateTime();
 
                 $query_duedate = $due_date->format('Y-m-d') . ' 23:59:59';
 
                 $trx_status = '';
                 $lateBills = 0;
-                if ($month_num < $curr_month) {
+
+                if ($last_due_date < $curr_date && $curr_date < $due_date){
+                    $trx_status = 'waiting';
+                } elseif ($due_date < $curr_date){
                     $query = "SELECT trx_status FROM bills WHERE nis = $user[nis] AND MONTH(payment_due) = $month_num";
                     $trx_result = read($query)[0]['trx_status']?? null;
                     if ($trx_result == 'not paid') {
@@ -97,12 +99,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         $trx_status = 'not paid';
                     }
-                    $lateBills = $user['late_bills'];
-                } elseif ($month_num > $curr_month) {
-                    $trx_status = 'inactive';
                 } else {
-                    $trx_status = 'waiting';
+                    $trx_status = 'inactive';
                 }
+
 
                 $trx_id = generateTrxID($user['level'], $user['nis'], $month_num);
                 $input .= "(
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     '{$user['name']}', '$user[parent_phone]', '$user[phone_number]',
                     '{$user['email_address']}', '{$user['monthly_bills']}', '$trx_status',
                     'Pembayaran tahun ajaran $tahun_ajaran Semester $semester bulan $months[$num_padded]', '{$user['class']}', '$tahun_ajaran',
-                    '$semester', '$query_duedate', '$lateBills'), ";
+                    '$semester', '$query_duedate', '0'), ";
             }
         }
 

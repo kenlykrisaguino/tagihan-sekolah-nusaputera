@@ -13,74 +13,53 @@ $class = $_GET['class'] ?? '';
 $major = $_GET['major'] ?? '';
 $nis = $_GET['nis'] ?? '';
 
-// Menentukan query untuk tunggakan berdasarkan bulan
-$tunggakan_query = $month !== '' ?
-    "WHEN b.trx_status = 'not paid' THEN b.late_bills
-     WHEN b.trx_status = 'late' THEN b.late_bills" :
-    "WHEN b.trx_status = 'not paid' THEN b.late_bills
-     WHEN b.trx_status = 'late' THEN b.late_bills";
-
-// Query untuk total pembayaran dari bank
-$query_bank = "
-    SELECT
-        SUM(p.trx_amount) AS bank
-    FROM payments p
-    JOIN bills b ON p.bill_id = b.id
-    JOIN classes c ON c.id = b.class
-    WHERE TRUE AND
-    b.trx_status IN ('paid', 'late') 
-";
-
-// Query untuk total tunggakan
-$query_tunggakan = "
-    SELECT
-        SUM(CASE 
-            $tunggakan_query
-            ELSE 0 
-        END) AS tunggakan
+// Menyiapkan query untuk total bank, pendapatan, dan total denda
+$query = "SELECT
+    SUM(CASE
+        WHEN b.trx_status IN ('paid', 'late') THEN b.trx_amount
+        ELSE 0
+    END) AS bank,
+    SUM(CASE
+        WHEN b.trx_status IN ('not paid' , 'late') THEN b.late_bills
+        ELSE 0
+    END) AS denda,
+    SUM(CASE
+        WHEN b.trx_status IN ('late') THEN b.stored_late_bills
+        ELSE 0
+    END) + SUM(CASE
+        WHEN b.trx_status IN ('paid', 'late') THEN b.trx_amount
+        ELSE 0
+    END) AS pendapatan
     FROM bills b
-    JOIN classes c ON c.id = b.class
-    WHERE TRUE
-";
+    JOIN classes c ON b.class = c.id
+    WHERE TRUE ";
+
 
 // Menambahkan filter untuk bulan jika ada
 if ($month !== '') {
-    $query_bank .= " AND MONTH(b.payment_due) = '$month'";
-    $query_tunggakan .= " AND MONTH(b.payment_due) = '$month'";
+    $query .= " AND MONTH(b.payment_due) = '$month'";
 } else {
     // Jika bulan tidak dipilih, cek pembayaran di semester tersebut
-    $query_bank .= $semester !== '' ? " AND b.semester = '$semester'" : "";
-    $query_tunggakan .= $semester !== '' ? " AND b.semester = '$semester'" : "";
+    $query .= $semester !== '' ? " AND b.semester = '$semester'" : "";
 }
 
 // Menambahkan filter lainnya ke query
-$query_bank .= $period !== '' ? " AND b.period = '$period'" : "";
-$query_bank .= $level !== '' ? " AND c.level = '$level'" : "";
-$query_bank .= $class !== '' ? " AND c.name = '$class'" : "";
-$query_bank .= $major !== '' ? " AND c.major = '$major'" : "";
-$query_bank .= $nis !== '' ? " AND b.nis = '$nis'" : "";
-
-$query_tunggakan .= $period !== '' ? " AND b.period = '$period'" : "";
-$query_tunggakan .= $level !== '' ? " AND c.level = '$level'" : "";
-$query_tunggakan .= $class !== '' ? " AND c.name = '$class'" : "";
-$query_tunggakan .= $major !== '' ? " AND c.major = '$major'" : "";
-$query_tunggakan .= $nis !== '' ? " AND b.nis = '$nis'" : "";
+$query .= $period !== '' ? " AND b.period = '$period'" : "";
+$query .= $level !== '' ? " AND c.level = '$level'" : "";
+$query .= $class !== '' ? " AND c.name = '$class'" : "";
+$query .= $major !== '' ? " AND c.major = '$major'" : "";
+$query .= $nis !== '' ? " AND b.nis = '$nis'" : "";
 
 // Eksekusi kedua query dan ambil hasilnya
-$result_bank = read($query_bank)[0] ?? ['bank' => 0];
-$result_tunggakan = read($query_tunggakan)[0] ?? ['tunggakan' => 0];
-
-// Hitung 'pendapatan' sebagai penjumlahan dari 'bank' dan 'tunggakan'
-$pendapatan = $result_bank['bank'] + $result_tunggakan['tunggakan'];
-// $pendapatan = $result_bank['bank'] + $result_tunggakan['tunggakan'];
+$result = read($query)[0] ?? ['bank' => 0, 'denda' => 0, 'pendapatan' => 0];
 
 // Output hasil dalam format JSON
 echo json_encode([
     "status" => true,
     "data" => [
-        "bank" => $result_bank['bank'],
-        "tunggakan" => $result_tunggakan['tunggakan'],
-        "pendapatan" => $pendapatan
+        "bank" => $result['bank'],
+        "tunggakan" => $result['denda'],
+        "pendapatan" => $result['pendapatan']
     ],
     "message" => "Hasil Penjurnalan berhasil didapat"
 ]);

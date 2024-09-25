@@ -102,6 +102,12 @@ $sql_update = "UPDATE bills b
             WHEN b.trx_status = 'disabled' THEN 0
             ELSE b.late_bills
         END,
+        b.stored_late_bills = CASE
+            WHEN b.trx_status = 'waiting' THEN COALESCE(c.late_bills, 0)
+            WHEN b.trx_status = 'not paid' THEN b.stored_late_bills + COALESCE(c.late_bills, 0)
+            WHEN b.trx_status = 'disabled' THEN 0
+            ELSE b.stored_late_bills
+        END,
         next_b.trx_status = CASE
             WHEN b.trx_status IN ('late', 'not paid') AND next_b.trx_status = 'inactive' THEN 'waiting'
             WHEN b.trx_status IN ('waiting', 'paid') AND next_b.trx_status = 'inactive' THEN 'waiting'
