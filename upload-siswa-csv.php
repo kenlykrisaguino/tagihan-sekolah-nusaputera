@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if($nis == ''){
                     continue;
                 }
+
                 $nis_list[] = $nis;
                 $total_count++;
             }
@@ -90,7 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 foreach ($checkUsers as $user) {
                     foreach ($csvData as $new) {
-                        if ($user['nis'] == $new['nis']) {
+                        if($new['nis'] == ''){
+                            continue;
+                        } else if ($user['nis'] == $new['nis']) {
                             $edit_count++;
                             $user_id = $user['id'];
                             $registered_nis[] = $user['nis'];
@@ -102,6 +105,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             // Get the class id from the preloaded class data
                             $class_id = $classes[$new['jenjang']][$new['tingkat']][$new['kelas']] ?? 1;
+
+                            if ($new['birthdate'] != '') {
+                                $birthdate = date('Y-m-d', strtotime($new['birthdate']));
+                                $new['birthdate'] = $birthdate;
+                            }
 
                             // Build the CASE statements for batch update
                             $updateQuery .= "WHEN $user_id THEN '$new[name]' ";
@@ -138,6 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $query_runnable = false;
 
+
             foreach ($csvData as $data) {
                 $nis = $data['nis'];
                 $name = $data['name'];
@@ -150,8 +159,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email_address = $data['email_address'];
                 $parent_phone = $data['parent_phone'];
 
-                if (in_array($nis, $registered_nis)) {
+                if (in_array($nis, $registered_nis) || $nis == '') {
                     continue;
+                }
+
+                if ($birthdate != '') {
+                    $birthdate = "'" . date('Y-m-d', strtotime($birthdate)) . "'";
+                } else {
+                    $birthdate = 'NULL';
                 }
 
                 $add_count++;
@@ -171,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $password = md5($va);
 
                 $users[] = "('$nis', '$name', '$address', 
-                '$birthdate', 'Active', '$class_id', 
+                $birthdate, 'Active', '$class_id', 
                 '$phone_number', '$email_address', '$parent_phone',
                 '$va', '$tahun_ajaran', '$semester', '$password')";
             }
