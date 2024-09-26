@@ -13,12 +13,12 @@ $query = "
 SELECT 
     u.nis, 
     u.name AS student_name, 
-    c.id AS class_id,  -- Get the max class ID
-    CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS level,  -- Get class details
+    c.id AS class_id,
+    CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS level, 
     u.virtual_account,
-    SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) AS tagihan,
+    SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status in ('waiting', 'not paid', 'inactive') THEN b.trx_amount ELSE 0 END) AS tagihan,
     SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS denda,
-    SUM(CASE WHEN b.trx_status = 'waiting' OR b.trx_status = 'not paid' THEN b.trx_amount ELSE 0 END) AS penerimaan
+    SUM(CASE WHEN b.trx_status in ('waiting', 'not paid', 'inactive') THEN b.trx_amount ELSE 0 END) AS piutang
 FROM 
     bills b 
 JOIN 
@@ -35,7 +35,7 @@ JOIN
 JOIN 
     classes c ON mc.max_class_id = c.id  -- Join with classes to get class details
 WHERE 
-    b.trx_status IN ('not paid', 'waiting') AND
+    b.trx_status IN ('not paid', 'waiting', 'inactive') AND
     b.payment_due <= '$currentDate'
 GROUP BY
     u.nis, u.name, 
@@ -52,9 +52,9 @@ $data_content = "";
 $content = "";
 
 foreach($result as $data){
-    $penerimaan = formatToRupiah($data['penerimaan']);
-    $denda = formatToRupiah($data['denda']);
     $tagihan = formatToRupiah($data['tagihan']);
+    $denda = formatToRupiah($data['denda']);
+    $piutang = formatToRupiah($data['piutang']);
 
     $content .= "
     <tr>
@@ -62,9 +62,9 @@ foreach($result as $data){
         <td>{$data['student_name']}</td>
         <td>{$data['level']}</td>
         <td>{$data['virtual_account']}</td>
-        <td>{$tagihan}</td>
+        <td>{$piutang}</td>
         <td>{$denda}</td>
-        <td>{$penerimaan}</td>
+        <td>{$tagihan}</td>
     </tr>";
 }
 
@@ -165,7 +165,7 @@ $html = "<!DOCTYPE html>
                 <th>Nama</th>
                 <th>Kelas</th>
                 <th>VA</th>
-                <th>Penerimaan</th>
+                <th>Piutang</th>
                 <th>Denda</th>
                 <th>Total</th>
             </tr>
