@@ -35,8 +35,7 @@ JOIN
 JOIN 
     classes c ON mc.max_class_id = c.id  -- Join with classes to get class details
 WHERE 
-    b.trx_status IN ('not paid', 'waiting', 'inactive') AND
-    b.payment_due <= '$currentDate'
+    b.trx_status IN ('not paid', 'waiting', 'inactive')
 GROUP BY
     u.nis, u.name, 
     c.id,  -- Group by class id

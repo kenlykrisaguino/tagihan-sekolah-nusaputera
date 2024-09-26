@@ -76,7 +76,7 @@ $sql = "SELECT
     b.virtual_account,
     b.student_name, CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS level, b.parent_phone, b.period,
     SUM(CASE WHEN b.trx_status = 'late' THEN c.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
-    SUM(CASE WHEN b.trx_status = 'not paid' THEN c.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status IN ('waiting', 'not paid', 'inactive') THEN b.trx_amount ELSE 0 END) AS tagihan,
+    SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status IN ('waiting', 'not paid', 'inactive') THEN b.trx_amount ELSE 0 END) AS tagihan,
     $sql_semester, 
     (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis AND MONTH(bills.payment_due) <= $final_month AND YEAR(bills.payment_due)<=$academic_year) AS tunggakan
     FROM 
