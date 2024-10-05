@@ -17,7 +17,7 @@ $sort_direction = isset($_GET['sortDir']) && strtolower($_GET['sortDir']) === 'a
 // Membangun query SQL untuk mendapatkan data pengguna
 $sql = "SELECT
     u.nis, u.name, c.level AS level, c.name AS class, c.major, u.phone_number,
-    u.email_address, u.parent_phone, u.virtual_account, 
+    u.email_address, u.parent_phone, u.virtual_account, c.monthly_bills,
     MAX(p.trx_timestamp) AS latest_payment, u.status
     FROM users u
     INNER JOIN classes c ON u.class = c.id
@@ -48,7 +48,7 @@ if ($major) {
 // Menambahkan pengelompokkan dan pengurutan hasil query
 $sql .= "GROUP BY 
     u.nis, u.name, c.level, c.name, c.major, u.phone_number,
-    u.email_address, u.parent_phone, u.virtual_account, u.status
+    u.email_address, u.parent_phone, u.virtual_account, u.status, c.monthly_bills
     ORDER BY $sort_by $sort_direction;";
 
 // Menjalankan query dan mendapatkan hasilnya

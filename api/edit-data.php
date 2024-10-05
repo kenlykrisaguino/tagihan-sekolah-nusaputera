@@ -18,12 +18,12 @@ $hiddenQuery = $hidden == 0 ? '' : 'b.bill_disabled IS NULL AND';
 // Membuat query SQL berdasarkan semester
 if ($semester == 'Genap') {
     $sql_semester = "
-    SUM(CASE WHEN MONTH(b.payment_due) = 1 THEN b.trx_amount ELSE 0 END) AS Januari,
-    SUM(CASE WHEN MONTH(b.payment_due) = 2 THEN b.trx_amount ELSE 0 END) AS Februari,
-    SUM(CASE WHEN MONTH(b.payment_due) = 3 THEN b.trx_amount ELSE 0 END) AS Maret,
-    SUM(CASE WHEN MONTH(b.payment_due) = 4 THEN b.trx_amount ELSE 0 END) AS April,
-    SUM(CASE WHEN MONTH(b.payment_due) = 5 THEN b.trx_amount ELSE 0 END) AS Mei,
-    SUM(CASE WHEN MONTH(b.payment_due) = 6 THEN b.trx_amount ELSE 0 END) AS Juni,
+    SUM(CASE WHEN MONTH(b.payment_due) = 1 THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS Januari,
+    SUM(CASE WHEN MONTH(b.payment_due) = 2 THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS Februari,
+    SUM(CASE WHEN MONTH(b.payment_due) = 3 THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS Maret,
+    SUM(CASE WHEN MONTH(b.payment_due) = 4 THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS April,
+    SUM(CASE WHEN MONTH(b.payment_due) = 5 THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS Mei,
+    SUM(CASE WHEN MONTH(b.payment_due) = 6 THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS Juni,
     max(CASE WHEN MONTH(b.payment_due) = 1 THEN b.trx_status ELSE '' END) AS statusJanuari,
     max(CASE WHEN MONTH(b.payment_due) = 2 THEN b.trx_status ELSE '' END) AS statusFebruari,
     max(CASE WHEN MONTH(b.payment_due) = 3 THEN b.trx_status ELSE '' END) AS statusMaret,
@@ -44,12 +44,12 @@ if ($semester == 'Genap') {
     MONTH(p.trx_timestamp) BETWEEN 2 AND 7";
 } else {
     $sql_semester = "
-    SUM(CASE WHEN MONTH(b.payment_due) = 7  THEN b.trx_amount ELSE 0 END) AS Juli,
-    SUM(CASE WHEN MONTH(b.payment_due) = 8  THEN b.trx_amount ELSE 0 END) AS Agustus,
-    SUM(CASE WHEN MONTH(b.payment_due) = 9  THEN b.trx_amount ELSE 0 END) AS September,
-    SUM(CASE WHEN MONTH(b.payment_due) = 10 THEN b.trx_amount ELSE 0 END) AS Oktober,
-    SUM(CASE WHEN MONTH(b.payment_due) = 11 THEN b.trx_amount ELSE 0 END) AS November,
-    SUM(CASE WHEN MONTH(b.payment_due) = 12 THEN b.trx_amount ELSE 0 END) AS Desember,
+    SUM(CASE WHEN MONTH(b.payment_due) = 7  THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS Juli,
+    SUM(CASE WHEN MONTH(b.payment_due) = 8  THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS Agustus,
+    SUM(CASE WHEN MONTH(b.payment_due) = 9  THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS September,
+    SUM(CASE WHEN MONTH(b.payment_due) = 10 THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS Oktober,
+    SUM(CASE WHEN MONTH(b.payment_due) = 11 THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS November,
+    SUM(CASE WHEN MONTH(b.payment_due) = 12 THEN b.trx_amount + b.additional_fee_amount ELSE 0 END) AS Desember,
     max(CASE WHEN MONTH(b.payment_due) = 7  THEN b.trx_status ELSE '' END) AS statusJuli,
     max(CASE WHEN MONTH(b.payment_due) = 8  THEN b.trx_status ELSE '' END) AS statusAgustus,
     max(CASE WHEN MONTH(b.payment_due) = 9  THEN b.trx_status ELSE '' END) AS statusSeptember,
@@ -76,7 +76,7 @@ $sql = "SELECT
     b.virtual_account,
     b.student_name, CONCAT(COALESCE(c.level, ''), ' ', COALESCE(c.name, ''), ' ', COALESCE(c.major, '')) AS level, b.parent_phone, b.period,
     SUM(CASE WHEN b.trx_status = 'late' THEN c.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status = 'paid' OR b.trx_status = 'late' THEN b.trx_amount ELSE 0 END) AS penerimaan, 
-    SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status IN ('waiting', 'not paid', 'inactive') THEN b.trx_amount ELSE 0 END) AS tagihan,
+    SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status IN ('waiting', 'not paid') THEN b.trx_amount ELSE 0 END) AS tagihan,
     $sql_semester, 
     (SELECT SUM(late_bills) FROM bills WHERE bills.nis = b.nis AND MONTH(bills.payment_due) <= $final_month AND YEAR(bills.payment_due)<=$academic_year) AS tunggakan
     FROM 

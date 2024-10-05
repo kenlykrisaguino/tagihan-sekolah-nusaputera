@@ -18,14 +18,13 @@ SELECT
     u.virtual_account,
     SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) + SUM(CASE WHEN b.trx_status in ('waiting', 'not paid', 'inactive') THEN b.trx_amount ELSE 0 END) AS tagihan,
     SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS denda,
-    SUM(CASE WHEN b.trx_status in ('waiting', 'not paid', 'inactive') THEN b.trx_amount ELSE 0 END) AS piutang
+    SUM(CASE WHEN b.trx_status in ('waiting', 'not paid') THEN b.trx_amount ELSE 0 END) AS piutang
 FROM 
     bills b 
 JOIN 
     users u ON b.nis = u.nis 
 JOIN 
     (
-        -- Subquery to get the maximum class ID from the bills table for each user
         SELECT b.nis, MAX(c.id) AS max_class_id
         FROM bills b
         JOIN users u ON b.nis = u.nis
@@ -35,7 +34,7 @@ JOIN
 JOIN 
     classes c ON mc.max_class_id = c.id  -- Join with classes to get class details
 WHERE 
-    b.trx_status IN ('not paid', 'waiting', 'inactive')
+    b.trx_status IN ('not paid', 'waiting')
 GROUP BY
     u.nis, u.name, 
     c.id,  -- Group by class id

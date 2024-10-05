@@ -11,9 +11,38 @@ $query_semester = 'SELECT DISTINCT semester FROM bills ORDER BY semester';
 $tahun_ajaran_options = read($query_tahun_ajaran);
 $semester_options = read($query_semester);
 
+$username = $_SESSION['username'];
+
 ?>
 
 <body>
+    <style>
+        td.editable[data-column="virtual_account"],
+        td.editable[data-column="student_name"],
+        td[data-column="level"],
+        th[data-column="virtual_account"],
+        th[data-column="student_name"],
+        th[data-column="level"]
+        {
+            position: -webkit-sticky;
+            position: sticky;
+            background-color: #fff;
+            left: 0;
+            z-index: 2;
+        }
+
+        td.editable[data-column="student_name"],
+        th[data-column="student_name"]{
+            left: 162px;
+            z-index: 1;
+        }
+
+        td[data-column="level"],
+        th[data-column="level"]{
+            left: 252px;
+            z-index: 1;
+        }
+    </style>
     <div class="container">
         <div class="position-fixed d-none" id="loader">
             <span class="loader"></span>
@@ -43,46 +72,21 @@ $semester_options = read($query_semester);
         <div class="row h-screen">
             <div class="row h-3_5">
                 <div class="col-12">
-                    <!-- Header -->
-                    <div class="text-center my-4">
-                        <img src="assets/img/logo.png" alt="Logo" style="width: 50px; height: 50px;">
-                        <h1>Sistem Pembayaran</h1>
-                    </div>
-
-                    <!-- Navigation Tabs -->
-                    <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'rekap-siswa.php' ? 'active' : ''; ?>" href="rekap-siswa.php">Siswa</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'input-siswa.php' ? 'active' : ''; ?>" href="input-siswa.php">Input Siswa</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'input-data.php' ? 'active' : ''; ?>" href="input-data.php">Input Data</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'edit-data.php' ? 'active' : ''; ?>" href="edit-data.php">Edit Data</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'rekap-data.php' ? 'active' : ''; ?>" href="rekap-data.php">Rekap</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'penjurnalan.php' ? 'active' : ''; ?>" href="penjurnalan.php">Jurnal</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="Logout.php">Logout</a>
-                        </li>
-                    </ul>
+                    <?php include './headers/nav-admin.php'?>
                 </div>
                 <div class="col-12">
-                    <div class="d-flex my-4">
-                        <div class="col-9">
+                    <div class="d-flex flex-wrap my-4">
+                        <div class="col-12 col-md-7 text-md-left text-center">
                             <h2 class="">Edit Data</h2>
                         </div>
-                        <div class="col-3">
-                            <button onclick="downloadUnpaid()" class="btn btn-outline-primary w-100">Download</button>
+                        <div class="col-12 col-md-5 d-flex" style="justify-content: center;">
+                            <div class="btn-group w-full" role="group" aria-label="Second group">
+                                <button onclick="downloadUnpaidPDF()"  type="button" class="btn btn-secondary">Download PDF</button>
+                                <button onclick="downloadUnpaidCSV()"  type="button" class="btn btn-secondary">Download CSV</button>
+                            </div>
                         </div>
                     </div>
+
                     <div class="d-flex flex-wrap">
                         <div class="form-group col-4">
                             <label for="tahun_ajaran">Search</label>
@@ -183,7 +187,7 @@ $semester_options = read($query_semester);
             });
         }
 
-        const downloadUnpaid = () => {
+        const downloadUnpaidPDF = () => {
             $.ajax({
                 url: './api/pdf/download-unpaid-bills.php',
                 method: 'POST',
@@ -212,6 +216,10 @@ $semester_options = read($query_semester);
                     console.error('Error generating PDF:', error);
                 }
             });
+        }
+
+        const downloadUnpaidCSV = () => {
+            window.location.href = 'api/download-unpaid-csv.php';
         }
 
         const getData = () => {
@@ -264,11 +272,11 @@ $semester_options = read($query_semester);
                 });
         }
 
-        <?php if($_SESSION['role'] == 'ADMIN'):?>
         const editTable = function() {
             var originalContent = $(this).text();
             var dataId = $(this).data('id');
             var column = $(this).data('column');
+            var updated_by = "<?php echo $username ?>";
 
             var month = $(this).data('month');
             var payment = $(this).data('payment');
@@ -293,10 +301,13 @@ $semester_options = read($query_semester);
                     $(this).parent().removeClass('cellEditing');
 
                     if (payment === true) {
+                        console.log("data");
+
                         $.ajax({
                             url: 'api/update-payment.php',
                             type: 'POST',
                             data: {
+                                updated_by: updated_by,
                                 id: dataId,
                                 column: column,
                                 value: fromIDRtoNum(newContent),
@@ -305,6 +316,7 @@ $semester_options = read($query_semester);
                                 semester: document.getElementById('semester').value,
                             },
                             success: (data) => {
+                                console.log(data);
                                 if (!data.status) {
                                     $.toast({
                                         heading: 'Gagal',
@@ -321,6 +333,10 @@ $semester_options = read($query_semester);
                                     })
                                 }
                                 getData();
+                            }, 
+                            error: (xhr, status, error) => {
+                                console.error('Error updating payment:', error);
+                                console.error(xhr)
                             }
                         });
                     } else {
@@ -328,6 +344,7 @@ $semester_options = read($query_semester);
                             url: 'api/update-data.php',
                             type: 'POST',
                             data: {
+                                updated_by: updated_by,
                                 id: dataId,
                                 column: column,
                                 value: newContent
@@ -365,7 +382,6 @@ $semester_options = read($query_semester);
                 $(this).parent().removeClass('cellEditing');
             });
         }
-        <?php endif ?>
 
         const statusColor = (status) => {
             if (status === 'paid') {

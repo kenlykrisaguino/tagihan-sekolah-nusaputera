@@ -26,8 +26,8 @@ $first_month = $semester_month[0];
 
 // Mendapatkan data siswa yang aktif dan bukan admin
 $users = "SELECT
-    u.nis, u.virtual_account, u.name, u.parent_phone, u.phone_number,
-    u.email_address, c.monthly_bills, c.id AS class, c.level as level
+    u.nis, u.virtual_account, u.name, u.parent_phone, u.phone_number, 
+    u.email_address, u.additional_fee_details, c.monthly_bills, c.id AS class , c.level as level
     FROM users u
     INNER JOIN classes c ON u.class = c.id
     WHERE 
@@ -36,6 +36,39 @@ $users = "SELECT
 
 // Menjalankan query untuk mendapatkan data siswa
 $usersResult = read($users);
+
+// mengolah data additional fee
+$name_query = "SELECT * FROM additional_payment_category";
+$names = read($name_query);
+$fee_name = [];
+
+foreach ($names as $name){
+    $fee_name[$name['id']] = $name['category_name'];
+}
+
+$fee_data = [];
+$fee_amount = [];
+foreach ($usersResult as $user){
+    $fees = json_decode($user['additional_fee_details'], true);
+    foreach ($fees as $fee) {
+        foreach($fee['years'] as $academic_year){
+            if($academic_year == $tahun_ajaran){
+                foreach($fee['months'] as $month){
+                    $fee_data[$user['nis']][$academic_year][$month][]= array(
+                        'type' => $fee['type'],
+                        'name' => $fee_name[$fee['type']],
+                        'amount' => $fee['amount']
+                    );
+    
+                    if (!isset($fee_amount[$user['nis']][$academic_year][$month])) {
+                        $fee_amount[$user['nis']][$academic_year][$month] = 0;
+                    }
+                    $fee_amount[$user['nis']][$academic_year][$month] += $fee['amount'];
+                }
+            }
+        }
+    }
+}
 
 // Variabel untuk menyimpan query insert tagihan
 $input = "";
@@ -61,13 +94,18 @@ foreach ($usersResult as $user) {
         // Membuat trx_id untuk transaksi berdasarkan level, NIS, dan bulan
         $trx_id = generateTrxID($user['level'], $user['nis'], $month_num);
 
+        // Mengolah Additional Fee menjadi JSON
+        $additional_fee = $fee_data[$user['nis']][$tahun_ajaran][$month_num] ?? '';
+        $additional_json = json_encode($additional_fee);
+        $additional_amount = $fee_amount[$user['nis']][$tahun_ajaran][$month_num] ?? 0;
+
         // Menyusun nilai untuk query insert ke tabel bills
         $input .= "(
             '$user[nis]', '$trx_id', '$user[virtual_account]',
             '{$user['name']}', '$user[parent_phone]', '$user[phone_number]',
             '{$user['email_address']}', '{$user['monthly_bills']}', '$trx_status',
             'Pembayaran tahun ajaran $tahun_ajaran Semester $semester bulan $months[$num_padded]', '{$user['class']}', '$tahun_ajaran',
-            '$semester', '$query_duedate'
+            '$semester', '$query_duedate', '$additional_json', '$additional_amount'
         ), ";
     }
 }
@@ -78,7 +116,8 @@ $sql = "INSERT INTO bills(
     student_name, parent_phone, student_phone,
     student_email, trx_amount, trx_status,
     description, class, period,
-    semester, payment_due
+    semester, payment_due, 
+    additional_fee_details, additional_fee_amount
 ) VALUES 
 $input";
 

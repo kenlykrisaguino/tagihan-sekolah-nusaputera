@@ -8,6 +8,7 @@
     <?php endif; ?>
     <td>${u.nis}</td>
     <td>${u.name}</td>
+    <td>${formatToIDR(u.monthly_bills)}</td>
     <td>${u.level ?? '-'}</td>
     <td>${u.class ?? '-'}</td>
     <td>${u.major ?? '-'}</td>

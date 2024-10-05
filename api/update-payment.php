@@ -7,6 +7,7 @@ include_once '../config/app.php';
 header('Content-Type: application/json');
 
 // Mengambil data dari POST request
+$updated_by = $_POST['updated_by'];
 $id = $_POST['id']; // ID untuk pencarian data yang akan diupdate
 $column = $_POST['column']; // Nama kolom yang akan diupdate
 $value = $_POST['value']; // Nilai baru untuk kolom yang diupdate
@@ -32,8 +33,8 @@ $indonesianMonths = [
 
 // Menyusun query SQL untuk memeriksa data yang ada berdasarkan ID, semester, tahun ajaran, dan bulan
 $checkQuery = "SELECT
-    trx_amount,  // Kolom jumlah transaksi
-    payment_due  // Kolom jatuh tempo pembayaran
+    trx_amount,  
+    payment_due
 FROM
     bills
 WHERE
@@ -52,8 +53,8 @@ if (isset($checkResult) && count($checkResult) != 0) {
     $sql = "UPDATE
         bills
     SET
-        $column = '$value',  // Memperbarui kolom dengan nilai baru
-        payment_due = '$due' // Menjaga agar tanggal jatuh tempo tetap sama
+        $column = '$value',  
+        payment_due = '$due'
     WHERE
         nis = '$id' AND
         semester = '$semester' AND
@@ -64,10 +65,18 @@ if (isset($checkResult) && count($checkResult) != 0) {
 // Menjalankan query SQL untuk memperbarui data
 $result = crud($sql);
 
+// Membuat log activity
+$log = "INSERT INTO activity_log(activity_by, activity) VALUES
+('$updated_by', 'Mengubah kolom $column tahun ajaran $tahunAjaran semester $semester bulan $indonesianMonths[$month] menjadi $value di user id $id')";
+
+// Menjalankan query SQL untuk menulis log
+crud($log);
+
 // Menyiapkan data respons JSON untuk dikembalikan
 $data = [
     'status' => $result, // Status operasi update
-    'message' => $result ? "Berhasil mengupdate pembayaran bulan $month" : "Gagal" // Pesan sukses atau gagal
+    'message' => $result ? "Berhasil mengupdate pembayaran bulan $month" : "Gagal", // Pesan sukses atau gagal
+    'log' => $log, 
 ];
 
 // Mengembalikan data dalam format JSON

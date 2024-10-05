@@ -37,36 +37,7 @@ include './headers/admin.php';
         <div class="row h-screen">
             <div class="row h-half">
                 <div class="col-12">
-                    <!-- Header -->
-                    <div class="text-center my-4">
-                        <img src="assets/img/logo.png" alt="Logo" style="width: 50px; height: 50px;">
-                        <h1>Sistem Pembayaran</h1>
-                    </div>
-
-                    <!-- Navigation Tabs -->
-                    <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'rekap-siswa.php' ? 'active' : ''; ?>" href="rekap-siswa.php">Siswa</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'input-siswa.php' ? 'active' : ''; ?>" href="input-siswa.php">Input Siswa</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'input-data.php' ? 'active' : ''; ?>" href="input-data.php">Input Data</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'edit-data.php' ? 'active' : ''; ?>" href="edit-data.php">Edit Data</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'rekap-data.php' ? 'active' : ''; ?>" href="rekap-data.php">Rekap</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page == 'penjurnalan.php' ? 'active' : ''; ?>" href="penjurnalan.php">Jurnal</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="Logout.php">Logout</a>
-                        </li>
-                    </ul>
+                    <?php include './headers/nav-admin.php'?>
                 </div>
                 <div class="col-12">
                     <div class="d-flex my-4">
@@ -113,6 +84,7 @@ include './headers/admin.php';
                                 <?php echo $_SESSION['role'] == 'ADMIN' ? "<th>Action</th>" : "" ?>
                                 <th>NIS</th>
                                 <th>Nama</th>
+                                <th>SPP</th>
                                 <th>Jenjang</th>
                                 <th>Tingkat</th>
                                 <th>Kelas</th>
@@ -197,6 +169,10 @@ include './headers/admin.php';
                 },
                 {
                     data: 'name',
+                    orderable: true
+                },
+                {
+                    data: 'monthly_bills',
                     orderable: true
                 },
                 {

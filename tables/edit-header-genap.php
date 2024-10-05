@@ -1,8 +1,8 @@
 <thead class="thead-dark text-center">
     <tr>
-        <th>Virtual Account</th>
-        <th>Nama</th>
-        <th>Kelas</th>
+        <th data-column="virtual_account">Virtual Account</th>
+        <th data-column="student_name">Nama</th>
+        <th data-column="level">Kelas</th>
         <th>No. Ortu</th>
         <th>Tagihan</th>
 

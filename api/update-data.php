@@ -7,6 +7,7 @@ include_once '../config/app.php';
 header('Content-Type: application/json');
 
 // Mengambil data dari POST request
+$updated_by = $_POST['updated_by'];
 $id = $_POST['id']; // ID untuk pencarian data yang akan diupdate
 $column = $_POST['column']; // Nama kolom yang akan diupdate
 $value = $_POST['value']; // Nilai baru untuk kolom yang diupdate
@@ -16,6 +17,13 @@ $sql = "UPDATE bills SET $column = '$value' WHERE nis = '$id'";
 
 // Menjalankan query SQL untuk melakukan update
 $result = crud($sql); // Fungsi 'crud()' digunakan untuk mengeksekusi query
+
+// Membuat log activity
+$log = "INSERT INTO activity_log(activity_by, activity) VALUES
+('$updated_by', 'Mengubah kolom $column menjadi $value di user id $id')";
+
+// Menjalankan query SQL untuk menulis log
+crud($log);
 
 // Memeriksa hasil dari query
 if ($result) {
