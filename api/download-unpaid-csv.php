@@ -8,8 +8,7 @@ include_once '../config/app.php';
 // header('Content-Disposition: attachment; filename=unpaid_bills.csv');
 
 // Menjalankan query
-$query = "
-SELECT 
+$query = "SELECT 
     ROW_NUMBER() OVER (ORDER BY c.id, u.nis) AS No,
     u.virtual_account AS VA,
     u.nis AS NIS, 
@@ -21,6 +20,13 @@ SELECT
     u.additional_fee_details,
     MAX(CONCAT(YEAR(b.payment_due), '/', LPAD(MONTH(b.payment_due), 2, '0'))) AS 'Periode Pembayaran',
     COUNT(CASE WHEN b.trx_status = 'not paid' THEN 1 ELSE NULL END) AS 'jumlah_keterlambatan',
+    (SELECT MAX(count_late) 
+     FROM (
+         SELECT COUNT(CASE WHEN b2.trx_status = 'not paid' THEN 1 ELSE NULL END) as count_late
+         FROM bills b2 
+         WHERE b2.nis = b.nis
+         GROUP BY b2.nis
+     ) as subquery_late) AS 'max_jumlah_keterlambatan',
     SUM(CASE WHEN b.trx_status = 'not paid' THEN b.late_bills ELSE 0 END) AS denda,
     SUM(CASE WHEN b.trx_status IN ('not paid', 'waiting') THEN b.trx_amount ELSE 0 END) AS piutang
 FROM 
@@ -45,9 +51,13 @@ GROUP BY
     c.monthly_bills, u.additional_fee_details
 ORDER BY
     c.id, u.nis;
+
 ";
 
 $result = read($query);
+
+print_r($result);
+exit(); 
 
 // Membuka aliran output untuk menulis file CSV
 $output = fopen('php://output', 'w');

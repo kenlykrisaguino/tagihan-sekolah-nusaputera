@@ -74,13 +74,13 @@ $amount_query = [];
 foreach ($data as $year => $months) {
     foreach ($months as $month => $details) {
         $detail_json = json_encode($details);
-        $detail_query[] = "WHEN period = '$year' AND MONTH(payment_due) = '$month' THEN '$detail_json'";
+        $detail_query[] = "WHEN period = '$year' AND MONTH(payment_due) = '$month' AND nis = '$nis' THEN '$detail_json'";
     }
 }
 
 foreach ($amount as $year => $months) {
     foreach ($months as $month => $amount) {
-        $amount_query[] = "WHEN period = '$year' AND MONTH(payment_due) = '$month' THEN $amount";
+        $amount_query[] = "WHEN period = '$year' AND MONTH(payment_due) = '$month' AND nis = '$nis' THEN $amount";
     }
 }
 

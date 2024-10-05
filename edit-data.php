@@ -82,7 +82,7 @@ $username = $_SESSION['username'];
                         <div class="col-12 col-md-5 d-flex" style="justify-content: center;">
                             <div class="btn-group w-full" role="group" aria-label="Second group">
                                 <button onclick="downloadUnpaidPDF()"  type="button" class="btn btn-secondary">Download PDF</button>
-                                <button onclick="downloadUnpaidCSV()"  type="button" class="btn btn-secondary">Download CSV</button>
+                                <button onclick="downloadUnpaidCSV()"  type="button" class="btn btn-secondary">Download XLSX</button>
                             </div>
                         </div>
                     </div>
@@ -219,7 +219,7 @@ $username = $_SESSION['username'];
         }
 
         const downloadUnpaidCSV = () => {
-            window.location.href = 'api/download-unpaid-csv.php';
+            window.location.href = 'api/download-unpaid-xlsx.php';
         }
 
         const getData = () => {

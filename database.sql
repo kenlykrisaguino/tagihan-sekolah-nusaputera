@@ -12,7 +12,7 @@ CREATE TABLE `administrations` (
 CREATE TABLE `activity_log` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `activity_by` VARCHAR(255) NOT NULL,
-  `activity` VARCHAR(255) NOT NULL,
+  `activity` LONGTEXT NOT NULL,
   `created_at` datetime DEFAULT NOW()
 );
 
@@ -81,7 +81,7 @@ CREATE TABLE `users` (
   `birthdate` DATE DEFAULT NULL,
   `status` VARCHAR(10) NOT NULL,
   `class` int NOT NULL,
-  `additional_fee_details` text DEFAULT NULL, -- JSON
+  `additional_fee_details` LONGTEXT DEFAULT NULL, -- JSON
   `phone_number` VARCHAR(16) DEFAULT NULL,
   `email_address` VARCHAR(255) DEFAULT NULL,
   `parent_phone` VARCHAR(16) NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE `bills` (
   `student_phone` VARCHAR(16) DEFAULT NULL,
   `student_email` VARCHAR(255) DEFAULT NULL,
   `trx_amount` decimal NOT NULL,
-  `additional_fee_details` text DEFAULT NULL,  
+  `additional_fee_details` LONGTEXT DEFAULT NULL,  
   `additional_fee_amount` decimal DEFAULT 0,  
   `trx_status` VARCHAR(15) NOT NULL,
   `late_bills` decimal DEFAULT 0,
